@@ -43,6 +43,7 @@ public class IdentityAndTrustService implements IdentityService {
 
     private final SecureTokenService secureTokenService;
     private final String issuerDid;
+    private final String participantId;
 
     /**
      * Constructs a new instance of the {@link IdentityAndTrustService}.
@@ -50,9 +51,10 @@ public class IdentityAndTrustService implements IdentityService {
      * @param secureTokenService Instance of an STS, which can create SI tokens
      * @param issuerDid          The DID which belongs to "this connector"
      */
-    public IdentityAndTrustService(SecureTokenService secureTokenService, String issuerDid) {
+    public IdentityAndTrustService(SecureTokenService secureTokenService, String issuerDid, String participantId) {
         this.secureTokenService = secureTokenService;
         this.issuerDid = issuerDid;
+        this.participantId = participantId;
     }
 
     @Override
@@ -64,8 +66,14 @@ public class IdentityAndTrustService implements IdentityService {
             return failure(scopeValidationResult.getFailureMessages());
         }
 
+        var mandatoryClaims = Map.of(
+                "iss", issuerDid,
+                "sub", issuerDid,
+                "aud", parameters.getAudience(),
+                "client_id", participantId);
         // create claims for the STS
-        var claims = new java.util.HashMap<>(Map.of("iss", issuerDid, "sub", issuerDid, "aud", parameters.getAudience()));
+        var claims = new java.util.HashMap<String, Object>(mandatoryClaims);
+
         parameters.getAdditional().forEach((k, v) -> claims.replace(k, v.toString()));
 
         return secureTokenService.createToken(claims, scope);

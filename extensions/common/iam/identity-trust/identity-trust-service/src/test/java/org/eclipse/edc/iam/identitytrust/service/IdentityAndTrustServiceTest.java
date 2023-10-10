@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 
 class IdentityAndTrustServiceTest {
     private final SecureTokenService mockedSts = mock();
-    private final IdentityAndTrustService service = new IdentityAndTrustService(mockedSts, "did:web:test");
+    private final IdentityAndTrustService service = new IdentityAndTrustService(mockedSts, "did:web:test", "participantId");
 
 
     @ParameterizedTest(name = "{0}")
@@ -80,6 +80,7 @@ class IdentityAndTrustServiceTest {
         AbstractResultAssert.assertThat(service.obtainClientCredentials(tp)).isSucceeded();
         verify(mockedSts).createToken(argThat(m -> m.get("iss").equals("did:web:test") &&
                 m.get("sub").equals("did:web:test") &&
-                m.get("aud").equals(tp.getAudience())), eq(scope));
+                m.get("aud").equals(tp.getAudience()) &&
+                m.get("client_id").equals("participantId")), eq(scope));
     }
 }
