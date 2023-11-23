@@ -14,11 +14,13 @@
 
 package org.eclipse.edc.connector.transfer;
 
+import org.eclipse.edc.connector.transfer.edr.EdrGeneratorManagerImpl;
 import org.eclipse.edc.connector.transfer.flow.DataFlowManagerImpl;
 import org.eclipse.edc.connector.transfer.observe.TransferProcessObservableImpl;
 import org.eclipse.edc.connector.transfer.provision.ProvisionManagerImpl;
 import org.eclipse.edc.connector.transfer.provision.ResourceManifestGeneratorImpl;
 import org.eclipse.edc.connector.transfer.spi.TransferProcessPendingGuard;
+import org.eclipse.edc.connector.transfer.spi.edr.EdrGeneratorManager;
 import org.eclipse.edc.connector.transfer.spi.flow.DataFlowManager;
 import org.eclipse.edc.connector.transfer.spi.observe.TransferProcessObservable;
 import org.eclipse.edc.connector.transfer.spi.provision.ProvisionManager;
@@ -46,6 +48,11 @@ public class TransferProcessDefaultServicesExtension implements ServiceExtension
     @Provider
     public DataFlowManager dataFlowManager() {
         return new DataFlowManagerImpl();
+    }
+
+    @Provider
+    public EdrGeneratorManager edrGeneratorManager() {
+        return new EdrGeneratorManagerImpl();
     }
 
     @Provider

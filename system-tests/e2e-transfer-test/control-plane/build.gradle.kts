@@ -26,12 +26,14 @@ dependencies {
     implementation(project(":extensions:control-plane:api:control-plane-api"))
     implementation(project(":extensions:control-plane:api:management-api"))
     implementation(project(":extensions:control-plane:transfer:transfer-data-plane"))
+    implementation(project(":extensions:control-plane:transfer:transfer-consumer-pull"))
     implementation(project(":extensions:data-plane:data-plane-client"))
 
     implementation(project(":core:data-plane-selector:data-plane-selector-core"))
     implementation(project(":extensions:data-plane-selector:data-plane-selector-api"))
 
     implementation(project(":extensions:control-plane:provision:provision-http"))
+    implementation(project(":extensions:control-plane:provision:provision-edr"))
     implementation(project(":extensions:control-plane:transfer:transfer-pull-http-receiver"))
     implementation(project(":extensions:control-plane:transfer:transfer-pull-http-dynamic-receiver"))
     implementation(project(":extensions:common:api:management-api-configuration"))
