@@ -43,8 +43,8 @@ public class JsonObjectFromTransferCompletionMessageTransformer extends Abstract
         return jsonBuilderFactory.createObjectBuilder()
                 .add(ID, transferCompletionMessage.getId())
                 .add(TYPE, DSPACE_TYPE_TRANSFER_COMPLETION_MESSAGE)
-                .add(DSPACE_PROPERTY_CONSUMER_PID, transferCompletionMessage.getConsumerPid())
-                .add(DSPACE_PROPERTY_PROVIDER_PID, transferCompletionMessage.getProviderPid())
+                .add(DSPACE_PROPERTY_CONSUMER_PID, id(jsonBuilderFactory, transferCompletionMessage.getConsumerPid()))
+                .add(DSPACE_PROPERTY_PROVIDER_PID, id(jsonBuilderFactory, transferCompletionMessage.getProviderPid()))
                 .build();
     }
 }

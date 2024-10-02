@@ -70,7 +70,7 @@ public class JsonObjectFromCatalogTransformer extends AbstractJsonLdTransformer<
                 .add(DCAT_DISTRIBUTION_ATTRIBUTE, distributions)
                 .add(DCAT_DATA_SERVICE_ATTRIBUTE, dataServices);
 
-        ofNullable(catalog.getParticipantId()).ifPresent(pid -> objectBuilder.add(DSPACE_PROPERTY_PARTICIPANT_ID, participantIdMapper.toIri(pid)));
+        ofNullable(catalog.getParticipantId()).ifPresent(pid -> objectBuilder.add(DSPACE_PROPERTY_PARTICIPANT_ID, id(jsonFactory, participantIdMapper.toIri(pid))));
 
         transformProperties(catalog.getProperties(), objectBuilder, mapper, context);
 

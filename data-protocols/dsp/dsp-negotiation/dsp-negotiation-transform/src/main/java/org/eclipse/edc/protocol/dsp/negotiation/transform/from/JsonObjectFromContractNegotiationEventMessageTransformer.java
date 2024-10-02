@@ -49,11 +49,11 @@ public class JsonObjectFromContractNegotiationEventMessageTransformer extends Ab
         return jsonFactory.createObjectBuilder()
                 .add(ID, eventMessage.getId())
                 .add(TYPE, DSPACE_TYPE_CONTRACT_NEGOTIATION_EVENT_MESSAGE)
-                .add(DSPACE_PROPERTY_CONSUMER_PID, eventMessage.getConsumerPid())
-                .add(DSPACE_PROPERTY_PROVIDER_PID, eventMessage.getProviderPid())
+                .add(DSPACE_PROPERTY_CONSUMER_PID, id(jsonFactory, eventMessage.getConsumerPid()))
+                .add(DSPACE_PROPERTY_PROVIDER_PID, id(jsonFactory, eventMessage.getProviderPid()))
                 .add(DSPACE_PROPERTY_EVENT_TYPE, switch (eventMessage.getType()) {
-                    case ACCEPTED -> DSPACE_VALUE_NEGOTIATION_EVENT_TYPE_ACCEPTED;
-                    case FINALIZED -> DSPACE_VALUE_NEGOTIATION_EVENT_TYPE_FINALIZED;
+                    case ACCEPTED -> id(jsonFactory, DSPACE_VALUE_NEGOTIATION_EVENT_TYPE_ACCEPTED);
+                    case FINALIZED -> id(jsonFactory, DSPACE_VALUE_NEGOTIATION_EVENT_TYPE_FINALIZED);
                 })
                 .build();
     }

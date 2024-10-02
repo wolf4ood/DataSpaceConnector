@@ -30,6 +30,7 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTyp
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CALLBACK_ADDRESS;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CONSUMER_PID;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_PROVIDER_PID;
+import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.XSD_TYPE_ANY_URI;
 
 /**
  * Creates a {@link JsonObject} from a {@link ContractOfferMessage}.
@@ -48,10 +49,10 @@ public class JsonObjectFromContractOfferMessageTransformer extends AbstractJsonL
         var builder = jsonFactory.createObjectBuilder()
                 .add(ID, message.getId())
                 .add(TYPE, DSPACE_TYPE_CONTRACT_OFFER_MESSAGE)
-                .add(DSPACE_PROPERTY_PROVIDER_PID, message.getProviderPid());
+                .add(DSPACE_PROPERTY_PROVIDER_PID, id(jsonFactory, message.getProviderPid()));
 
-        addIfNotNull(message.getConsumerPid(), DSPACE_PROPERTY_CONSUMER_PID, builder);
-        addIfNotNull(message.getCallbackAddress(), DSPACE_PROPERTY_CALLBACK_ADDRESS, builder);
+        addIfNotNullId(message.getConsumerPid(), DSPACE_PROPERTY_CONSUMER_PID, jsonFactory, builder);
+        addIfNotNullValue(message.getCallbackAddress(), DSPACE_PROPERTY_CALLBACK_ADDRESS, XSD_TYPE_ANY_URI, jsonFactory, builder);
 
         var offer = message.getContractOffer();
         var policy = context.transform(offer.getPolicy(), JsonObject.class);

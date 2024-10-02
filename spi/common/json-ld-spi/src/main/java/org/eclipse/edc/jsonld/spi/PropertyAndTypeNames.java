@@ -34,6 +34,7 @@ public interface PropertyAndTypeNames {
     String DCAT_DISTRIBUTION_ATTRIBUTE = DCAT_SCHEMA + "distribution";
     String DCAT_ACCESS_SERVICE_ATTRIBUTE = DCAT_SCHEMA + "accessService";
     String DCAT_ENDPOINT_URL_ATTRIBUTE = DCAT_SCHEMA + "endpointUrl";
+    String DCAT_ENDPOINT_URL_NEW_ATTRIBUTE = DCAT_SCHEMA + "endpointURL";
     String DCAT_ENDPOINT_DESCRIPTION_ATTRIBUTE = DCAT_SCHEMA + "endpointDescription";
 
     //EDC

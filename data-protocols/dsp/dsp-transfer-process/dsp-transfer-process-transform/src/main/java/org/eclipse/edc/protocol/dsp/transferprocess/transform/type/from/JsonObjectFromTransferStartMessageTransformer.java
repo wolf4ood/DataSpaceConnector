@@ -43,8 +43,8 @@ public class JsonObjectFromTransferStartMessageTransformer extends AbstractJsonL
         var builder = jsonBuilderFactory.createObjectBuilder()
                 .add(ID, transferStartMessage.getId())
                 .add(TYPE, DSPACE_TYPE_TRANSFER_START_MESSAGE)
-                .add(DSPACE_PROPERTY_PROVIDER_PID, transferStartMessage.getProviderPid())
-                .add(DSPACE_PROPERTY_CONSUMER_PID, transferStartMessage.getConsumerPid());
+                .add(DSPACE_PROPERTY_PROVIDER_PID, id(jsonBuilderFactory, transferStartMessage.getProviderPid()))
+                .add(DSPACE_PROPERTY_CONSUMER_PID, id(jsonBuilderFactory, transferStartMessage.getConsumerPid()));
 
         if (transferStartMessage.getDataAddress() != null) {
             builder.add(DSPACE_PROPERTY_DATA_ADDRESS, context.transform(transferStartMessage.getDataAddress(), JsonObject.class));

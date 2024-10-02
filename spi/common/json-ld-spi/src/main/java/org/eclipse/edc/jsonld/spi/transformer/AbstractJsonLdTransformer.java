@@ -16,6 +16,7 @@ package org.eclipse.edc.jsonld.spi.transformer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.json.JsonArray;
+import jakarta.json.JsonBuilderFactory;
 import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
@@ -43,6 +44,9 @@ import static jakarta.json.JsonValue.ValueType.TRUE;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.ID;
+import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.TYPE;
+import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.VALUE;
 
 /**
  * Base JSON-LD transformer implementation.
@@ -258,7 +262,7 @@ public abstract class AbstractJsonLdTransformer<INPUT, OUTPUT> implements JsonLd
             return ((JsonString) value).getString();
         } else if (value instanceof JsonObject) {
             var object = value.asJsonObject();
-            return Stream.of(JsonLdKeywords.VALUE, JsonLdKeywords.ID).map(object::get)
+            return Stream.of(JsonLdKeywords.VALUE, ID).map(object::get)
                     .filter(Objects::nonNull)
                     .findFirst().map(it -> transformString(it, context))
                     .orElseGet(() -> {
@@ -442,7 +446,7 @@ public abstract class AbstractJsonLdTransformer<INPUT, OUTPUT> implements JsonLd
         if (object instanceof JsonArray) {
             return nodeId(object.asJsonArray().get(0));
         } else {
-            var id = object.asJsonObject().get(JsonLdKeywords.ID);
+            var id = object.asJsonObject().get(ID);
             return id instanceof JsonString ? ((JsonString) id).getString() : null;
         }
     }
@@ -479,13 +483,42 @@ public abstract class AbstractJsonLdTransformer<INPUT, OUTPUT> implements JsonLd
     /**
      * Add a key-value pair to the builder only if the value is not null, to avoid NPE.
      *
-     * @param value the value.
-     * @param key the key.
+     * @param value   the value.
+     * @param key     the key.
      * @param builder the builder.
      */
     protected void addIfNotNull(String value, String key, JsonObjectBuilder builder) {
         if (value != null) {
             builder.add(key, value);
         }
+    }
+
+    /**
+     * Add a key-value pair to the builder only if the value is not null, to avoid NPE.
+     *
+     * @param value   the value.
+     * @param key     the key.
+     * @param builder the builder.
+     */
+    protected void addIfNotNullId(String value, String key, JsonBuilderFactory factory, JsonObjectBuilder builder) {
+        if (value != null) {
+            builder.add(key, id(factory, value));
+        }
+    }
+
+    protected void addIfNotNullValue(String value, String key, String type, JsonBuilderFactory factory, JsonObjectBuilder builder) {
+        if (value != null) {
+            builder.add(key, value(factory, value, type));
+        }
+    }
+
+    protected JsonObject id(JsonBuilderFactory factory, String value) {
+        return factory.createObjectBuilder().add(ID, value).build();
+    }
+
+    protected JsonObject value(JsonBuilderFactory factory, String value, String type) {
+        var builder = factory.createObjectBuilder().add(VALUE, value);
+        addIfNotNull(type, TYPE, builder);
+        return builder.build();
     }
 }

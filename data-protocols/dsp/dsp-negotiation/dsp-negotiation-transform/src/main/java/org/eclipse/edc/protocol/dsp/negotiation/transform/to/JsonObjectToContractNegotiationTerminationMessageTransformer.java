@@ -22,6 +22,8 @@ import org.eclipse.edc.transform.spi.TransformerContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.stream.Collectors;
+
 import static jakarta.json.JsonValue.ValueType.ARRAY;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTypeNames.DSPACE_TYPE_CONTRACT_NEGOTIATION_TERMINATION_MESSAGE;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CODE;
@@ -68,9 +70,7 @@ public class JsonObjectToContractNegotiationTerminationMessageTransformer extend
         if (reasons != null) {  // optional property
             if (reasons instanceof JsonArray) {
                 var array = (JsonArray) reasons;
-                if (array.size() > 0) {
-                    builder.rejectionReason(array.toString());
-                }
+                builder.rejectionReason(array.stream().map(reason -> transformString(reason, context)).collect(Collectors.joining()));
             } else {
                 context.problem()
                         .unexpectedType()

@@ -44,8 +44,8 @@ public class JsonObjectFromTransferSuspensionMessageTransformer extends Abstract
         var builder = jsonBuilderFactory.createObjectBuilder()
                 .add(ID, message.getId())
                 .add(TYPE, DSPACE_TYPE_TRANSFER_SUSPENSION_MESSAGE)
-                .add(DSPACE_PROPERTY_CONSUMER_PID, message.getConsumerPid())
-                .add(DSPACE_PROPERTY_PROVIDER_PID, message.getProviderPid())
+                .add(DSPACE_PROPERTY_CONSUMER_PID, id(jsonBuilderFactory, message.getConsumerPid()))
+                .add(DSPACE_PROPERTY_PROVIDER_PID, id(jsonBuilderFactory, message.getProviderPid()))
                 .add(DSPACE_PROPERTY_REASON, jsonBuilderFactory.createArrayBuilder(message.getReason()));
 
         addIfNotNull(message.getCode(), DSPACE_PROPERTY_CODE, builder);

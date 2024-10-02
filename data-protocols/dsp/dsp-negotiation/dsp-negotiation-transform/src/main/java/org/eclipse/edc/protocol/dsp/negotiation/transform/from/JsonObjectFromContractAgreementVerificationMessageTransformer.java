@@ -45,8 +45,8 @@ public class JsonObjectFromContractAgreementVerificationMessageTransformer exten
         return jsonFactory.createObjectBuilder()
                 .add(ID, verificationMessage.getId())
                 .add(TYPE, DSPACE_TYPE_CONTRACT_AGREEMENT_VERIFICATION_MESSAGE)
-                .add(DSPACE_PROPERTY_CONSUMER_PID, verificationMessage.getConsumerPid())
-                .add(DSPACE_PROPERTY_PROVIDER_PID, verificationMessage.getProviderPid())
+                .add(DSPACE_PROPERTY_CONSUMER_PID, id(jsonFactory, verificationMessage.getConsumerPid()))
+                .add(DSPACE_PROPERTY_PROVIDER_PID, id(jsonFactory, verificationMessage.getProviderPid()))
                 .build();
     }
 }

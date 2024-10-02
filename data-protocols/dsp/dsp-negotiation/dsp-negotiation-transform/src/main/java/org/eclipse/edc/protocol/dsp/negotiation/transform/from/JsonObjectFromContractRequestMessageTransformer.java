@@ -30,6 +30,7 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTyp
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CALLBACK_ADDRESS;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CONSUMER_PID;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_PROVIDER_PID;
+import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.XSD_TYPE_ANY_URI;
 
 
 /**
@@ -49,10 +50,10 @@ public class JsonObjectFromContractRequestMessageTransformer extends AbstractJso
         var builder = jsonFactory.createObjectBuilder()
                 .add(ID, requestMessage.getId())
                 .add(TYPE, DSPACE_TYPE_CONTRACT_REQUEST_MESSAGE)
-                .add(DSPACE_PROPERTY_CONSUMER_PID, requestMessage.getConsumerPid());
+                .add(DSPACE_PROPERTY_CONSUMER_PID, id(jsonFactory, requestMessage.getConsumerPid()));
 
-        addIfNotNull(requestMessage.getProviderPid(), DSPACE_PROPERTY_PROVIDER_PID, builder);
-        addIfNotNull(requestMessage.getCallbackAddress(), DSPACE_PROPERTY_CALLBACK_ADDRESS, builder);
+        addIfNotNullId(requestMessage.getProviderPid(), DSPACE_PROPERTY_PROVIDER_PID, jsonFactory, builder);
+        addIfNotNullValue(requestMessage.getCallbackAddress(), DSPACE_PROPERTY_CALLBACK_ADDRESS, XSD_TYPE_ANY_URI, jsonFactory, builder);
 
         var policy = context.transform(requestMessage.getContractOffer().getPolicy(), JsonObject.class);
         if (policy == null) {

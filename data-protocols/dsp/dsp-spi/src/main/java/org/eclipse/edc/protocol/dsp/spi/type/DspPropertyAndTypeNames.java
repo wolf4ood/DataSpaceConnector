@@ -15,6 +15,7 @@
 package org.eclipse.edc.protocol.dsp.spi.type;
 
 import static org.eclipse.edc.jsonld.spi.Namespaces.DSPACE_SCHEMA;
+import static org.eclipse.edc.jsonld.spi.Namespaces.XSD_SCHEMA;
 
 /**
  * This class provides generic dsp property and type names.
@@ -28,4 +29,7 @@ public interface DspPropertyAndTypeNames {
     String DSPACE_PROPERTY_PROCESS_ID = DSPACE_SCHEMA + "processId";
     String DSPACE_PROPERTY_CALLBACK_ADDRESS = DSPACE_SCHEMA + "callbackAddress";
     String DSPACE_PROPERTY_STATE = DSPACE_SCHEMA + "state";
+    String XSD_TYPE_ANY_URI = XSD_SCHEMA + "anyURI";
+    String XSD_TYPE_DATA_TIME = XSD_SCHEMA + "dateTime";
+
 }

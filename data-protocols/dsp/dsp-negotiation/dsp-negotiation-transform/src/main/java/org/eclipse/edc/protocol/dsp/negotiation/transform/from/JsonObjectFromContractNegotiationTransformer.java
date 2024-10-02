@@ -55,9 +55,9 @@ public class JsonObjectFromContractNegotiationTransformer extends AbstractJsonLd
         return jsonFactory.createObjectBuilder()
                 .add(ID, pidFor(contractNegotiation, contractNegotiation.getType()))
                 .add(TYPE, DSPACE_TYPE_CONTRACT_NEGOTIATION)
-                .add(DSPACE_PROPERTY_CONSUMER_PID, pidFor(contractNegotiation, ContractNegotiation.Type.CONSUMER))
-                .add(DSPACE_PROPERTY_PROVIDER_PID, pidFor(contractNegotiation, ContractNegotiation.Type.PROVIDER))
-                .add(DSPACE_PROPERTY_STATE, state(contractNegotiation.getState(), context))
+                .add(DSPACE_PROPERTY_CONSUMER_PID, id(jsonFactory, pidFor(contractNegotiation, ContractNegotiation.Type.CONSUMER)))
+                .add(DSPACE_PROPERTY_PROVIDER_PID, id(jsonFactory, pidFor(contractNegotiation, ContractNegotiation.Type.PROVIDER)))
+                .add(DSPACE_PROPERTY_STATE, id(jsonFactory, state(contractNegotiation.getState(), context)))
                 .build();
     }
 

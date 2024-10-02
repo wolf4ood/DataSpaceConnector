@@ -57,11 +57,13 @@ import static org.eclipse.edc.jsonld.spi.Namespaces.DCAT_PREFIX;
 import static org.eclipse.edc.jsonld.spi.Namespaces.DCAT_SCHEMA;
 import static org.eclipse.edc.jsonld.spi.Namespaces.DCT_PREFIX;
 import static org.eclipse.edc.jsonld.spi.Namespaces.DCT_SCHEMA;
+import static org.eclipse.edc.jsonld.spi.Namespaces.DSPACE_CONTEXT;
 import static org.eclipse.edc.jsonld.spi.Namespaces.DSPACE_PREFIX;
 import static org.eclipse.edc.jsonld.spi.Namespaces.DSPACE_SCHEMA;
 import static org.eclipse.edc.policy.model.OdrlNamespace.ODRL_PREFIX;
 import static org.eclipse.edc.policy.model.OdrlNamespace.ODRL_SCHEMA;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_SCOPE;
+import static org.eclipse.edc.spi.constants.CoreConstants.EDC_DSPACE_CONTEXT;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_PREFIX;
 import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
@@ -77,6 +79,11 @@ public class DspApiConfigurationExtension implements ServiceExtension {
 
     @Setting(value = "Configures endpoint for reaching the Protocol API.", defaultValue = "<hostname:protocol.port/protocol.path>")
     public static final String DSP_CALLBACK_ADDRESS = "edc.dsp.callback.address";
+
+    private static final boolean DEFAULT_DSP_API_ENABLE_CONTEXT = false;
+
+    @Setting(value = "If set enable the usage of dsp api JSON-LD context.", defaultValue = "" + DEFAULT_DSP_API_ENABLE_CONTEXT)
+    private static final String DSP_API_ENABLE_CONTEXT = "edc.dsp.context.enabled";
 
     @SettingContext("Protocol API context setting key")
     private static final String PROTOCOL_CONFIG_KEY = "web.http." + ApiContext.PROTOCOL;
@@ -120,14 +127,21 @@ public class DspApiConfigurationExtension implements ServiceExtension {
 
         var jsonLdMapper = typeManager.getMapper(JSON_LD);
 
-        // registers ns for DSP scope
-        jsonLd.registerNamespace(DCAT_PREFIX, DCAT_SCHEMA, DSP_SCOPE);
-        jsonLd.registerNamespace(DCT_PREFIX, DCT_SCHEMA, DSP_SCOPE);
-        jsonLd.registerNamespace(ODRL_PREFIX, ODRL_SCHEMA, DSP_SCOPE);
-        jsonLd.registerNamespace(DSPACE_PREFIX, DSPACE_SCHEMA, DSP_SCOPE);
-        jsonLd.registerNamespace(VOCAB, EDC_NAMESPACE, DSP_SCOPE);
-        jsonLd.registerNamespace(EDC_PREFIX, EDC_NAMESPACE, DSP_SCOPE);
 
+        var isDspContextEnabled = context.getSetting(DSP_API_ENABLE_CONTEXT, DEFAULT_DSP_API_ENABLE_CONTEXT);
+
+        if (isDspContextEnabled) {
+            jsonLd.registerContext(DSPACE_CONTEXT, DSP_SCOPE);
+            jsonLd.registerContext(EDC_DSPACE_CONTEXT, DSP_SCOPE);
+        } else {
+            // registers ns for DSP scope
+            jsonLd.registerNamespace(DCAT_PREFIX, DCAT_SCHEMA, DSP_SCOPE);
+            jsonLd.registerNamespace(DCT_PREFIX, DCT_SCHEMA, DSP_SCOPE);
+            jsonLd.registerNamespace(ODRL_PREFIX, ODRL_SCHEMA, DSP_SCOPE);
+            jsonLd.registerNamespace(DSPACE_PREFIX, DSPACE_SCHEMA, DSP_SCOPE);
+            jsonLd.registerNamespace(VOCAB, EDC_NAMESPACE, DSP_SCOPE);
+            jsonLd.registerNamespace(EDC_PREFIX, EDC_NAMESPACE, DSP_SCOPE);
+        }
 
         webService.registerResource(ApiContext.PROTOCOL, new ObjectMapperProvider(jsonLdMapper));
         webService.registerResource(ApiContext.PROTOCOL, new JerseyJsonLdInterceptor(jsonLd, jsonLdMapper, DSP_SCOPE));

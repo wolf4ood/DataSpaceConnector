@@ -1,62 +1,167 @@
 {
   "@context": {
-    "odrl": "http://www.w3.org/ns/odrl/2/",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
-    "cred": "https://www.w3.org/2018/credentials#",
-    "sec": "https://w3id.org/security#",
-    "foaf": "http://xmlns.com/foaf/0.1/",
-    "cc": "http://creativecommons.org/ns#",
     "dct": "http://purl.org/dc/terms/",
     "dcat": "http://www.w3.org/ns/dcat#",
-    "dspace": "https://w3id.org/dspace/2024/1/",
-
-    "dct:title": { "@language": "en" },
-    "dct:creator": { "@type": "@id" },
-    "dct:description": { "@container": "@set" },
-    "dct:issued": { "@type": "xsd:dateTime" },
-    "dct:modified": { "@type": "xsd:dateTime" },
-
-    "dcat:byteSize": { "@type": "xsd:decimal" },
-    "dcat:distribution": { "@container": "@set" },
-    "dcat:theme": { "@type": "@id" },
-    "dcat:conformsTo": { "@type": "@id" },
-    "dcat:dataset": { "@container": "@set" },
-    "dcat:endpointURL": { "@type": "xsd:anyURI" },
-    "dcat:endpointDescription": { "@type": "xsd:anyURI" },
-    "dcat:keyword": { "@container": "@set" },
-    "dcat:servesDataset": {"@container": "@set" },
-    "dcat:service": { "@container": "@set" },
-    "dcat:accessService": { "@container": "@set" },
-
-    "dspace:agreementId": { "@type": "@id" },
-    "dspace:dataset": { "@type": "@id" },
-    "dspace:transportType": { "@type": "@id" },
-    "dspace:state": { "@type": "@id" },
-    "dspace:providerId": { "@type": "@id" },
-    "dspace:consumerId": { "@type": "@id" },
-    "dspace:participantId": { "@type": "@id" },
-    "dspace:reason": { "@container": "@set" },
-    "dspace:catalog": { "@container": "@set" },
-    "dspace:filter": { "@container": "@set" },
-    "dspace:timestamp": { "@type": "xsd:dateTime" },
-    "dspace:callbackAddress": { "@type": "xsd:anyURI" },
-    "dspace:endpointProperties": { "@container": "@set" },
-
-    "foaf:homepage": { "@type": "xsd:anyURI" },
-
-    "odrl:hasPolicy": { "@container": "@set" },
-    "odrl:permission": { "@container": "@set" },
-    "odrl:prohibition": { "@container": "@set" },
-    "odrl:obligation": { "@container": "@set" },
-    "odrl:duty": { "@container": "@set" },
-    "odrl:constraint": { "@container": "@set" },
-    "odrl:action": { "@type": "@id" },
-    "odrl:target": { "@type": "@id" },
-    "odrl:leftOperand": { "@type": "@id" },
-    "odrl:operator": { "@type": "@id" },
-    "odrl:rightOperandReference": { "@type": "@id" },
-    "odrl:profile": { "@container": "@set" },
-    "odrl:assigner": { "@type": "@id" },
-    "odrl:assignee": { "@type": "@id" }
+    "dspace": "https://w3id.org/dspace/v0.8/",
+    "CatalogRequestMessage": "dspace:CatalogRequestMessage",
+    "TransferRequestMessage": "dspace:TransferRequestMessage",
+    "TransferStartMessage": "dspace:TransferStartMessage",
+    "TransferCompletionMessage": "dspace:TransferCompletionMessage",
+    "TransferTerminationMessage": "dspace:TransferTerminationMessage",
+    "TransferSuspensionMessage": "dspace:TransferSuspensionMessage",
+    "ContractRequestMessage": {
+      "@id": "dspace:ContractRequestMessage",
+      "@context": {
+        "@import": "http://www.w3.org/ns/odrl.jsonld",
+        "@propagate": true,
+        "uid": null,
+        "type": null
+      }
+    },
+    "ContractOfferMessage": {
+      "@id": "dspace:ContractOfferMessage",
+      "@context": {
+        "@import": "http://www.w3.org/ns/odrl.jsonld",
+        "@propagate": true,
+        "uid": null,
+        "type": null
+      }
+    },
+    "ContractAgreementMessage": {
+      "@id": "dspace:ContractAgreementMessage",
+      "@context": {
+        "@import": "http://www.w3.org/ns/odrl.jsonld",
+        "@propagate": true,
+        "uid": null,
+        "type": null
+      }
+    },
+    "ContractAgreementVerificationMessage": "dspace:ContractAgreementVerificationMessage",
+    "ContractNegotiationEventMessage": "dspace:ContractNegotiationEventMessage",
+    "ContractNegotiationTerminationMessage": "dspace:ContractNegotiationTerminationMessage",
+    "DataAddress": "dspace:DataAddress",
+    "EndpointProperty": "dspace:EndpointProperty",
+    "TransferProcess": "dspace:TransferProcess",
+    "ContractNegotiation": "dspace:ContractNegotiation",
+    "Catalog": "dcat:Catalog",
+    "Dataset": {
+      "@id": "dcat:Dataset",
+      "@context": {
+        "@import": "http://www.w3.org/ns/odrl.jsonld",
+        "@propagate": true,
+        "uid": null,
+        "type": null,
+        "hasPolicy": {
+          "@id": "odrl:hasPolicy",
+          "@container": "@set"
+        }
+      }
+    },
+    "DataService": "dcat:DataService",
+    "Distribution": "dcat:Distribution",
+    "agreementId": {
+      "@type": "@id",
+      "@id": "dspace:agreementId"
+    },
+    "state": {
+      "@type": "@vocab",
+      "@id": "dspace:state"
+    },
+    "consumerPid": {
+      "@type": "@id",
+      "@id": "dspace:consumerPid"
+    },
+    "providerPid": {
+      "@type": "@id",
+      "@id": "dspace:providerPid"
+    },
+    "participantId": {
+      "@type": "@id",
+      "@id": "dspace:participantId"
+    },
+    "reason": {
+      "@id": "dspace:reason",
+      "@container": "@set"
+    },
+    "code": "dspace:code",
+    "catalog": {
+      "@id": "dspace:catalog",
+      "@container": "@set"
+    },
+    "filter": {
+      "@id": "dspace:filter",
+      "@container": "@set"
+    },
+    "callbackAddress": {
+      "@type": "xsd:anyURI",
+      "@id": "dspace:callbackAddress"
+    },
+    "dataAddress": "dspace:dataAddress",
+    "name": "dspace:name",
+    "value": "dspace:value",
+    "endpointType": {
+      "@type": "@vocab",
+      "@id": "dspace:endpointType"
+    },
+    "endpointProperties": {
+      "@id": "dspace:endpointProperties",
+      "@container": "@set"
+    },
+    "endpoint": {
+      "@type": "xsd:anyURI",
+      "@id": "dspace:endpoint"
+    },
+    "offer": {
+      "@type": "@id",
+      "@id": "dspace:offer"
+    },
+    "agreement": {
+      "@id": "dspace:agreement",
+      "@type": "@id"
+    },
+    "timestamp": {
+      "@type": "xsd:dateTime",
+      "@id": "dspace:timestamp"
+    },
+    "eventType": {
+      "@type": "@vocab",
+      "@id": "dspace:eventType"
+    },
+    "ACCEPTED": "dspace:ACCEPTED",
+    "FINALIZED": "dspace:FINALIZED",
+    "REQUESTED": "dspace:REQUESTED",
+    "STARTED": "dspace:STARTED",
+    "COMPLETED": "dspace:COMPLETED",
+    "SUSPENDED": "dspace:SUSPENDED",
+    "TERMINATED": "dspace:TERMINATED",
+    "OFFERED": "dspace:OFFERED",
+    "AGREED": "dspace:AGREED",
+    "VERIFIED": "dspace:VERIFIED",
+    "format": {
+      "@type": "@vocab",
+      "@id": "dct:format"
+    },
+    "service": {
+      "@id": "dcat:service",
+      "@container": "@set"
+    },
+    "dataset": {
+      "@id": "dcat:dataset",
+      "@container": "@set"
+    },
+    "distribution": {
+      "@id": "dcat:distribution",
+      "@container": "@set"
+    },
+    "accessService": {
+      "@id": "dcat:accessService",
+      "@container": "@set"
+    },
+    "endpointDescription": "dcat:endpointDescription",
+    "endpointURL": {
+      "@type": "xsd:anyURI",
+      "@id": "dcat:endpointURL"
+    }
   }
 }

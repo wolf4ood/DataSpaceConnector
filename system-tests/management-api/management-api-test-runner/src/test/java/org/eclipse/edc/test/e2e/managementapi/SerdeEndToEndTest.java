@@ -381,7 +381,7 @@ public class SerdeEndToEndTest {
         var expanded = jsonLd.expand(inputObject).orElseThrow(f -> new AssertionError(f.getFailureDetail()));
 
         // transform the expanded into the input klass type
-        var result = registry.transform(expanded, klass).orElseThrow(failure -> new RuntimeException());
+        var result = registry.transform(expanded, klass).orElseThrow(failure -> new RuntimeException(failure.getFailureDetail()));
         // transform the klass type instance into JsonObject
         var object = registry.transform(result, JsonObject.class).orElseThrow(failure -> new RuntimeException());
 
@@ -417,7 +417,7 @@ public class SerdeEndToEndTest {
             assertThat(((JsonString) t).getString()).startsWith(EDC_NAMESPACE);
         });
 
-        return registry.transform(expanded, klass).orElseThrow(failure -> new RuntimeException());
+        return registry.transform(expanded, klass).orElseThrow(failure -> new RuntimeException(failure.getFailureDetail()));
     }
 
     private static class JsonInputProvider implements ArgumentsProvider {

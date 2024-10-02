@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.ID;
 import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.TYPE;
+import static org.eclipse.edc.jsonld.spi.Namespaces.DSPACE_SCHEMA;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CONSUMER_PID;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_PROVIDER_PID;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_STATE;
@@ -44,14 +45,14 @@ public class JsonObjectFromTransferProcessTransformer extends AbstractJsonLdTran
         var builder = jsonBuilderFactory.createObjectBuilder()
                 .add(ID, transferProcess.getId())
                 .add(TYPE, DSPACE_TYPE_TRANSFER_PROCESS)
-                .add(DSPACE_PROPERTY_STATE, TransferProcessStates.from(transferProcess.getState()).name());
+                .add(DSPACE_PROPERTY_STATE, id(jsonBuilderFactory, DSPACE_SCHEMA + TransferProcessStates.from(transferProcess.getState()).name()));
 
         if (transferProcess.getType() == TransferProcess.Type.PROVIDER) {
-            builder.add(DSPACE_PROPERTY_PROVIDER_PID, transferProcess.getId());
-            addIfNotNull(transferProcess.getCorrelationId(), DSPACE_PROPERTY_CONSUMER_PID, builder);
+            builder.add(DSPACE_PROPERTY_PROVIDER_PID, id(jsonBuilderFactory, transferProcess.getId()));
+            addIfNotNullId(transferProcess.getCorrelationId(), DSPACE_PROPERTY_CONSUMER_PID, jsonBuilderFactory, builder);
         } else {
-            builder.add(DSPACE_PROPERTY_CONSUMER_PID, transferProcess.getId());
-            addIfNotNull(transferProcess.getCorrelationId(), DSPACE_PROPERTY_PROVIDER_PID, builder);
+            builder.add(DSPACE_PROPERTY_CONSUMER_PID, id(jsonBuilderFactory, transferProcess.getId()));
+            addIfNotNullId(transferProcess.getCorrelationId(), DSPACE_PROPERTY_PROVIDER_PID, jsonBuilderFactory, builder);
         }
 
         return builder.build();

@@ -51,7 +51,7 @@ public class JsonObjectFromDataAddressDspaceTransformer extends AbstractJsonLdTr
 
         return jsonFactory.createObjectBuilder()
                 .add(TYPE, DataAddressDspaceSerialization.DSPACE_DATAADDRESS_TYPE)
-                .add(DataAddressDspaceSerialization.ENDPOINT_TYPE_PROPERTY, dataAddress.getType())
+                .add(DataAddressDspaceSerialization.ENDPOINT_TYPE_PROPERTY, id(jsonFactory, dataAddress.getType()))
                 .add(DataAddressDspaceSerialization.ENDPOINT_PROPERTIES_PROPERTY, endpointProperties)
                 .build();
     }

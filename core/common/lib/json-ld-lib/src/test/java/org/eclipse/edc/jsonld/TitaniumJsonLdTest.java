@@ -14,6 +14,8 @@
 
 package org.eclipse.edc.jsonld;
 
+import com.apicatalog.jsonld.JsonLdError;
+import com.apicatalog.jsonld.document.JsonDocument;
 import jakarta.json.Json;
 import jakarta.json.JsonValue;
 import org.assertj.core.api.Assertions;
@@ -257,6 +259,29 @@ class TitaniumJsonLdTest {
         assertThat(compacted).isSucceeded().satisfies(c -> {
             Assertions.assertThat(c).isEqualTo(input);
         });
+    }
+
+    @Test
+    void expandAndCompactTest() throws JsonLdError {
+
+
+        var context = createObjectBuilder()
+                .add("dspace", "https://w3id.org/dspace/2024/1/")
+                .add("TransferRequestMessage", "dspace:TransferRequestMessage")
+                .add("agreementId", createObjectBuilder().add("@type", "@id")
+                        .add("@id", "dspace:agreementId")).build();
+
+        var input = createObjectBuilder()
+                .add("@context", context)
+                .add("@type", "TransferRequestMessage")
+                .add("agreementId", "agreementId")
+                .build();
+
+
+        var result = com.apicatalog.jsonld.JsonLd.expand(JsonDocument.of(input)).get().get(0).asJsonObject();
+
+        System.out.println(result.toString());
+        System.out.println(com.apicatalog.jsonld.JsonLd.compact(JsonDocument.of(result), JsonDocument.of(context)).get().toString());
     }
 
     @Test

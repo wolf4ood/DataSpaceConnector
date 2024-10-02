@@ -28,5 +28,9 @@ public interface Namespaces {
     String DCT_SCHEMA = "http://purl.org/dc/terms/";
 
     String DSPACE_PREFIX = "dspace";
-    String DSPACE_SCHEMA = "https://w3id.org/dspace/v0.8/"; // TODO to be defined
+    String DSPACE_SCHEMA = "https://w3id.org/dspace/2024/1/"; // TODO to be defined
+    String DSPACE_CONTEXT = "https://w3id.org/dspace/2024/1/context.json";
+
+    String XSD_PREFIX = "xsd";
+    String XSD_SCHEMA = "http://www.w3.org/2001/XMLSchema#";
 }

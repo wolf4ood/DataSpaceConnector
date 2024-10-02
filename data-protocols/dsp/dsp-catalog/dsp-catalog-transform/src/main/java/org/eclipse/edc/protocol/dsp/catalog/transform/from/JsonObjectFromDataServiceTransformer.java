@@ -27,6 +27,8 @@ import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.TYPE;
 import static org.eclipse.edc.jsonld.spi.PropertyAndTypeNames.DCAT_DATA_SERVICE_TYPE;
 import static org.eclipse.edc.jsonld.spi.PropertyAndTypeNames.DCAT_ENDPOINT_DESCRIPTION_ATTRIBUTE;
 import static org.eclipse.edc.jsonld.spi.PropertyAndTypeNames.DCAT_ENDPOINT_URL_ATTRIBUTE;
+import static org.eclipse.edc.jsonld.spi.PropertyAndTypeNames.DCAT_ENDPOINT_URL_NEW_ATTRIBUTE;
+import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.XSD_TYPE_ANY_URI;
 
 /**
  * Converts from a {@link DataService} to a DCAT data service as a {@link JsonObject} in JSON-LD expanded form.
@@ -48,6 +50,7 @@ public class JsonObjectFromDataServiceTransformer extends AbstractJsonLdTransfor
 
         addIfNotNull(dataService.getEndpointDescription(), DCAT_ENDPOINT_DESCRIPTION_ATTRIBUTE, objectBuilder);
         addIfNotNull(dataService.getEndpointUrl(), DCAT_ENDPOINT_URL_ATTRIBUTE, objectBuilder);
+        addIfNotNullValue(dataService.getEndpointUrl(), DCAT_ENDPOINT_URL_NEW_ATTRIBUTE, XSD_TYPE_ANY_URI, jsonFactory, objectBuilder);
 
         return objectBuilder.build();
     }

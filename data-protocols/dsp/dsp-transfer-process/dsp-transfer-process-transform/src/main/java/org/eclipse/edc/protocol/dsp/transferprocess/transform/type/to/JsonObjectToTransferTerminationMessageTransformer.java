@@ -22,6 +22,8 @@ import org.eclipse.edc.transform.spi.TransformerContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.stream.Collectors;
+
 import static jakarta.json.JsonValue.ValueType.ARRAY;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CODE;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CONSUMER_PID;
@@ -73,9 +75,10 @@ public class JsonObjectToTransferTerminationMessageTransformer extends AbstractJ
                         .report();
             } else {
                 var array = (JsonArray) reasons;
-                if (array.size() > 0) {
-                    builder.reason(array.toString());
-                }
+                builder.reason(array.stream().map(reason -> transformString(reason, context)).collect(Collectors.joining()));
+//                if (array.size() > 0) {
+//                    builder.reason(array.toString());
+//                }
             }
         }
 

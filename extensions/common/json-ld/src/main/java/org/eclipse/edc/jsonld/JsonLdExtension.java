@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_CONNECTOR_MANAGEMENT_CONTEXT;
+import static org.eclipse.edc.spi.constants.CoreConstants.EDC_DSPACE_CONTEXT;
 import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
@@ -96,8 +97,9 @@ public class JsonLdExtension implements ServiceExtension {
 
         Stream.of(
                 new JsonLdContext("odrl.jsonld", "http://www.w3.org/ns/odrl.jsonld"),
-                new JsonLdContext("dspace.jsonld", "https://w3id.org/dspace/2024/1/context.json"),
-                new JsonLdContext("management-context-v1.jsonld", EDC_CONNECTOR_MANAGEMENT_CONTEXT)
+                new JsonLdContext("dspace-v2024-1.jsonld", "https://w3id.org/dspace/2024/1/context.json"),
+                new JsonLdContext("management-context-v1.jsonld", EDC_CONNECTOR_MANAGEMENT_CONTEXT),
+                new JsonLdContext("dspace-edc-context-v1.jsonld", EDC_DSPACE_CONTEXT)
         ).forEach(jsonLdContext -> getResourceUri("document/" + jsonLdContext.fileName())
                 .onSuccess(uri -> service.registerCachedDocument(jsonLdContext.url(), uri))
                 .onFailure(failure -> monitor.warning("Failed to register cached json-ld document: " + failure.getFailureDetail()))

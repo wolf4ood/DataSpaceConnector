@@ -33,6 +33,7 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTyp
 import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTypeNames.DSPACE_TYPE_CONTRACT_AGREEMENT_MESSAGE;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CONSUMER_PID;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_PROVIDER_PID;
+import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.XSD_TYPE_DATA_TIME;
 
 
 /**
@@ -65,16 +66,16 @@ public class JsonObjectFromContractAgreementMessageTransformer extends AbstractJ
 
         var copiedPolicy = Json.createObjectBuilder(policy)
                 .add(ID, agreement.getId())
-                .add(ODRL_ASSIGNEE_ATTRIBUTE, agreement.getConsumerId())
-                .add(ODRL_ASSIGNER_ATTRIBUTE, agreement.getProviderId())
-                .add(DSPACE_PROPERTY_TIMESTAMP, signing)
+                .add(ODRL_ASSIGNEE_ATTRIBUTE, id(jsonFactory, agreement.getConsumerId()))
+                .add(ODRL_ASSIGNER_ATTRIBUTE, id(jsonFactory, agreement.getProviderId()))
+                .add(DSPACE_PROPERTY_TIMESTAMP, value(jsonFactory, signing, XSD_TYPE_DATA_TIME))
                 .build();
 
         return jsonFactory.createObjectBuilder()
                 .add(ID, agreementMessage.getId())
                 .add(TYPE, DSPACE_TYPE_CONTRACT_AGREEMENT_MESSAGE)
-                .add(DSPACE_PROPERTY_PROVIDER_PID, agreementMessage.getProviderPid())
-                .add(DSPACE_PROPERTY_CONSUMER_PID, agreementMessage.getConsumerPid())
+                .add(DSPACE_PROPERTY_PROVIDER_PID, id(jsonFactory, agreementMessage.getProviderPid()))
+                .add(DSPACE_PROPERTY_CONSUMER_PID, id(jsonFactory, agreementMessage.getConsumerPid()))
                 .add(DSPACE_PROPERTY_AGREEMENT, copiedPolicy)
                 .build();
     }

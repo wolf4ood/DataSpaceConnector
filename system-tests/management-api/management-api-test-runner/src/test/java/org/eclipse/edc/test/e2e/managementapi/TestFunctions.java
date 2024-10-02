@@ -318,8 +318,12 @@ public class TestFunctions {
     }
 
     public static JsonObjectBuilder policy(JsonObject permission) {
+        return policy(permission, "Set");
+    }
+
+    public static JsonObjectBuilder policy(JsonObject permission, String type) {
         return createObjectBuilder()
-                .add(TYPE, "Set")
+                .add(TYPE, type)
                 .add("obligation", createArrayBuilder().build())
                 .add("permission", permission)
                 .add("target", "assetId")
@@ -327,6 +331,11 @@ public class TestFunctions {
     }
 
     public static JsonObject querySpecObject() {
+        return querySpecObject(createObjectBuilder()
+                .add(CONTEXT, createContextBuilder().build()));
+    }
+
+    private static JsonObject querySpecObject(JsonObjectBuilder builder) {
         var criterion = createObjectBuilder()
                 .add(TYPE, "Criterion")
                 .add("operandLeft", "foo")
@@ -334,8 +343,7 @@ public class TestFunctions {
                 .add("operandRight", "bar")
                 .build();
 
-        return createObjectBuilder()
-                .add(CONTEXT, createContextBuilder().build())
+        return builder
                 .add(TYPE, "QuerySpec")
                 .add("offset", 10)
                 .add("limit", 20)
@@ -344,6 +352,10 @@ public class TestFunctions {
                 .add("sortField", "fieldName")
                 .build();
 
+    }
+
+    public static JsonObject embeddedQuerySpec() {
+        return querySpecObject(createObjectBuilder());
     }
 
     public static JsonObject inForceDatePolicy(String operatorStart, Object startDate, String operatorEnd, Object endDate) {

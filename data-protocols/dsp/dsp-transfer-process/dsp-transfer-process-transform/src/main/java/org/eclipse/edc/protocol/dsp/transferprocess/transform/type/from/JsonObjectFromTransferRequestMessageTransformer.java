@@ -26,9 +26,11 @@ import java.util.Optional;
 
 import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.ID;
 import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.TYPE;
+import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.VALUE;
 import static org.eclipse.edc.jsonld.spi.PropertyAndTypeNames.DCT_FORMAT_ATTRIBUTE;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CALLBACK_ADDRESS;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CONSUMER_PID;
+import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.XSD_TYPE_ANY_URI;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_PROPERTY_CONTRACT_AGREEMENT_ID;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_PROPERTY_DATA_ADDRESS;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_REQUEST_MESSAGE;
@@ -51,10 +53,10 @@ public class JsonObjectFromTransferRequestMessageTransformer extends AbstractJso
         var builder = jsonBuilderFactory.createObjectBuilder()
                 .add(ID, transferRequestMessage.getId())
                 .add(TYPE, DSPACE_TYPE_TRANSFER_REQUEST_MESSAGE)
-                .add(DSPACE_PROPERTY_CONTRACT_AGREEMENT_ID, transferRequestMessage.getContractId())
-                .add(DCT_FORMAT_ATTRIBUTE, format)
-                .add(DSPACE_PROPERTY_CALLBACK_ADDRESS, transferRequestMessage.getCallbackAddress())
-                .add(DSPACE_PROPERTY_CONSUMER_PID, transferRequestMessage.getConsumerPid());
+                .add(DSPACE_PROPERTY_CONTRACT_AGREEMENT_ID, id(jsonBuilderFactory, transferRequestMessage.getContractId()))
+                .add(DCT_FORMAT_ATTRIBUTE, id(jsonBuilderFactory, format))
+                .add(DSPACE_PROPERTY_CALLBACK_ADDRESS, jsonBuilderFactory.createObjectBuilder().add(VALUE, transferRequestMessage.getCallbackAddress()).add(TYPE, XSD_TYPE_ANY_URI))
+                .add(DSPACE_PROPERTY_CONSUMER_PID, id(jsonBuilderFactory, transferRequestMessage.getConsumerPid()));
 
         if (transferRequestMessage.getDataDestination() != null && transferRequestMessage.getDataDestination().getProperties().size() > 1) {
             builder.add(DSPACE_PROPERTY_DATA_ADDRESS, context.transform(transferRequestMessage.getDataDestination(), JsonObject.class));

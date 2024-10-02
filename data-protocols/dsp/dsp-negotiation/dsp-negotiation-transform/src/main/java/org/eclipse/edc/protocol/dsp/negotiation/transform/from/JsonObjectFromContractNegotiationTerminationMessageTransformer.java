@@ -47,8 +47,8 @@ public class JsonObjectFromContractNegotiationTerminationMessageTransformer exte
         var builder = jsonFactory.createObjectBuilder()
                 .add(ID, terminationMessage.getId())
                 .add(TYPE, DSPACE_TYPE_CONTRACT_NEGOTIATION_TERMINATION_MESSAGE)
-                .add(DSPACE_PROPERTY_CONSUMER_PID, terminationMessage.getConsumerPid())
-                .add(DSPACE_PROPERTY_PROVIDER_PID, terminationMessage.getProviderPid());
+                .add(DSPACE_PROPERTY_CONSUMER_PID, id(jsonFactory, terminationMessage.getConsumerPid()))
+                .add(DSPACE_PROPERTY_PROVIDER_PID, id(jsonFactory, terminationMessage.getProviderPid()));
 
         addIfNotNull(terminationMessage.getRejectionReason(), DSPACE_PROPERTY_REASON, builder);
         addIfNotNull(terminationMessage.getCode(), DSPACE_PROPERTY_CODE, builder);

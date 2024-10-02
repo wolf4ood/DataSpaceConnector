@@ -44,8 +44,8 @@ public class JsonObjectFromTransferTerminationMessageTransformer extends Abstrac
         var builder = jsonBuilderFactory.createObjectBuilder()
                 .add(ID, transferTerminationMessage.getId())
                 .add(TYPE, DSPACE_TYPE_TRANSFER_TERMINATION_MESSAGE)
-                .add(DSPACE_PROPERTY_CONSUMER_PID, transferTerminationMessage.getConsumerPid())
-                .add(DSPACE_PROPERTY_PROVIDER_PID, transferTerminationMessage.getProviderPid());
+                .add(DSPACE_PROPERTY_CONSUMER_PID, id(jsonBuilderFactory, transferTerminationMessage.getConsumerPid()))
+                .add(DSPACE_PROPERTY_PROVIDER_PID, id(jsonBuilderFactory, transferTerminationMessage.getProviderPid()));
 
         addIfNotNull(transferTerminationMessage.getCode(), DSPACE_PROPERTY_CODE, builder);
         addIfNotNull(transferTerminationMessage.getReason(), DSPACE_PROPERTY_REASON, builder);
