@@ -18,6 +18,7 @@ import org.eclipse.edc.connector.controlplane.services.spi.contractnegotiation.C
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolVersionRegistry;
 import org.eclipse.edc.jsonld.spi.JsonLd;
 import org.eclipse.edc.jsonld.spi.JsonLdNamespace;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
 import org.eclipse.edc.protocol.dsp.negotiation.http.api.controller.DspNegotiationApiController;
 import org.eclipse.edc.protocol.dsp.negotiation.http.api.controller.DspNegotiationApiController20241;
@@ -31,7 +32,6 @@ import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.validator.spi.JsonObjectValidatorRegistry;
 import org.eclipse.edc.web.jersey.providers.jsonld.JerseyJsonLdInterceptor;
 import org.eclipse.edc.web.spi.WebService;
@@ -49,7 +49,6 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTyp
 import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTypeNames.DSPACE_TYPE_CONTRACT_REQUEST_MESSAGE_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.version.DspVersions.V_08;
 import static org.eclipse.edc.protocol.dsp.spi.version.DspVersions.V_2024_1;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
  * Creates and registers the controller for dataspace protocol negotiation requests.
@@ -74,7 +73,7 @@ public class DspNegotiationApiExtension implements ServiceExtension {
     private JsonLd jsonLd;
 
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Override
     public String name() {
@@ -83,7 +82,7 @@ public class DspNegotiationApiExtension implements ServiceExtension {
 
     @Override
     public void initialize(ServiceExtensionContext context) {
-        var jsonLdMapper = typeManager.getMapper(JSON_LD);
+        var jsonLdMapper = jsonLdMapperProvider.get();
 
         registerValidators(DSP_NAMESPACE_V_08);
         registerValidators(DSP_NAMESPACE_V_2024_1);

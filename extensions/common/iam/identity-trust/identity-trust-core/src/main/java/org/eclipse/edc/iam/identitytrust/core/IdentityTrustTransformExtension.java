@@ -26,12 +26,12 @@ import org.eclipse.edc.iam.identitytrust.transform.to.JsonObjectToVerifiablePres
 import org.eclipse.edc.iam.identitytrust.transform.to.JwtToVerifiableCredentialTransformer;
 import org.eclipse.edc.iam.identitytrust.transform.to.JwtToVerifiablePresentationTransformer;
 import org.eclipse.edc.jsonld.spi.JsonLd;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.spi.result.Result;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +41,6 @@ import java.net.URISyntaxException;
 
 import static java.lang.String.format;
 import static org.eclipse.edc.iam.identitytrust.spi.DcpConstants.DCP_CONTEXT_URL;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 @Extension(value = IdentityTrustTransformExtension.NAME, categories = { "iam", "transform", "jsonld" })
 public class IdentityTrustTransformExtension implements ServiceExtension {
@@ -53,7 +52,7 @@ public class IdentityTrustTransformExtension implements ServiceExtension {
     @Inject
     private JsonLd jsonLdService;
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Override
     public void initialize(ServiceExtensionContext context) {
@@ -69,8 +68,8 @@ public class IdentityTrustTransformExtension implements ServiceExtension {
                 .onSuccess(uri -> jsonLdService.registerCachedDocument(DCP_CONTEXT_URL, uri))
                 .onFailure(failure -> context.getMonitor().warning("Failed to register cached json-ld document: " + failure.getFailureDetail()));
 
-        typeTransformerRegistry.register(new JsonObjectToPresentationQueryTransformer(typeManager.getMapper(JSON_LD)));
-        typeTransformerRegistry.register(new JsonObjectToPresentationResponseMessageTransformer(typeManager.getMapper(JSON_LD)));
+        typeTransformerRegistry.register(new JsonObjectToPresentationQueryTransformer(jsonLdMapperProvider.get()));
+        typeTransformerRegistry.register(new JsonObjectToPresentationResponseMessageTransformer(jsonLdMapperProvider.get()));
         typeTransformerRegistry.register(new JsonObjectFromPresentationQueryTransformer());
         typeTransformerRegistry.register(new JsonObjectFromPresentationResponseMessageTransformer());
         typeTransformerRegistry.register(new JsonObjectToVerifiablePresentationTransformer());
@@ -78,7 +77,7 @@ public class IdentityTrustTransformExtension implements ServiceExtension {
         typeTransformerRegistry.register(new JsonObjectToIssuerTransformer());
         typeTransformerRegistry.register(new JsonObjectToCredentialSubjectTransformer());
         typeTransformerRegistry.register(new JsonObjectToCredentialStatusTransformer());
-        typeTransformerRegistry.register(new JwtToVerifiablePresentationTransformer(context.getMonitor(), typeManager.getMapper(JSON_LD), jsonLdService));
+        typeTransformerRegistry.register(new JwtToVerifiablePresentationTransformer(context.getMonitor(), jsonLdMapperProvider.get(), jsonLdService));
         typeTransformerRegistry.register(new JwtToVerifiableCredentialTransformer(context.getMonitor()));
     }
 

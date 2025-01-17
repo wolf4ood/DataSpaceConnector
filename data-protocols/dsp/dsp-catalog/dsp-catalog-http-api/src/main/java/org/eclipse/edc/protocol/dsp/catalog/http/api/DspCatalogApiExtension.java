@@ -20,6 +20,7 @@ import org.eclipse.edc.connector.controlplane.services.spi.catalog.CatalogProtoc
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolVersionRegistry;
 import org.eclipse.edc.jsonld.spi.JsonLd;
 import org.eclipse.edc.jsonld.spi.JsonLdNamespace;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.protocol.dsp.catalog.http.api.controller.DspCatalogApiController;
 import org.eclipse.edc.protocol.dsp.catalog.http.api.controller.DspCatalogApiController20241;
 import org.eclipse.edc.protocol.dsp.catalog.http.api.decorator.Base64continuationTokenSerDes;
@@ -34,7 +35,6 @@ import org.eclipse.edc.spi.protocol.ProtocolWebhook;
 import org.eclipse.edc.spi.query.CriterionOperatorRegistry;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.validator.spi.JsonObjectValidatorRegistry;
 import org.eclipse.edc.web.jersey.providers.jsonld.JerseyJsonLdInterceptor;
@@ -50,7 +50,6 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_TRANSFORMER
 import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_TRANSFORMER_CONTEXT_V_2024_1;
 import static org.eclipse.edc.protocol.dsp.spi.version.DspVersions.V_08;
 import static org.eclipse.edc.protocol.dsp.spi.version.DspVersions.V_2024_1;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
  * Creates and registers the controller for dataspace protocol catalog requests.
@@ -81,9 +80,9 @@ public class DspCatalogApiExtension implements ServiceExtension {
     @Inject
     private Monitor monitor;
     @Inject
-    private TypeManager typeManager;
-    @Inject
     private JsonLd jsonLd;
+    @Inject
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Override
     public String name() {
@@ -92,7 +91,7 @@ public class DspCatalogApiExtension implements ServiceExtension {
 
     @Override
     public void initialize(ServiceExtensionContext context) {
-        var jsonLdMapper = typeManager.getMapper(JSON_LD);
+        var jsonLdMapper = jsonLdMapperProvider.get();
         registerValidators(DSP_NAMESPACE_V_08);
         registerValidators(DSP_NAMESPACE_V_2024_1);
 

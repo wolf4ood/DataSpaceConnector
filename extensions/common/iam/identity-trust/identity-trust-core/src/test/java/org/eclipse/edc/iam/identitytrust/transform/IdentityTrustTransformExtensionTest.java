@@ -26,31 +26,26 @@ import org.eclipse.edc.iam.identitytrust.transform.to.JsonObjectToVerifiableCred
 import org.eclipse.edc.iam.identitytrust.transform.to.JsonObjectToVerifiablePresentationTransformer;
 import org.eclipse.edc.iam.identitytrust.transform.to.JwtToVerifiableCredentialTransformer;
 import org.eclipse.edc.iam.identitytrust.transform.to.JwtToVerifiablePresentationTransformer;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.junit.extensions.DependencyInjectionExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(DependencyInjectionExtension.class)
 class IdentityTrustTransformExtensionTest {
 
     private final TypeTransformerRegistry mockRegistry = mock();
-
-    private final TypeManager typeManager = mock();
-
+    
     @BeforeEach
     void setup(ServiceExtensionContext context) {
-        when(typeManager.getMapper(JSON_LD)).thenReturn(new ObjectMapper());
-        context.registerService(TypeManager.class, typeManager);
+        context.registerService(JsonLdObjectMapperProvider.class, ObjectMapper::new);
         context.registerService(TypeTransformerRegistry.class, mockRegistry);
     }
 

@@ -18,13 +18,13 @@ import jakarta.json.Json;
 import org.eclipse.edc.connector.dataplane.selector.spi.DataPlaneSelectorService;
 import org.eclipse.edc.http.spi.ControlApiHttpClient;
 import org.eclipse.edc.jsonld.spi.JsonLd;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.runtime.metamodel.annotation.Provider;
 import org.eclipse.edc.runtime.metamodel.annotation.Setting;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.transform.transformer.edc.from.JsonObjectFromDataAddressTransformer;
 import org.eclipse.edc.transform.transformer.edc.from.JsonObjectFromDataPlaneInstanceTransformer;
@@ -33,7 +33,6 @@ import org.eclipse.edc.transform.transformer.edc.to.JsonObjectToDataPlaneInstanc
 import org.eclipse.edc.transform.transformer.edc.to.JsonValueToGenericTypeTransformer;
 
 import static java.util.Collections.emptyMap;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 @Extension(DataPlaneSelectorClientExtension.NAME)
 public class DataPlaneSelectorClientExtension implements ServiceExtension {
@@ -50,7 +49,7 @@ public class DataPlaneSelectorClientExtension implements ServiceExtension {
     private ControlApiHttpClient httpClient;
 
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Inject
     private TypeTransformerRegistry typeTransformerRegistry;
@@ -66,7 +65,7 @@ public class DataPlaneSelectorClientExtension implements ServiceExtension {
     @Override
     public void initialize(ServiceExtensionContext context) {
         var builderFactory = Json.createBuilderFactory(emptyMap());
-        var objectMapper = typeManager.getMapper(JSON_LD);
+        var objectMapper = jsonLdMapperProvider.get();
         typeTransformerRegistry.register(new JsonObjectFromDataPlaneInstanceTransformer(builderFactory, objectMapper));
         typeTransformerRegistry.register(new JsonObjectFromDataAddressTransformer(builderFactory));
         typeTransformerRegistry.register(new JsonObjectToDataPlaneInstanceTransformer());
@@ -76,7 +75,7 @@ public class DataPlaneSelectorClientExtension implements ServiceExtension {
 
     @Provider
     public DataPlaneSelectorService dataPlaneSelectorService(ServiceExtensionContext context) {
-        return new RemoteDataPlaneSelectorService(httpClient, selectorApiUrl, typeManager.getMapper(JSON_LD), typeTransformerRegistry,
+        return new RemoteDataPlaneSelectorService(httpClient, selectorApiUrl, jsonLdMapperProvider.get(), typeTransformerRegistry,
                 selectionStrategy, jsonLd);
     }
 }

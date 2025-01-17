@@ -17,6 +17,7 @@ package org.eclipse.edc.protocol.dsp.transferprocess.transform;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.json.Json;
 import org.eclipse.edc.jsonld.spi.JsonLdNamespace;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.protocol.dsp.transferprocess.transform.type.from.JsonObjectFromTransferCompletionMessageTransformer;
 import org.eclipse.edc.protocol.dsp.transferprocess.transform.type.from.JsonObjectFromTransferErrorTransformer;
 import org.eclipse.edc.protocol.dsp.transferprocess.transform.type.from.JsonObjectFromTransferProcessTransformer;
@@ -40,7 +41,6 @@ import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 
 import java.util.Map;
@@ -49,7 +49,6 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_NAMESPACE_V
 import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_NAMESPACE_V_2024_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_TRANSFORMER_CONTEXT_V_08;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_TRANSFORMER_CONTEXT_V_2024_1;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
  * Provides the transformers for transferprocess message types via the {@link TypeTransformerRegistry}.
@@ -63,7 +62,7 @@ public class DspTransferProcessTransformExtension implements ServiceExtension {
     private TypeTransformerRegistry registry;
 
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Override
     public String name() {
@@ -72,7 +71,7 @@ public class DspTransferProcessTransformExtension implements ServiceExtension {
 
     @Override
     public void initialize(ServiceExtensionContext context) {
-        var objectMapper = typeManager.getMapper(JSON_LD);
+        var objectMapper = jsonLdMapperProvider.get();
 
         registerV08transformers();
         registerV2024transformers();

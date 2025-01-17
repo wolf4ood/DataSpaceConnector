@@ -32,6 +32,7 @@ import org.eclipse.edc.connector.controlplane.transfer.spi.types.protocol.Transf
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.protocol.TransferTerminationMessage;
 import org.eclipse.edc.http.spi.EdcHttpClient;
 import org.eclipse.edc.jsonld.spi.JsonLd;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.policy.context.request.spi.RequestCatalogPolicyContext;
 import org.eclipse.edc.policy.context.request.spi.RequestContractNegotiationPolicyContext;
 import org.eclipse.edc.policy.context.request.spi.RequestTransferProcessPolicyContext;
@@ -56,7 +57,6 @@ import org.eclipse.edc.spi.message.RemoteMessageDispatcherRegistry;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.token.spi.TokenDecorator;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.validator.spi.JsonObjectValidatorRegistry;
@@ -69,7 +69,6 @@ import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DA
 import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP_V_2024_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_SCOPE;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_TRANSFORMER_CONTEXT;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
  * Provides an implementation of {@link DspHttpRemoteMessageDispatcher} to support sending dataspace
@@ -90,7 +89,7 @@ public class DspHttpCoreExtension implements ServiceExtension {
     @Inject
     private TypeTransformerRegistry transformerRegistry;
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
     @Inject
     private JsonLd jsonLdService;
     @Inject(required = false)
@@ -150,7 +149,7 @@ public class DspHttpCoreExtension implements ServiceExtension {
 
     @Provider
     public JsonLdRemoteMessageSerializer jsonLdRemoteMessageSerializer() {
-        return new JsonLdRemoteMessageSerializerImpl(dspTransformerRegistry(), typeManager.getMapper(JSON_LD), jsonLdService, dspProtocolParser(), DSP_SCOPE);
+        return new JsonLdRemoteMessageSerializerImpl(dspTransformerRegistry(), jsonLdMapperProvider.get(), jsonLdService, dspProtocolParser(), DSP_SCOPE);
     }
 
     @Provider

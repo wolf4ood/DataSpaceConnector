@@ -17,11 +17,11 @@ package org.eclipse.edc.connector.dataplane.selector.control.api;
 
 import org.eclipse.edc.connector.dataplane.selector.control.api.transformer.JsonObjectToSelectionRequestTransformer;
 import org.eclipse.edc.connector.dataplane.selector.spi.DataPlaneSelectorService;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.transform.transformer.edc.from.JsonObjectFromDataPlaneInstanceTransformer;
 import org.eclipse.edc.transform.transformer.edc.to.JsonObjectToDataAddressTransformer;
@@ -37,7 +37,6 @@ import java.util.Map;
 import static jakarta.json.Json.createBuilderFactory;
 import static org.eclipse.edc.connector.dataplane.selector.control.api.DataplaneSelectorControlApiExtension.NAME;
 import static org.eclipse.edc.connector.dataplane.selector.spi.instance.DataPlaneInstance.DATAPLANE_INSTANCE_TYPE;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 @Extension(NAME)
 public class DataplaneSelectorControlApiExtension implements ServiceExtension {
@@ -51,7 +50,7 @@ public class DataplaneSelectorControlApiExtension implements ServiceExtension {
     private JsonObjectValidatorRegistry validatorRegistry;
 
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Inject
     private TypeTransformerRegistry typeTransformerRegistry;
@@ -70,7 +69,7 @@ public class DataplaneSelectorControlApiExtension implements ServiceExtension {
     @Override
     public void initialize(ServiceExtensionContext context) {
         validatorRegistry.register(DATAPLANE_INSTANCE_TYPE, DataPlaneInstanceValidator.instance());
-        var objectMapper = typeManager.getMapper(JSON_LD);
+        var objectMapper = jsonLdMapperProvider.get();
 
         typeTransformerRegistry.register(new JsonObjectToDataPlaneInstanceTransformer());
         typeTransformerRegistry.register(new JsonObjectToSelectionRequestTransformer());

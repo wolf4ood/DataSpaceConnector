@@ -21,11 +21,11 @@ import org.eclipse.edc.connector.api.signaling.transform.to.JsonObjectToDataFlow
 import org.eclipse.edc.connector.api.signaling.transform.to.JsonObjectToDataFlowTerminateMessageTransformer;
 import org.eclipse.edc.connector.dataplane.api.controller.v1.DataPlaneSignalingApiController;
 import org.eclipse.edc.connector.dataplane.spi.manager.DataPlaneManager;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.transform.transformer.dspace.from.JsonObjectFromDataAddressDspaceTransformer;
 import org.eclipse.edc.transform.transformer.dspace.to.JsonObjectToDataAddressDspaceTransformer;
@@ -35,7 +35,6 @@ import org.eclipse.edc.web.spi.configuration.ApiContext;
 import java.util.Map;
 
 import static org.eclipse.edc.connector.dataplane.api.DataPlaneSignalingApiExtension.NAME;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 @Extension(NAME)
 public class DataPlaneSignalingApiExtension implements ServiceExtension {
@@ -49,7 +48,7 @@ public class DataPlaneSignalingApiExtension implements ServiceExtension {
     @Inject
     private DataPlaneManager dataPlaneManager;
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Override
     public String name() {
@@ -59,7 +58,7 @@ public class DataPlaneSignalingApiExtension implements ServiceExtension {
     @Override
     public void initialize(ServiceExtensionContext context) {
         var factory = Json.createBuilderFactory(Map.of());
-        var jsonLdMapper = typeManager.getMapper(JSON_LD);
+        var jsonLdMapper = jsonLdMapperProvider.get();
 
         var signalingApiTypeTransformerRegistry = transformerRegistry.forContext("signaling-api");
         signalingApiTypeTransformerRegistry.register(new JsonObjectToDataFlowStartMessageTransformer());

@@ -15,11 +15,13 @@
 package org.eclipse.edc.jsonld;
 
 import org.eclipse.edc.jsonld.spi.JsonLd;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.jsonld.spi.transformer.JsonLdTransformer;
 import org.eclipse.edc.jsonld.util.JacksonJsonLd;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.runtime.metamodel.annotation.Provider;
+import org.eclipse.edc.runtime.metamodel.annotation.Provides;
 import org.eclipse.edc.runtime.metamodel.annotation.Setting;
 import org.eclipse.edc.spi.constants.CoreConstants;
 import org.eclipse.edc.spi.result.Result;
@@ -44,6 +46,7 @@ import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
  * functions for working with JSON-LD structures.
  */
 @Extension(value = JsonLdExtension.NAME)
+@Provides(JsonLdObjectMapperProvider.class)
 public class JsonLdExtension implements ServiceExtension {
 
     public static final String NAME = "JSON-LD Extension";
@@ -56,17 +59,14 @@ public class JsonLdExtension implements ServiceExtension {
     public static final String CONFIG_VALUE_URL = "url";
 
     private static final boolean DEFAULT_HTTP_HTTPS_RESOLUTION = false;
+    private static final boolean DEFAULT_AVOID_VOCAB_CONTEXT = false;
+    private static final boolean DEFAULT_CHECK_PREFIXES = true;
     @Setting(description = "If set enable http json-ld document resolution", defaultValue = DEFAULT_HTTP_HTTPS_RESOLUTION + "", key = "edc.jsonld.http.enabled")
     private boolean httpResolutionEnabled;
-
     @Setting(description = "If set enable https json-ld document resolution", type = "boolean", defaultValue = DEFAULT_HTTP_HTTPS_RESOLUTION + "", key = "edc.jsonld.https.enabled")
     private boolean httpsResolutionEnabled;
-
-    private static final boolean DEFAULT_AVOID_VOCAB_CONTEXT = false;
     @Setting(description = "If true disable the @vocab context definition. This could be used to avoid api breaking changes", defaultValue = DEFAULT_AVOID_VOCAB_CONTEXT + "", key = "edc.jsonld.vocab.disable")
     private boolean avoidVocab;
-
-    private static final boolean DEFAULT_CHECK_PREFIXES = true;
     @Setting(description = "If true a validation on expended object will be made against configured prefixes", type = "boolean", defaultValue = DEFAULT_CHECK_PREFIXES + "", key = "edc.jsonld.prefixes.check")
     private boolean checkPrefixes;
 
@@ -80,7 +80,9 @@ public class JsonLdExtension implements ServiceExtension {
 
     @Override
     public void initialize(ServiceExtensionContext context) {
-        typeManager.registerContext(JSON_LD, JacksonJsonLd.createObjectMapper());
+        var objectMapper = JacksonJsonLd.createObjectMapper();
+        typeManager.registerContext(JSON_LD, objectMapper);
+        context.registerService(JsonLdObjectMapperProvider.class, () -> objectMapper);
     }
 
     @Provider

@@ -22,6 +22,7 @@ import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.Con
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractRequestMessage;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.protocol.ContractNegotiationAck;
 import org.eclipse.edc.jsonld.spi.JsonLd;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.protocol.dsp.http.dispatcher.PostDspHttpRequestFactory;
 import org.eclipse.edc.protocol.dsp.http.serialization.JsonLdResponseBodyDeserializer;
 import org.eclipse.edc.protocol.dsp.http.spi.DspProtocolParser;
@@ -32,10 +33,8 @@ import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 
 import static org.eclipse.edc.protocol.dsp.http.spi.dispatcher.response.DspHttpResponseBodyExtractor.NOOP;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 @Extension(value = DspNegotiationHttpDispatcherExtension.NAME)
 public class DspNegotiationHttpDispatcherExtension implements ServiceExtension {
@@ -49,7 +48,7 @@ public class DspNegotiationHttpDispatcherExtension implements ServiceExtension {
     private JsonLdRemoteMessageSerializer remoteMessageSerializer;
 
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Inject
     private DspProtocolTypeTransformerRegistry dspTransformerRegistry;
@@ -68,7 +67,7 @@ public class DspNegotiationHttpDispatcherExtension implements ServiceExtension {
     @Override
     public void initialize(ServiceExtensionContext context) {
         var contractNegotiationAckDeserializer = new JsonLdResponseBodyDeserializer<>(
-                ContractNegotiationAck.class, typeManager.getMapper(JSON_LD), jsonLd, dspTransformerRegistry);
+                ContractNegotiationAck.class, jsonLdMapperProvider.get(), jsonLd, dspTransformerRegistry);
 
         messageDispatcher.registerMessage(
                 ContractAgreementMessage.class,

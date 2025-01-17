@@ -22,6 +22,7 @@ import org.eclipse.edc.connector.controlplane.transfer.spi.types.protocol.Transf
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.protocol.TransferSuspensionMessage;
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.protocol.TransferTerminationMessage;
 import org.eclipse.edc.jsonld.spi.JsonLd;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.protocol.dsp.http.dispatcher.PostDspHttpRequestFactory;
 import org.eclipse.edc.protocol.dsp.http.serialization.JsonLdResponseBodyDeserializer;
 import org.eclipse.edc.protocol.dsp.http.spi.DspProtocolParser;
@@ -32,7 +33,6 @@ import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 
 import static org.eclipse.edc.protocol.dsp.http.spi.dispatcher.response.DspHttpResponseBodyExtractor.NOOP;
 import static org.eclipse.edc.protocol.dsp.transferprocess.http.dispatcher.TransferProcessApiPaths.BASE_PATH;
@@ -41,7 +41,6 @@ import static org.eclipse.edc.protocol.dsp.transferprocess.http.dispatcher.Trans
 import static org.eclipse.edc.protocol.dsp.transferprocess.http.dispatcher.TransferProcessApiPaths.TRANSFER_START;
 import static org.eclipse.edc.protocol.dsp.transferprocess.http.dispatcher.TransferProcessApiPaths.TRANSFER_SUSPENSION;
 import static org.eclipse.edc.protocol.dsp.transferprocess.http.dispatcher.TransferProcessApiPaths.TRANSFER_TERMINATION;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 
 /**
@@ -59,7 +58,7 @@ public class DspTransferProcessDispatcherExtension implements ServiceExtension {
     private JsonLdRemoteMessageSerializer remoteMessageSerializer;
 
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Inject
     private DspProtocolTypeTransformerRegistry dspTransformerRegistry;
@@ -80,7 +79,7 @@ public class DspTransferProcessDispatcherExtension implements ServiceExtension {
         messageDispatcher.registerMessage(
                 TransferRequestMessage.class,
                 new PostDspHttpRequestFactory<>(remoteMessageSerializer, dspProtocolParser, m -> BASE_PATH + TRANSFER_INITIAL_REQUEST),
-                new JsonLdResponseBodyDeserializer<>(TransferProcessAck.class, typeManager.getMapper(JSON_LD), jsonLd, dspTransformerRegistry)
+                new JsonLdResponseBodyDeserializer<>(TransferProcessAck.class, jsonLdMapperProvider.get(), jsonLd, dspTransformerRegistry)
         );
         messageDispatcher.registerMessage(
                 TransferCompletionMessage.class,

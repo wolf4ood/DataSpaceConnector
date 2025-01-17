@@ -19,12 +19,12 @@ import org.eclipse.edc.connector.dataplane.selector.spi.client.DataPlaneClientFa
 import org.eclipse.edc.connector.dataplane.spi.manager.DataPlaneManager;
 import org.eclipse.edc.http.spi.ControlApiHttpClient;
 import org.eclipse.edc.jsonld.spi.JsonLd;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.runtime.metamodel.annotation.Provider;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 
 import java.util.Objects;
@@ -35,7 +35,6 @@ import static org.eclipse.edc.jsonld.spi.Namespaces.DSPACE_SCHEMA;
 import static org.eclipse.edc.policy.model.OdrlNamespace.ODRL_PREFIX;
 import static org.eclipse.edc.policy.model.OdrlNamespace.ODRL_SCHEMA;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
  * This extension provides an implementation of {@link DataPlaneClient} compliant with the data plane signaling protocol
@@ -48,7 +47,7 @@ public class DataPlaneSignalingClientExtension implements ServiceExtension {
     @Inject(required = false)
     private ControlApiHttpClient httpClient;
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
     @Inject
     private TypeTransformerRegistry transformerRegistry;
     @Inject
@@ -74,7 +73,7 @@ public class DataPlaneSignalingClientExtension implements ServiceExtension {
         jsonLd.registerNamespace(DSPACE_PREFIX, DSPACE_SCHEMA, CONTROL_CLIENT_SCOPE);
         jsonLd.registerNamespace(VOCAB, EDC_NAMESPACE, CONTROL_CLIENT_SCOPE);
 
-        var mapper = typeManager.getMapper(JSON_LD);
+        var mapper = jsonLdMapperProvider.get();
         context.getMonitor().debug(() -> "Using remote Data Plane client.");
         Objects.requireNonNull(httpClient, "To use remote Data Plane client, a ControlApiHttpClient instance must be registered");
         var signalingApiTypeTransformerRegistry = transformerRegistry.forContext("signaling-api");

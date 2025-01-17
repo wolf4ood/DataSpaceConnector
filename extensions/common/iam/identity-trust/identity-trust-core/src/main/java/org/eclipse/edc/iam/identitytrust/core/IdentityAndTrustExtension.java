@@ -37,6 +37,7 @@ import org.eclipse.edc.iam.verifiablecredentials.spi.model.revocation.statuslist
 import org.eclipse.edc.iam.verifiablecredentials.spi.validation.PresentationVerifier;
 import org.eclipse.edc.iam.verifiablecredentials.spi.validation.TrustedIssuerRegistry;
 import org.eclipse.edc.jsonld.spi.JsonLd;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.jwt.validation.jti.JtiValidationStore;
 import org.eclipse.edc.participant.spi.ParticipantAgentService;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
@@ -48,7 +49,6 @@ import org.eclipse.edc.spi.iam.IdentityService;
 import org.eclipse.edc.spi.system.ExecutorInstrumentation;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.token.rules.AudienceValidationRule;
 import org.eclipse.edc.token.rules.ExpirationIssuedAtValidationRule;
 import org.eclipse.edc.token.spi.TokenValidationRulesRegistry;
@@ -71,27 +71,21 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.eclipse.edc.iam.verifiablecredentials.spi.VcConstants.STATUSLIST_2021_URL;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 import static org.eclipse.edc.verifiablecredentials.jwt.JwtPresentationVerifier.JWT_VC_TOKEN_CONTEXT;
 
 @Extension("Identity And Trust Extension")
 public class IdentityAndTrustExtension implements ServiceExtension {
 
     public static final long DEFAULT_REVOCATION_CACHE_VALIDITY_MILLIS = 15 * 60 * 1000L;
-    @Setting(description = "Validity period of cached StatusList2021 credential entries in milliseconds.", defaultValue = DEFAULT_REVOCATION_CACHE_VALIDITY_MILLIS + "", key = "edc.iam.credential.revocation.cache.validity")
-    private long revocationCacheValidity;
-
-    @Setting(description = "DID of this connector", key = "edc.iam.issuer.id")
-    private String issuerId;
-
-    @Setting(description = "The period of the JTI entry reaper thread in seconds", defaultValue = DEFAULT_CLEANUP_PERIOD_SECONDS + "", key = "edc.sql.store.jti.cleanup.period")
-    private long reaperCleanupPeriod;
-
     public static final String DCP_SELF_ISSUED_TOKEN_CONTEXT = "dcp-si";
     public static final String JSON_2020_SIGNATURE_SUITE = "JsonWebSignature2020";
     public static final long DEFAULT_CLEANUP_PERIOD_SECONDS = 60;
-
-
+    @Setting(description = "Validity period of cached StatusList2021 credential entries in milliseconds.", defaultValue = DEFAULT_REVOCATION_CACHE_VALIDITY_MILLIS + "", key = "edc.iam.credential.revocation.cache.validity")
+    private long revocationCacheValidity;
+    @Setting(description = "DID of this connector", key = "edc.iam.issuer.id")
+    private String issuerId;
+    @Setting(description = "The period of the JTI entry reaper thread in seconds", defaultValue = DEFAULT_CLEANUP_PERIOD_SECONDS + "", key = "edc.sql.store.jti.cleanup.period")
+    private long reaperCleanupPeriod;
     @Inject
     private SecureTokenService secureTokenService;
 
@@ -99,7 +93,7 @@ public class IdentityAndTrustExtension implements ServiceExtension {
     private TrustedIssuerRegistry trustedIssuerRegistry;
 
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Inject
     private SignatureSuiteRegistry signatureSuiteRegistry;
@@ -160,7 +154,7 @@ public class IdentityAndTrustExtension implements ServiceExtension {
         rulesRegistry.addRule(JWT_VC_TOKEN_CONTEXT, new HasSubjectRule());
 
         // TODO move in a separated extension?
-        signatureSuiteRegistry.register(JSON_2020_SIGNATURE_SUITE, new Jws2020SignatureSuite(typeManager.getMapper(JSON_LD)));
+        signatureSuiteRegistry.register(JSON_2020_SIGNATURE_SUITE, new Jws2020SignatureSuite(jsonLdMapperProvider.get()));
 
 
         try {
@@ -172,8 +166,8 @@ public class IdentityAndTrustExtension implements ServiceExtension {
         participantAgentService.register(participantAgentServiceExtension);
 
         // register revocation services
-        revocationServiceRegistry.addService(StatusList2021Status.TYPE, new StatusList2021RevocationService(typeManager.getMapper(), revocationCacheValidity));
-        revocationServiceRegistry.addService(BitstringStatusListStatus.TYPE, new BitstringStatusListRevocationService(typeManager.getMapper(), revocationCacheValidity));
+        revocationServiceRegistry.addService(StatusList2021Status.TYPE, new StatusList2021RevocationService(jsonLdMapperProvider.get(), revocationCacheValidity));
+        revocationServiceRegistry.addService(BitstringStatusListStatus.TYPE, new BitstringStatusListRevocationService(jsonLdMapperProvider.get(), revocationCacheValidity));
     }
 
     @Override
@@ -204,7 +198,7 @@ public class IdentityAndTrustExtension implements ServiceExtension {
     public CredentialServiceClient getCredentialServiceClient(ServiceExtensionContext context) {
         if (credentialServiceClient == null) {
             credentialServiceClient = new DefaultCredentialServiceClient(httpClient, Json.createBuilderFactory(Map.of()),
-                    typeManager.getMapper(JSON_LD), typeTransformerRegistry, jsonLd, context.getMonitor());
+                    jsonLdMapperProvider.get(), typeTransformerRegistry, jsonLd, context.getMonitor());
         }
         return credentialServiceClient;
     }
@@ -212,7 +206,7 @@ public class IdentityAndTrustExtension implements ServiceExtension {
     @Provider
     public PresentationVerifier createPresentationVerifier(ServiceExtensionContext context) {
         if (presentationVerifier == null) {
-            var mapper = typeManager.getMapper(JSON_LD);
+            var mapper = jsonLdMapperProvider.get();
 
             var jwtVerifier = new JwtPresentationVerifier(mapper, tokenValidationService, rulesRegistry, didPublicKeyResolver);
             var ldpVerifier = LdpVerifier.Builder.newInstance()

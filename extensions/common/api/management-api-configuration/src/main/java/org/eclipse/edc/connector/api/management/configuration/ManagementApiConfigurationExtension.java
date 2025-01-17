@@ -24,6 +24,7 @@ import org.eclipse.edc.connector.controlplane.transform.edc.to.JsonObjectToAsset
 import org.eclipse.edc.connector.controlplane.transform.odrl.OdrlTransformersFactory;
 import org.eclipse.edc.connector.controlplane.transform.odrl.from.JsonObjectFromPolicyTransformer;
 import org.eclipse.edc.jsonld.spi.JsonLd;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.participant.spi.ParticipantIdMapper;
 import org.eclipse.edc.runtime.metamodel.annotation.Configuration;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
@@ -69,7 +70,6 @@ import static org.eclipse.edc.policy.model.OdrlNamespace.ODRL_SCHEMA;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_CONNECTOR_MANAGEMENT_CONTEXT;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_PREFIX;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
  * Configure 'management' api context.
@@ -103,6 +103,8 @@ public class ManagementApiConfigurationExtension implements ServiceExtension {
     @Inject
     private JsonLd jsonLd;
     @Inject
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
+    @Inject
     private TypeTransformerRegistry transformerRegistry;
     @Inject
     private ParticipantIdMapper participantIdMapper;
@@ -135,7 +137,7 @@ public class ManagementApiConfigurationExtension implements ServiceExtension {
             jsonLd.registerNamespace(ODRL_PREFIX, ODRL_SCHEMA, MANAGEMENT_SCOPE);
         }
 
-        var jsonLdMapper = typeManager.getMapper(JSON_LD);
+        var jsonLdMapper = jsonLdMapperProvider.get();
         webService.registerResource(ApiContext.MANAGEMENT, new ObjectMapperProvider(jsonLdMapper));
         webService.registerResource(ApiContext.MANAGEMENT, new JerseyJsonLdInterceptor(jsonLd, jsonLdMapper, MANAGEMENT_SCOPE));
 

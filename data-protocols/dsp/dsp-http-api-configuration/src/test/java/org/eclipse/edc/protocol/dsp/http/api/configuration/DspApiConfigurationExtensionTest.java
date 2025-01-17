@@ -16,12 +16,12 @@ package org.eclipse.edc.protocol.dsp.http.api.configuration;
 
 import org.eclipse.edc.boot.system.injection.ObjectFactory;
 import org.eclipse.edc.jsonld.spi.JsonLd;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.junit.extensions.DependencyInjectionExtension;
 import org.eclipse.edc.spi.protocol.ProtocolWebhook;
 import org.eclipse.edc.spi.system.Hostname;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
 import org.eclipse.edc.spi.system.configuration.ConfigFactory;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.web.jersey.providers.jsonld.ObjectMapperProvider;
 import org.eclipse.edc.web.spi.WebService;
@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 
 import java.util.Map;
 
@@ -61,7 +62,6 @@ import static org.mockito.Mockito.when;
 class DspApiConfigurationExtensionTest {
 
     private final WebService webService = mock();
-    private final TypeManager typeManager = mock();
     private final JsonLd jsonLd = mock();
     private final PortMappingRegistry portMappingRegistry = mock();
 
@@ -70,14 +70,13 @@ class DspApiConfigurationExtensionTest {
     void setUp(ServiceExtensionContext context) {
         context.registerService(PortMappingRegistry.class, portMappingRegistry);
         context.registerService(WebService.class, webService);
-        context.registerService(TypeManager.class, typeManager);
+        context.registerService(JsonLdObjectMapperProvider.class, Mockito::mock);
         context.registerService(Hostname.class, () -> "hostname");
         context.registerService(JsonLd.class, jsonLd);
         TypeTransformerRegistry typeTransformerRegistry = mock();
         when(typeTransformerRegistry.forContext(any())).thenReturn(mock());
         context.registerService(TypeTransformerRegistry.class, typeTransformerRegistry);
 
-        when(typeManager.getMapper(any())).thenReturn(mock());
     }
 
     @Test

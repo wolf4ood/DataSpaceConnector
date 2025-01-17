@@ -14,10 +14,12 @@
 
 package org.eclipse.edc.iam.identitytrust.core;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.edc.boot.system.injection.ObjectFactory;
 import org.eclipse.edc.iam.identitytrust.service.IdentityAndTrustService;
 import org.eclipse.edc.iam.identitytrust.spi.SecureTokenService;
 import org.eclipse.edc.json.JacksonTypeManager;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.junit.extensions.DependencyInjectionExtension;
 import org.eclipse.edc.jwt.validation.jti.JtiValidationStore;
 import org.eclipse.edc.spi.system.ExecutorInstrumentation;
@@ -49,6 +51,7 @@ class IdentityAndTrustExtensionTest {
     void setUp(ServiceExtensionContext context) {
         context.registerService(SecureTokenService.class, mock());
         context.registerService(TypeManager.class, new JacksonTypeManager());
+        context.registerService(JsonLdObjectMapperProvider.class, ObjectMapper::new);
         context.registerService(JtiValidationStore.class, storeMock);
         context.registerService(ExecutorInstrumentation.class, ExecutorInstrumentation.noop());
 

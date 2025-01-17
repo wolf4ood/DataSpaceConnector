@@ -19,18 +19,16 @@ import org.eclipse.edc.connector.api.signaling.transform.from.JsonObjectFromData
 import org.eclipse.edc.connector.api.signaling.transform.from.JsonObjectFromDataFlowSuspendMessageTransformer;
 import org.eclipse.edc.connector.api.signaling.transform.from.JsonObjectFromDataFlowTerminateMessageTransformer;
 import org.eclipse.edc.connector.api.signaling.transform.to.JsonObjectToDataFlowResponseMessageTransformer;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.transform.transformer.dspace.from.JsonObjectFromDataAddressDspaceTransformer;
 import org.eclipse.edc.transform.transformer.dspace.to.JsonObjectToDataAddressDspaceTransformer;
 
 import java.util.Map;
-
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
  * This extension registers all the transformers relevant for the data plane signaling protocol
@@ -44,7 +42,7 @@ public class DataPlaneSignalingClientTransformExtension implements ServiceExtens
     private TypeTransformerRegistry transformerRegistry;
 
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Override
     public String name() {
@@ -53,7 +51,7 @@ public class DataPlaneSignalingClientTransformExtension implements ServiceExtens
 
     @Override
     public void initialize(ServiceExtensionContext context) {
-        var mapper = typeManager.getMapper(JSON_LD);
+        var mapper = jsonLdMapperProvider.get();
         var factory = Json.createBuilderFactory(Map.of());
 
         var signalingApiTransformerRegistry = transformerRegistry.forContext("signaling-api");

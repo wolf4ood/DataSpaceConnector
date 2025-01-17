@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.eclipse.edc.api.auth.spi.AuthenticationRequestFilter;
 import org.eclipse.edc.api.auth.spi.registry.ApiAuthenticationRegistry;
 import org.eclipse.edc.jsonld.spi.JsonLd;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.runtime.metamodel.annotation.Configuration;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
@@ -52,7 +53,6 @@ import static org.eclipse.edc.policy.model.OdrlNamespace.ODRL_PREFIX;
 import static org.eclipse.edc.policy.model.OdrlNamespace.ODRL_SCHEMA;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_PREFIX;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
  * Tells all the Control API controllers under which context alias they need to register their resources: either
@@ -87,6 +87,8 @@ public class ControlApiConfigurationExtension implements ServiceExtension {
     private ApiAuthenticationRegistry authenticationRegistry;
     @Inject
     private ApiVersionService apiVersionService;
+    @Inject
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Override
     public String name() {
@@ -97,7 +99,7 @@ public class ControlApiConfigurationExtension implements ServiceExtension {
     public void initialize(ServiceExtensionContext context) {
         var portMapping = new PortMapping(ApiContext.CONTROL, apiConfiguration.port(), apiConfiguration.path());
         portMappingRegistry.register(portMapping);
-        var jsonLdMapper = typeManager.getMapper(JSON_LD);
+        var jsonLdMapper = jsonLdMapperProvider.get();
         context.registerService(ControlApiUrl.class, controlApiUrl(context, portMapping));
 
         jsonLd.registerNamespace(EDC_PREFIX, EDC_NAMESPACE, CONTROL_SCOPE);
@@ -129,7 +131,7 @@ public class ControlApiConfigurationExtension implements ServiceExtension {
 
     private ControlApiUrl controlApiUrl(ServiceExtensionContext context, PortMapping config) {
         var callbackAddress = ofNullable(controlEndpoint).orElseGet(() -> format("http://%s:%s%s", hostname.get(), config.port(), config.path()));
-        
+
         try {
             var url = URI.create(callbackAddress);
             return () -> url;

@@ -25,11 +25,11 @@ import org.eclipse.edc.connector.controlplane.api.management.policy.v31alpha.Pol
 import org.eclipse.edc.connector.controlplane.api.management.policy.validation.PolicyDefinitionValidator;
 import org.eclipse.edc.connector.controlplane.api.management.policy.validation.PolicyEvaluationPlanRequestValidator;
 import org.eclipse.edc.connector.controlplane.services.spi.policydefinition.PolicyDefinitionService;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.validator.spi.JsonObjectValidatorRegistry;
 import org.eclipse.edc.web.spi.WebService;
@@ -39,7 +39,6 @@ import java.util.Map;
 
 import static org.eclipse.edc.connector.controlplane.api.management.policy.model.PolicyEvaluationPlanRequest.EDC_POLICY_EVALUATION_PLAN_REQUEST_TYPE;
 import static org.eclipse.edc.connector.controlplane.policy.spi.PolicyDefinition.EDC_POLICY_DEFINITION_TYPE;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 
 @Extension(value = PolicyDefinitionApiExtension.NAME)
@@ -60,7 +59,7 @@ public class PolicyDefinitionApiExtension implements ServiceExtension {
     private JsonObjectValidatorRegistry validatorRegistry;
 
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider jsonLdMapperProvider;
 
     @Override
     public String name() {
@@ -71,7 +70,7 @@ public class PolicyDefinitionApiExtension implements ServiceExtension {
     public void initialize(ServiceExtensionContext context) {
         var jsonBuilderFactory = Json.createBuilderFactory(Map.of());
         var managementApiTransformerRegistry = transformerRegistry.forContext("management-api");
-        var mapper = typeManager.getMapper(JSON_LD);
+        var mapper = jsonLdMapperProvider.get();
         managementApiTransformerRegistry.register(new JsonObjectToPolicyEvaluationPlanRequestTransformer());
         managementApiTransformerRegistry.register(new JsonObjectToPolicyDefinitionTransformer());
         managementApiTransformerRegistry.register(new JsonObjectFromPolicyDefinitionTransformer(jsonBuilderFactory, mapper));

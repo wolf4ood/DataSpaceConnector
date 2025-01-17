@@ -22,6 +22,7 @@ import org.eclipse.edc.connector.controlplane.transform.odrl.OdrlTransformersFac
 import org.eclipse.edc.connector.controlplane.transform.odrl.from.JsonObjectFromPolicyTransformer;
 import org.eclipse.edc.jsonld.spi.JsonLd;
 import org.eclipse.edc.jsonld.spi.JsonLdNamespace;
+import org.eclipse.edc.jsonld.spi.JsonLdObjectMapperProvider;
 import org.eclipse.edc.participant.spi.ParticipantIdMapper;
 import org.eclipse.edc.policy.model.AtomicConstraint;
 import org.eclipse.edc.policy.model.LiteralExpression;
@@ -35,7 +36,6 @@ import org.eclipse.edc.spi.protocol.ProtocolWebhook;
 import org.eclipse.edc.spi.system.Hostname;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
-import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.transform.transformer.dspace.from.JsonObjectFromDataAddressDspaceTransformer;
 import org.eclipse.edc.transform.transformer.dspace.to.JsonObjectToDataAddressDspaceTransformer;
@@ -71,7 +71,6 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_TRANSFORMER
 import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_TRANSFORMER_CONTEXT_V_2024_1;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_PREFIX;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
  * Configure 'protocol' api context.
@@ -91,7 +90,7 @@ public class DspApiConfigurationExtension implements ServiceExtension {
     private DspApiConfiguration apiConfiguration;
 
     @Inject
-    private TypeManager typeManager;
+    private JsonLdObjectMapperProvider mapperProvider;
     @Inject
     private WebService webService;
     @Inject
@@ -118,7 +117,7 @@ public class DspApiConfigurationExtension implements ServiceExtension {
         var dspWebhookAddress = ofNullable(callbackAddress).orElseGet(() -> format("http://%s:%s%s", hostname.get(), portMapping.port(), portMapping.path()));
         context.registerService(ProtocolWebhook.class, () -> dspWebhookAddress);
 
-        var jsonLdMapper = typeManager.getMapper(JSON_LD);
+        var jsonLdMapper = mapperProvider.get();
 
         // registers ns for DSP scope
         registerNamespaces(DSP_SCOPE_V_08, DSP_NAMESPACE_V_08);
@@ -126,13 +125,12 @@ public class DspApiConfigurationExtension implements ServiceExtension {
 
         webService.registerResource(ApiContext.PROTOCOL, new ObjectMapperProvider(jsonLdMapper));
 
-        var mapper = typeManager.getMapper(JSON_LD);
-        mapper.registerSubtypes(AtomicConstraint.class, LiteralExpression.class);
+        jsonLdMapper.registerSubtypes(AtomicConstraint.class, LiteralExpression.class);
 
-        registerV08Transformers(mapper);
-        registerV2024Transformers(mapper);
-        registerTransformers(DSP_TRANSFORMER_CONTEXT_V_08, DSP_NAMESPACE_V_08, mapper);
-        registerTransformers(DSP_TRANSFORMER_CONTEXT_V_2024_1, DSP_NAMESPACE_V_2024_1, mapper);
+        registerV08Transformers(jsonLdMapper);
+        registerV2024Transformers(jsonLdMapper);
+        registerTransformers(DSP_TRANSFORMER_CONTEXT_V_08, DSP_NAMESPACE_V_08, jsonLdMapper);
+        registerTransformers(DSP_TRANSFORMER_CONTEXT_V_2024_1, DSP_NAMESPACE_V_2024_1, jsonLdMapper);
     }
 
     private void registerNamespaces(String scope, JsonLdNamespace dspNamespace) {
