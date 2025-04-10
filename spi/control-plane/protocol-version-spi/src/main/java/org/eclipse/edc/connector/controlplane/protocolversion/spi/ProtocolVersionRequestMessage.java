@@ -23,7 +23,7 @@ import java.util.Objects;
 public class ProtocolVersionRequestMessage implements RemoteMessage {
 
     private final Policy policy;
-
+    protected String participantContextId;
     private String protocol = "unknown";
     private String counterPartyAddress;
     private String counterPartyId;
@@ -52,6 +52,12 @@ public class ProtocolVersionRequestMessage implements RemoteMessage {
         return policy;
     }
 
+
+    @Override
+    public String getParticipantContextId() {
+        return participantContextId;
+    }
+
     public static class Builder {
         private final ProtocolVersionRequestMessage message;
 
@@ -76,6 +82,11 @@ public class ProtocolVersionRequestMessage implements RemoteMessage {
 
         public ProtocolVersionRequestMessage.Builder counterPartyId(String counterPartyId) {
             this.message.counterPartyId = counterPartyId;
+            return this;
+        }
+
+        public ProtocolVersionRequestMessage.Builder participantContextId(String participantContextId) {
+            this.message.participantContextId = participantContextId;
             return this;
         }
 

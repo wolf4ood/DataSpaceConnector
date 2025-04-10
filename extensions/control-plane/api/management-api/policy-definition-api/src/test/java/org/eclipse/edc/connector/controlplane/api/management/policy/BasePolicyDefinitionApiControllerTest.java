@@ -18,10 +18,12 @@ import io.restassured.specification.RequestSpecification;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import org.eclipse.edc.api.model.IdResponse;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.policy.spi.PolicyDefinition;
 import org.eclipse.edc.connector.controlplane.services.spi.policydefinition.PolicyDefinitionService;
 import org.eclipse.edc.junit.annotations.ApiTest;
 import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.query.QuerySpec;
 import org.eclipse.edc.spi.result.Result;
 import org.eclipse.edc.spi.result.ServiceResult;
@@ -56,6 +58,8 @@ public abstract class BasePolicyDefinitionApiControllerTest extends RestControll
     protected final TypeTransformerRegistry transformerRegistry = mock();
     protected final PolicyDefinitionService service = mock();
     protected final JsonObjectValidatorRegistry validatorRegistry = mock();
+
+    protected final ParticipantContextSupplier participantContextSupplier = () -> new ParticipantContext("participantContextId", "participantContextId");
 
     @Test
     void create_shouldReturnDefinitionId() {

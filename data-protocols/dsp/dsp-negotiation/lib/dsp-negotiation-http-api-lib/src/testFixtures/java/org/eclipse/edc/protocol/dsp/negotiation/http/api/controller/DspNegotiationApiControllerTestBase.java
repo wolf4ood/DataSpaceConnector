@@ -24,11 +24,13 @@ import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.Con
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractNegotiationTerminationMessage;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractOfferMessage;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractRequestMessage;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.contractnegotiation.ContractNegotiationProtocolService;
 import org.eclipse.edc.jsonld.spi.JsonLdNamespace;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
 import org.eclipse.edc.protocol.dsp.http.spi.message.GetDspRequest;
 import org.eclipse.edc.protocol.dsp.http.spi.message.PostDspRequest;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.web.jersey.testfixtures.RestControllerTestBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -68,6 +70,7 @@ public abstract class DspNegotiationApiControllerTestBase extends RestController
 
     protected final ContractNegotiationProtocolService protocolService = mock();
     protected final DspRequestHandler dspRequestHandler = mock();
+    protected final ParticipantContextSupplier participantContextSupplier = () -> new ParticipantContext("participantId", "participantId");
 
     @Test
     void getNegotiation_shouldGetResource() {

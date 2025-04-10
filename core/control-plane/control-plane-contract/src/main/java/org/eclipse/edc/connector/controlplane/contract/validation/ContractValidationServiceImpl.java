@@ -32,6 +32,7 @@ import org.eclipse.edc.connector.controlplane.contract.spi.validation.ValidatedC
 import org.eclipse.edc.participant.spi.ParticipantAgent;
 import org.eclipse.edc.policy.engine.spi.PolicyEngine;
 import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.query.Criterion;
 import org.eclipse.edc.spi.result.Result;
 import org.jetbrains.annotations.NotNull;
@@ -63,8 +64,8 @@ public class ContractValidationServiceImpl implements ContractValidationService 
     }
 
     @Override
-    public @NotNull Result<ValidatedConsumerOffer> validateInitialOffer(ParticipantAgent agent, ValidatableConsumerOffer consumerOffer) {
-        return validateInitialOffer(consumerOffer, agent)
+    public @NotNull Result<ValidatedConsumerOffer> validateInitialOffer(ParticipantContext participantContext, ParticipantAgent agent, ValidatableConsumerOffer consumerOffer) {
+        return validateInitialOffer(participantContext, consumerOffer, agent)
                 .compose(policy -> createContractOffer(policy, consumerOffer.getOfferId()))
                 .map(contractOffer -> new ValidatedConsumerOffer(agent.getIdentity(), contractOffer));
     }
@@ -119,7 +120,7 @@ public class ContractValidationServiceImpl implements ContractValidationService 
      * Validates an initial contract offer, ensuring that the referenced asset exists, is selected by the corresponding policy definition and the agent fulfills the contract policy.
      * A sanitized policy definition is returned to avoid clients injecting manipulated policies.
      */
-    private Result<Policy> validateInitialOffer(ValidatableConsumerOffer consumerOffer, ParticipantAgent agent) {
+    private Result<Policy> validateInitialOffer(ParticipantContext participantContext, ValidatableConsumerOffer consumerOffer, ParticipantAgent agent) {
         var consumerIdentity = agent.getIdentity();
         if (consumerIdentity == null) {
             return failure("Invalid consumer identity");
@@ -133,7 +134,7 @@ public class ContractValidationServiceImpl implements ContractValidationService 
 
         // verify the target asset exists
         var targetAsset = assetIndex.findById(consumerOffer.getOfferId().assetIdPart());
-        if (targetAsset == null) {
+        if (targetAsset == null || !participantContext.id().equals(targetAsset.getParticipantContextId())) {
             return failure("Invalid target: " + consumerOffer.getOfferId().assetIdPart());
         }
 

@@ -17,6 +17,7 @@ package org.eclipse.edc.connector.controlplane.api.management.policy;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import org.eclipse.edc.api.model.IdResponse;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.policy.spi.PolicyDefinition;
 import org.eclipse.edc.connector.controlplane.services.spi.policydefinition.PolicyDefinitionService;
 import org.eclipse.edc.spi.EdcException;
@@ -41,13 +42,16 @@ public abstract class BasePolicyDefinitionApiController {
     protected final PolicyDefinitionService service;
     protected final TypeTransformerRegistry transformerRegistry;
     protected final JsonObjectValidatorRegistry validatorRegistry;
+    protected final ParticipantContextSupplier participantContextSupplier;
 
     public BasePolicyDefinitionApiController(Monitor monitor, TypeTransformerRegistry transformerRegistry,
-                                             PolicyDefinitionService service, JsonObjectValidatorRegistry validatorRegistry) {
+                                             PolicyDefinitionService service, JsonObjectValidatorRegistry validatorRegistry,
+                                             ParticipantContextSupplier participantContextSupplier) {
         this.monitor = monitor;
         this.transformerRegistry = transformerRegistry;
         this.service = service;
         this.validatorRegistry = validatorRegistry;
+        this.participantContextSupplier = participantContextSupplier;
     }
 
     public JsonArray queryPolicyDefinitions(JsonObject querySpecJson) {
@@ -82,7 +86,11 @@ public abstract class BasePolicyDefinitionApiController {
         validatorRegistry.validate(EDC_POLICY_DEFINITION_TYPE, request).orElseThrow(ValidationFailureException::new);
 
         var definition = transformerRegistry.transform(request, PolicyDefinition.class)
-                .orElseThrow(InvalidRequestException::new);
+                .orElseThrow(InvalidRequestException::new)
+                .toBuilder()
+                .participantContextId(participantContextSupplier.get().id())
+                .build();
+
 
         var createdDefinition = service.create(definition)
                 .onSuccess(d -> monitor.debug(format("Policy Definition created %s", d.getId())))

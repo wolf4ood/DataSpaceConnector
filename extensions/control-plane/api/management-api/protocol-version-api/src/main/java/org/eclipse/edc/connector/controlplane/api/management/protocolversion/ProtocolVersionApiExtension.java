@@ -17,6 +17,7 @@ package org.eclipse.edc.connector.controlplane.api.management.protocolversion;
 import org.eclipse.edc.connector.controlplane.api.management.protocolversion.transform.JsonObjectToProtocolVersionRequestTransformer;
 import org.eclipse.edc.connector.controlplane.api.management.protocolversion.v4alpha.ProtocolVersionApiV4AlphaController;
 import org.eclipse.edc.connector.controlplane.api.management.protocolversion.validation.ProtocolVersionRequestValidator;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.VersionService;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
@@ -51,6 +52,9 @@ public class ProtocolVersionApiExtension implements ServiceExtension {
     @Inject
     private CriterionOperatorRegistry criterionOperatorRegistry;
 
+    @Inject
+    private ParticipantContextSupplier participantContextSupplier;
+
     @Override
     public String name() {
         return NAME;
@@ -62,7 +66,7 @@ public class ProtocolVersionApiExtension implements ServiceExtension {
         var managementApiTransformerRegistry = transformerRegistry.forContext(MANAGEMENT_API_CONTEXT);
         managementApiTransformerRegistry.register(new JsonObjectToProtocolVersionRequestTransformer());
 
-        webService.registerResource(ApiContext.MANAGEMENT, new ProtocolVersionApiV4AlphaController(service, managementApiTransformerRegistry, validatorRegistry));
+        webService.registerResource(ApiContext.MANAGEMENT, new ProtocolVersionApiV4AlphaController(service, managementApiTransformerRegistry, validatorRegistry, participantContextSupplier));
         validatorRegistry.register(PROTOCOL_VERSION_REQUEST_TYPE, ProtocolVersionRequestValidator.instance());
 
     }

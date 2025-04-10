@@ -20,6 +20,7 @@ import org.eclipse.edc.junit.extensions.RuntimeExtension;
 import org.eclipse.edc.junit.extensions.RuntimePerMethodExtension;
 import org.eclipse.edc.jwt.spi.JwtRegisteredClaimNames;
 import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.IdentityService;
 import org.eclipse.edc.spi.iam.TokenParameters;
 import org.eclipse.edc.spi.iam.VerificationContext;
@@ -35,6 +36,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.edc.junit.testfixtures.TestUtils.findBuildRoot;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(RuntimePerMethodExtension.class)
 @ComponentTest
@@ -60,12 +62,13 @@ class DapsIntegrationTest {
                 .claims(JwtRegisteredClaimNames.SCOPE, "idsc:IDS_CONNECTOR_ATTRIBUTES_ALL")
                 .claims(JwtRegisteredClaimNames.AUDIENCE, "audience")
                 .build();
-        var tokenResult = identityService.obtainClientCredentials(tokenParameters);
+        var tokenResult = identityService.obtainClientCredentials(mock(), tokenParameters);
 
         assertThat(tokenResult.succeeded()).withFailMessage(tokenResult::getFailureDetail).isTrue();
 
         var verificationContext = VerificationContext.Builder.newInstance()
                 .policy(Policy.Builder.newInstance().build())
+                .participantContext(new ParticipantContext("test", "test"))
                 .build();
 
         var verificationResult = identityService.verifyJwtToken(tokenResult.getContent(), verificationContext);

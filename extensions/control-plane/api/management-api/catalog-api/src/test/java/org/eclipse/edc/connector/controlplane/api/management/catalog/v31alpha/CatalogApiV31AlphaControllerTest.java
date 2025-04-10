@@ -43,7 +43,7 @@ class CatalogApiV31AlphaControllerTest extends BaseCatalogApiControllerTest {
         var request = CatalogRequest.Builder.newInstance().counterPartyAddress("http://url").build();
         when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.success());
         when(transformerRegistry.transform(argThat(o -> o instanceof JsonObject jo && jo.containsKey(CatalogRequest.CATALOG_REQUEST_ADDITIONAL_SCOPES)), eq(CatalogRequest.class))).thenReturn(Result.success(request));
-        when(service.requestCatalog(any(), any(), any(), any())).thenReturn(completedFuture(StatusResult.success("{}".getBytes())));
+        when(service.requestCatalog(any(), any(), any(), any(), any())).thenReturn(completedFuture(StatusResult.success("{}".getBytes())));
         var requestBody = Json.createObjectBuilder()
                 .add(CatalogRequest.CATALOG_REQUEST_PROTOCOL, "any")
                 .add(CatalogRequest.CATALOG_REQUEST_ADDITIONAL_SCOPES, Json.createArrayBuilder(List.of("scope1", "scope2")).build())
@@ -71,6 +71,6 @@ class CatalogApiV31AlphaControllerTest extends BaseCatalogApiControllerTest {
 
     @Override
     protected Object controller() {
-        return new CatalogApiV31AlphaController(service, transformerRegistry, validatorRegistry);
+        return new CatalogApiV31AlphaController(service, transformerRegistry, validatorRegistry, participantContextSupplier);
     }
 }

@@ -17,9 +17,11 @@ package org.eclipse.edc.connector.controlplane.api.management.catalog;
 import jakarta.json.Json;
 import org.eclipse.edc.connector.controlplane.catalog.spi.CatalogRequest;
 import org.eclipse.edc.connector.controlplane.catalog.spi.DatasetRequest;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.catalog.CatalogService;
 import org.eclipse.edc.junit.annotations.ApiTest;
 import org.eclipse.edc.spi.EdcException;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.response.StatusResult;
 import org.eclipse.edc.spi.result.Result;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
@@ -52,12 +54,14 @@ public abstract class BaseCatalogApiControllerTest extends RestControllerTestBas
     protected final TypeTransformerRegistry transformerRegistry = mock();
     protected final JsonObjectValidatorRegistry validatorRegistry = mock();
 
+    protected final ParticipantContextSupplier participantContextSupplier = () -> new ParticipantContext("test", "test");
+
     @Test
     void requestCatalog() {
         var request = CatalogRequest.Builder.newInstance().counterPartyAddress("http://url").build();
         when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.success());
         when(transformerRegistry.transform(any(), eq(CatalogRequest.class))).thenReturn(Result.success(request));
-        when(service.requestCatalog(any(), any(), any(), any())).thenReturn(completedFuture(StatusResult.success("{}".getBytes())));
+        when(service.requestCatalog(any(), any(), any(), any(), any())).thenReturn(completedFuture(StatusResult.success("{}".getBytes())));
         var requestBody = Json.createObjectBuilder().add(CatalogRequest.CATALOG_REQUEST_PROTOCOL, "any").build();
 
         given()
@@ -108,7 +112,7 @@ public abstract class BaseCatalogApiControllerTest extends RestControllerTestBas
         var request = CatalogRequest.Builder.newInstance().counterPartyAddress("http://url").build();
         when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.success());
         when(transformerRegistry.transform(any(), eq(CatalogRequest.class))).thenReturn(Result.success(request));
-        when(service.requestCatalog(any(), any(), any(), any())).thenReturn(completedFuture(StatusResult.failure(FATAL_ERROR, "error")));
+        when(service.requestCatalog(any(), any(), any(), any(), any())).thenReturn(completedFuture(StatusResult.failure(FATAL_ERROR, "error")));
 
         var requestBody = Json.createObjectBuilder().add(CatalogRequest.CATALOG_REQUEST_PROTOCOL, "any").build();
 
@@ -126,7 +130,7 @@ public abstract class BaseCatalogApiControllerTest extends RestControllerTestBas
         var request = CatalogRequest.Builder.newInstance().counterPartyAddress("http://url").build();
         when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.success());
         when(transformerRegistry.transform(any(), eq(CatalogRequest.class))).thenReturn(Result.success(request));
-        when(service.requestCatalog(any(), any(), any(), any())).thenReturn(failedFuture(new EdcException("error")));
+        when(service.requestCatalog(any(), any(), any(), any(), any())).thenReturn(failedFuture(new EdcException("error")));
         var requestBody = Json.createObjectBuilder().add(CatalogRequest.CATALOG_REQUEST_PROTOCOL, "any").build();
 
         given()
@@ -148,7 +152,7 @@ public abstract class BaseCatalogApiControllerTest extends RestControllerTestBas
                 .build();
         when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.success());
         when(transformerRegistry.transform(any(), any())).thenReturn(Result.success(request));
-        when(service.requestDataset(any(), any(), any(), any())).thenReturn(CompletableFuture.completedFuture(StatusResult.success("{}".getBytes())));
+        when(service.requestDataset(any(), any(), any(), any(), any())).thenReturn(CompletableFuture.completedFuture(StatusResult.success("{}".getBytes())));
         var requestBody = Json.createObjectBuilder().add(DATASET_REQUEST_PROTOCOL, "any").build();
 
         given()
@@ -161,7 +165,7 @@ public abstract class BaseCatalogApiControllerTest extends RestControllerTestBas
 
         verify(validatorRegistry).validate(eq(DATASET_REQUEST_TYPE), any());
         verify(transformerRegistry).transform(any(), eq(DatasetRequest.class));
-        verify(service).requestDataset("dataset-id", "providerId", "http://provider-url", "protocol");
+        verify(service).requestDataset("test", "dataset-id", "providerId", "http://provider-url", "protocol");
     }
 
     @Test
@@ -201,7 +205,7 @@ public abstract class BaseCatalogApiControllerTest extends RestControllerTestBas
         var request = DatasetRequest.Builder.newInstance().counterPartyAddress("http://url").build();
         when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.success());
         when(transformerRegistry.transform(any(), eq(DatasetRequest.class))).thenReturn(Result.success(request));
-        when(service.requestDataset(any(), any(), any(), any())).thenReturn(completedFuture(StatusResult.failure(FATAL_ERROR, "error")));
+        when(service.requestDataset(any(), any(), any(), any(), any())).thenReturn(completedFuture(StatusResult.failure(FATAL_ERROR, "error")));
 
         var requestBody = Json.createObjectBuilder().add(DATASET_REQUEST_PROTOCOL, "any").build();
 
@@ -219,7 +223,7 @@ public abstract class BaseCatalogApiControllerTest extends RestControllerTestBas
         var request = DatasetRequest.Builder.newInstance().counterPartyAddress("http://url").build();
         when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.success());
         when(transformerRegistry.transform(any(), eq(DatasetRequest.class))).thenReturn(Result.success(request));
-        when(service.requestDataset(any(), any(), any(), any())).thenReturn(failedFuture(new EdcException("error")));
+        when(service.requestDataset(any(), any(), any(), any(), any())).thenReturn(failedFuture(new EdcException("error")));
         var requestBody = Json.createObjectBuilder().add(DATASET_REQUEST_PROTOCOL, "any").build();
 
         given()

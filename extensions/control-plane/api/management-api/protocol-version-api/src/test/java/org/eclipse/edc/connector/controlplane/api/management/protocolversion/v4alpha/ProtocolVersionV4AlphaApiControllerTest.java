@@ -15,10 +15,12 @@
 package org.eclipse.edc.connector.controlplane.api.management.protocolversion.v4alpha;
 
 import jakarta.json.Json;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.protocolversion.spi.ProtocolVersionRequest;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.VersionService;
 import org.eclipse.edc.junit.annotations.ApiTest;
 import org.eclipse.edc.spi.EdcException;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.response.StatusResult;
 import org.eclipse.edc.spi.result.Result;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
@@ -49,13 +51,14 @@ public class ProtocolVersionV4AlphaApiControllerTest extends RestControllerTestB
     protected final VersionService service = mock();
     protected final TypeTransformerRegistry transformerRegistry = mock();
     protected final JsonObjectValidatorRegistry validatorRegistry = mock();
+    protected final ParticipantContextSupplier supplier = () -> new ParticipantContext("id", "id");
 
     @Test
     void requestVersions() {
         var request = Builder.newInstance().counterPartyAddress("http://url").build();
         when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.success());
         when(transformerRegistry.transform(any(), eq(ProtocolVersionRequest.class))).thenReturn(Result.success(request));
-        when(service.requestVersions(any())).thenReturn(completedFuture(StatusResult.success("{}".getBytes())));
+        when(service.requestVersions(any(), any())).thenReturn(completedFuture(StatusResult.success("{}".getBytes())));
         var requestBody = Json.createObjectBuilder().add(PROTOCOL_VERSION_REQUEST_PROTOCOL, "any").build();
 
         given()
@@ -106,7 +109,7 @@ public class ProtocolVersionV4AlphaApiControllerTest extends RestControllerTestB
         var request = Builder.newInstance().counterPartyAddress("http://url").build();
         when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.success());
         when(transformerRegistry.transform(any(), eq(ProtocolVersionRequest.class))).thenReturn(Result.success(request));
-        when(service.requestVersions(any())).thenReturn(completedFuture(StatusResult.failure(FATAL_ERROR, "error")));
+        when(service.requestVersions(any(), any())).thenReturn(completedFuture(StatusResult.failure(FATAL_ERROR, "error")));
 
         var requestBody = Json.createObjectBuilder().add(PROTOCOL_VERSION_REQUEST_PROTOCOL, "any").build();
 
@@ -124,7 +127,7 @@ public class ProtocolVersionV4AlphaApiControllerTest extends RestControllerTestB
         var request = Builder.newInstance().counterPartyAddress("http://url").build();
         when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.success());
         when(transformerRegistry.transform(any(), eq(ProtocolVersionRequest.class))).thenReturn(Result.success(request));
-        when(service.requestVersions(any())).thenReturn(failedFuture(new EdcException("error")));
+        when(service.requestVersions(any(), any())).thenReturn(failedFuture(new EdcException("error")));
         var requestBody = Json.createObjectBuilder().add(PROTOCOL_VERSION_REQUEST_PROTOCOL, "any").build();
 
         given()
@@ -135,9 +138,9 @@ public class ProtocolVersionV4AlphaApiControllerTest extends RestControllerTestB
                 .then()
                 .statusCode(502);
     }
-    
+
     @Override
     protected Object controller() {
-        return new ProtocolVersionApiV4AlphaController(service, transformerRegistry, validatorRegistry);
+        return new ProtocolVersionApiV4AlphaController(service, transformerRegistry, validatorRegistry, supplier);
     }
 }

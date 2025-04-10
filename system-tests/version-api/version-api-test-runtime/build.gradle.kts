@@ -19,6 +19,7 @@ plugins {
 dependencies {
     implementation(project(":core:common:connector-core"))
     implementation(project(":core:common:runtime-core"))
+    implementation(project(":core:common:participant-context-core"))
     implementation(project(":core:common:token-core"))
     implementation(project(":core:common:edr-store-core"))
     implementation(project(":core:control-plane:control-plane-core"))

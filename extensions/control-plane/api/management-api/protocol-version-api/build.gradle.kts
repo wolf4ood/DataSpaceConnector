@@ -18,6 +18,7 @@ plugins {
 
 dependencies {
     api(project(":spi:control-plane:control-plane-spi"))
+    api(project(":spi:common:participant-context-spi"))
 
     implementation(project(":core:common:lib:validator-lib"))
     implementation(project(":extensions:common:api:lib:management-api-lib"))

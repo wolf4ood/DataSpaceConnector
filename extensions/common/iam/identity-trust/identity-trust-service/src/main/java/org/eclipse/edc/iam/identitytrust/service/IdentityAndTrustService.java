@@ -23,6 +23,7 @@ import org.eclipse.edc.iam.verifiablecredentials.spi.VerifiableCredentialValidat
 import org.eclipse.edc.iam.verifiablecredentials.spi.model.VerifiablePresentation;
 import org.eclipse.edc.iam.verifiablecredentials.spi.model.VerifiablePresentationContainer;
 import org.eclipse.edc.iam.verifiablecredentials.spi.validation.CredentialValidationRule;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.ClaimToken;
 import org.eclipse.edc.spi.iam.IdentityService;
 import org.eclipse.edc.spi.iam.TokenParameters;
@@ -94,7 +95,7 @@ public class IdentityAndTrustService implements IdentityService {
     }
 
     @Override
-    public Result<TokenRepresentation> obtainClientCredentials(TokenParameters parameters) {
+    public Result<TokenRepresentation> obtainClientCredentials(ParticipantContext participantContext, TokenParameters parameters) {
         var aud = parameters.getStringClaim(AUDIENCE);
         var scope = parameters.getStringClaim(SCOPE);
         parameters = TokenParameters.Builder.newInstance()

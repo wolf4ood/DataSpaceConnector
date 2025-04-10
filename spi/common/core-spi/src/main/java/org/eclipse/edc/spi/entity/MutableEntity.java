@@ -17,7 +17,7 @@ package org.eclipse.edc.spi.entity;
 /**
  * Makes an {@link Entity} <em>mutable</em> by adding a {@code updatedAt} field to it, so that changes can be tracked.
  */
-public abstract class MutableEntity extends Entity {
+public abstract class MutableEntity extends AbstractParticipantResource {
     protected long updatedAt;
 
     public long getUpdatedAt() {
@@ -35,7 +35,7 @@ public abstract class MutableEntity extends Entity {
         setUpdatedAt(clock.millis());
     }
 
-    protected abstract static class Builder<T extends MutableEntity, B extends Builder<T, B>> extends Entity.Builder<T, B> {
+    protected abstract static class Builder<T extends MutableEntity, B extends Builder<T, B>> extends AbstractParticipantResource.Builder<T, B> {
 
         protected Builder(T entity) {
             super(entity);

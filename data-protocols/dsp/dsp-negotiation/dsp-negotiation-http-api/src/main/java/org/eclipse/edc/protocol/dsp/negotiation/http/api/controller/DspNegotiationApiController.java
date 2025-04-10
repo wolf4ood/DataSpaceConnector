@@ -18,6 +18,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.contractnegotiation.ContractNegotiationProtocolService;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
 
@@ -29,16 +30,17 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_NAMESPACE_V
  * Provides consumer and provider endpoints for the contract negotiation according to the http binding
  * of the dataspace protocol.
  */
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON })
+@Consumes({MediaType.APPLICATION_JSON})
+@Produces({MediaType.APPLICATION_JSON})
 @Path(BASE_PATH)
 public class DspNegotiationApiController extends BaseDspNegotiationApiController {
 
 
     public DspNegotiationApiController(ContractNegotiationProtocolService protocolService,
-                                       DspRequestHandler dspRequestHandler) {
+                                       DspRequestHandler dspRequestHandler,
+                                       ParticipantContextSupplier participantContextSupplier) {
 
-        super(protocolService, dspRequestHandler, DATASPACE_PROTOCOL_HTTP, DSP_NAMESPACE_V_08);
+        super(protocolService, dspRequestHandler, DATASPACE_PROTOCOL_HTTP, DSP_NAMESPACE_V_08, participantContextSupplier);
     }
 
 }

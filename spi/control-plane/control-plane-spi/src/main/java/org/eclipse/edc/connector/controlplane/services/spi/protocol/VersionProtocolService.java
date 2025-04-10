@@ -14,6 +14,7 @@
 
 package org.eclipse.edc.connector.controlplane.services.spi.protocol;
 
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.TokenRepresentation;
 import org.eclipse.edc.spi.result.ServiceResult;
 
@@ -28,5 +29,5 @@ public interface VersionProtocolService {
      * @param tokenRepresentation the token.
      * @return a {@link ServiceResult} with the list of versions.
      */
-    ServiceResult<ProtocolVersions> getAll(TokenRepresentation tokenRepresentation);
+    ServiceResult<ProtocolVersions> getAll(ParticipantContext participantContext, TokenRepresentation tokenRepresentation);
 }

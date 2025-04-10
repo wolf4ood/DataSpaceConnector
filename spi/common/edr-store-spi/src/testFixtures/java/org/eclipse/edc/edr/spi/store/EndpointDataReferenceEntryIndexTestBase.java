@@ -14,7 +14,6 @@
 
 package org.eclipse.edc.edr.spi.store;
 
-import org.eclipse.edc.edr.spi.TestFunctions;
 import org.eclipse.edc.edr.spi.types.EndpointDataReferenceEntry;
 import org.eclipse.edc.spi.query.Criterion;
 import org.eclipse.edc.spi.query.QuerySpec;
@@ -36,6 +35,10 @@ import java.util.stream.Stream;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.edc.edr.spi.TestFunctions.edrEntry;
+import static org.eclipse.edc.edr.spi.TestFunctions.edrEntryBuilder;
+import static org.eclipse.edc.spi.entity.ParticipantResource.queryByParticipantContextId;
+import static org.eclipse.edc.spi.query.Criterion.criterion;
 
 /**
  * Default test suite for {@link EndpointDataReferenceEntryIndex} implementors
@@ -48,7 +51,7 @@ public abstract class EndpointDataReferenceEntryIndexTestBase {
         var tpId = "tp1";
         var assetId = "asset1";
 
-        var entry = TestFunctions.edrEntry(assetId, randomUUID().toString(), tpId, randomUUID().toString());
+        var entry = edrEntry(assetId, randomUUID().toString(), tpId, randomUUID().toString());
 
         getStore().save(entry);
 
@@ -64,14 +67,16 @@ public abstract class EndpointDataReferenceEntryIndexTestBase {
         var tpId = "tp1";
         var assetId = "asset1";
 
-        var entry = TestFunctions.edrEntry(assetId, randomUUID().toString(), tpId, randomUUID().toString());
+        var entry = edrEntry(assetId, randomUUID().toString(), tpId, randomUUID().toString());
 
         getStore().save(entry);
 
         var dbEntry = getStore().findById(entry.getTransferProcessId());
         assertThat(dbEntry).isNotNull().usingRecursiveComparison().isEqualTo(entry);
 
-        entry = TestFunctions.edrEntry(assetId, randomUUID().toString(), tpId, randomUUID().toString());
+        entry = edrEntryBuilder(assetId, randomUUID().toString(), tpId, randomUUID().toString())
+                .participantContextId(dbEntry.getParticipantContextId())
+                .build();
         getStore().save(entry);
 
         dbEntry = getStore().findById(entry.getTransferProcessId());
@@ -86,7 +91,7 @@ public abstract class EndpointDataReferenceEntryIndexTestBase {
     @Test
     void query_noQuerySpec() {
         var all = IntStream.range(0, 10)
-                .mapToObj(i -> TestFunctions.edrEntry("assetId" + i, "agreementId" + i, "tpId" + i, "cnId" + i))
+                .mapToObj(i -> edrEntry("assetId" + i, "agreementId" + i, "tpId" + i, "cnId" + i))
                 .peek(entry -> getStore().save(entry))
                 .collect(Collectors.toList());
 
@@ -101,11 +106,11 @@ public abstract class EndpointDataReferenceEntryIndexTestBase {
     @ArgumentsSource(FilterArgumentProvider.class)
     void query_withQuerySpec(String field, Function<EndpointDataReferenceEntry, String> mapping) {
         IntStream.range(0, 10)
-                .mapToObj(i -> TestFunctions.edrEntry("assetId" + i, "agreementId" + i, "tpId" + i, "cnId" + i))
+                .mapToObj(i -> edrEntry("assetId" + i, "agreementId" + i, "tpId" + i, "cnId" + i))
                 .forEach(entry -> getStore().save(entry));
 
 
-        var entry = TestFunctions.edrEntry("assetId", "agreementId", "tpId", "cnId");
+        var entry = edrEntry("assetId", "agreementId", "tpId", "cnId");
         getStore().save(entry);
 
         var filter = Criterion.Builder.newInstance()
@@ -122,9 +127,46 @@ public abstract class EndpointDataReferenceEntryIndexTestBase {
     }
 
     @Test
+    void query_ByParticipantContext() {
+        IntStream.range(0, 10)
+                .mapToObj(i -> edrEntry("assetId" + i, "agreementId" + i, "tpId" + i, "cnId" + i))
+                .forEach(entry -> getStore().save(entry));
+
+        var entry = edrEntryBuilder().participantContextId("customParticipantId").build();
+        getStore().save(entry);
+
+        var results = getStore().query(queryByParticipantContextId("customParticipantId").build());
+
+        assertThat(results.succeeded()).isTrue();
+        assertThat(results.getContent())
+                .hasSize(1)
+                .usingRecursiveFieldByFieldElementComparator().containsExactly(entry);
+
+    }
+
+    @Test
+    void query_ByDataspaceContext() {
+        IntStream.range(0, 10)
+                .mapToObj(i -> edrEntry("assetId" + i, "agreementId" + i, "tpId" + i, "cnId" + i))
+                .forEach(entry -> getStore().save(entry));
+
+        var entry = edrEntryBuilder().dataspaceContext("customDataspaceContext").build();
+        getStore().save(entry);
+
+        var results = getStore().query(QuerySpec.Builder.newInstance().filter(criterion("dataspaceContext", "=", "customDataspaceContext")).build());
+
+        assertThat(results.succeeded()).isTrue();
+        assertThat(results.getContent())
+                .hasSize(1)
+                .usingRecursiveFieldByFieldElementComparator().containsExactly(entry);
+
+    }
+
+
+    @Test
     void query_withOrderBy() {
         IntStream.range(0, 10)
-                .mapToObj(i -> TestFunctions.edrEntry("assetId" + i, "agreementId" + i, "tpId" + i, "cnId" + i))
+                .mapToObj(i -> edrEntry("assetId" + i, "agreementId" + i, "tpId" + i, "cnId" + i))
                 .forEach(entry -> getStore().save(entry));
 
         var results = getStore().query(QuerySpec.Builder.newInstance().sortField("createdAt").sortOrder(SortOrder.DESC).build());
@@ -138,7 +180,7 @@ public abstract class EndpointDataReferenceEntryIndexTestBase {
     @Test
     void delete_shouldDelete_WhenFound() {
 
-        var entry = TestFunctions.edrEntry("assetId", "agreementId", "tpId", "cnId");
+        var entry = edrEntry("assetId", "agreementId", "tpId", "cnId");
         getStore().save(entry);
 
         assertThat(getStore().delete(entry.getTransferProcessId()))

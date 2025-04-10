@@ -18,6 +18,7 @@ import jakarta.json.JsonObject;
 import jakarta.ws.rs.container.AsyncResponse;
 import org.eclipse.edc.connector.controlplane.catalog.spi.CatalogRequest;
 import org.eclipse.edc.connector.controlplane.catalog.spi.DatasetRequest;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.catalog.CatalogService;
 import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.response.StatusResult;
@@ -36,12 +37,14 @@ public abstract class BaseCatalogApiController {
     private final CatalogService service;
     private final TypeTransformerRegistry transformerRegistry;
     private final JsonObjectValidatorRegistry validatorRegistry;
+    private final ParticipantContextSupplier participantContextSupplier;
 
     public BaseCatalogApiController(CatalogService service, TypeTransformerRegistry transformerRegistry,
-                                    JsonObjectValidatorRegistry validatorRegistry) {
+                                    JsonObjectValidatorRegistry validatorRegistry, ParticipantContextSupplier participantContextSupplier) {
         this.service = service;
         this.transformerRegistry = transformerRegistry;
         this.validatorRegistry = validatorRegistry;
+        this.participantContextSupplier = participantContextSupplier;
     }
 
     public void requestCatalog(JsonObject requestBody, AsyncResponse response) {
@@ -51,7 +54,7 @@ public abstract class BaseCatalogApiController {
                 .orElseThrow(InvalidRequestException::new);
 
         var scopes = request.getAdditionalScopes().toArray(new String[0]);
-        service.requestCatalog(request.getCounterPartyId(), request.getCounterPartyAddress(), request.getProtocol(), request.getQuerySpec(), scopes)
+        service.requestCatalog(participantContextSupplier.get().id(), request.getCounterPartyId(), request.getCounterPartyAddress(), request.getProtocol(), request.getQuerySpec(), scopes)
                 .whenComplete((result, throwable) -> {
                     try {
                         response.resume(toResponse(result, throwable));
@@ -67,7 +70,7 @@ public abstract class BaseCatalogApiController {
         var request = transformerRegistry.transform(requestBody, DatasetRequest.class)
                 .orElseThrow(InvalidRequestException::new);
 
-        service.requestDataset(request.getId(), request.getCounterPartyId(), request.getCounterPartyAddress(), request.getProtocol())
+        service.requestDataset(participantContextSupplier.get().id(), request.getId(), request.getCounterPartyId(), request.getCounterPartyAddress(), request.getProtocol())
                 .whenComplete((result, throwable) -> {
                     try {
                         response.resume(toResponse(result, throwable));

@@ -28,10 +28,12 @@ import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.Con
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractOfferMessage;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.offer.ContractOffer;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.protocol.ContractNegotiationAck;
+import org.eclipse.edc.connector.controlplane.participants.spi.store.ParticipantContextStore;
 import org.eclipse.edc.connector.controlplane.policy.spi.PolicyDefinition;
 import org.eclipse.edc.connector.controlplane.policy.spi.store.PolicyDefinitionStore;
 import org.eclipse.edc.policy.model.Policy;
 import org.eclipse.edc.spi.EdcException;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.message.RemoteMessageDispatcherRegistry;
 import org.eclipse.edc.spi.protocol.ProtocolWebhookRegistry;
 import org.eclipse.edc.spi.query.Criterion;
@@ -79,6 +81,7 @@ import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.only;
@@ -88,7 +91,6 @@ import static org.mockito.Mockito.when;
 
 class ProviderContractNegotiationManagerImplTest {
 
-    private static final String PROVIDER_ID = "provider";
     private static final int RETRY_LIMIT = 1;
     private final ContractNegotiationStore store = mock();
     private final RemoteMessageDispatcherRegistry dispatcherRegistry = mock();
@@ -96,14 +98,16 @@ class ProviderContractNegotiationManagerImplTest {
     private final ContractNegotiationListener listener = mock();
     private final ContractNegotiationPendingGuard pendingGuard = mock();
     private final ProtocolWebhookRegistry protocolWebhookRegistry = mock();
+    private final ParticipantContextStore participantContextStore = mock();
     private ProviderContractNegotiationManagerImpl manager;
 
     @BeforeEach
     void setUp() {
         var observable = new ContractNegotiationObservableImpl();
         observable.registerListener(listener);
+        when(participantContextStore.findById(eq("participantContextId"))).thenReturn(new ParticipantContext("participantContextId", "participantContextId"));
         manager = ProviderContractNegotiationManagerImpl.Builder.newInstance()
-                .participantId(PROVIDER_ID)
+                .participantContextStore(participantContextStore)
                 .dispatcherRegistry(dispatcherRegistry)
                 .monitor(mock())
                 .observable(observable)
@@ -213,7 +217,7 @@ class ProviderContractNegotiationManagerImplTest {
         when(store.nextNotLeased(anyInt(), stateIs(AGREEING.code()))).thenReturn(List.of(negotiation)).thenReturn(emptyList());
         when(dispatcherRegistry.dispatch(any(), any())).thenReturn(completedFuture(StatusResult.success("any")));
         when(store.findById(negotiation.getId())).thenReturn(negotiation);
-        when(policyStore.findById(any())).thenReturn(PolicyDefinition.Builder.newInstance().policy(Policy.Builder.newInstance().build()).id("policyId").build());
+        when(policyStore.findById(any())).thenReturn(PolicyDefinition.Builder.newInstance().participantContextId(negotiation.getParticipantContextId()).policy(Policy.Builder.newInstance().build()).id("policyId").build());
 
         manager.start();
 
@@ -309,6 +313,7 @@ class ProviderContractNegotiationManagerImplTest {
                 .counterPartyId("connectorId")
                 .counterPartyAddress("callbackAddress")
                 .protocol("protocol")
+                .participantContextId("participantContextId")
                 .state(400)
                 .stateTimestamp(Instant.now().toEpochMilli());
     }
@@ -331,7 +336,7 @@ class ProviderContractNegotiationManagerImplTest {
     }
 
     private Criterion[] stateIs(int state) {
-        return aryEq(new Criterion[]{ hasState(state), isNotPending(), new Criterion("type", "=", "PROVIDER") });
+        return aryEq(new Criterion[]{hasState(state), isNotPending(), new Criterion("type", "=", "PROVIDER")});
     }
 
     private static class DispatchFailureArguments implements ArgumentsProvider {

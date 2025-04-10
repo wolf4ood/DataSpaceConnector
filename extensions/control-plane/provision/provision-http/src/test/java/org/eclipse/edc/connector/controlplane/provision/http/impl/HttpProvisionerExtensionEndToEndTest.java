@@ -39,6 +39,7 @@ import org.eclipse.edc.participant.spi.ParticipantAgent;
 import org.eclipse.edc.policy.model.Policy;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.runtime.metamodel.annotation.Provides;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.entity.StatefulEntity;
 import org.eclipse.edc.spi.iam.ClaimToken;
 import org.eclipse.edc.spi.iam.IdentityService;
@@ -125,13 +126,15 @@ public class HttpProvisionerExtensionEndToEndTest {
         policyStore.create(createPolicyDefinition());
         assetIndex.create(createAssetEntry());
 
+        var participantContext = new ParticipantContext("participantContextId", "participantContextId");
+
         when(delegate.intercept(any()))
                 .thenAnswer(invocation -> HttpProvisionerFixtures.createResponse(503, invocation))
                 .thenAnswer(invocation -> HttpProvisionerFixtures.createResponse(200, invocation));
 
         when(identityService.verifyJwtToken(any(), isA(VerificationContext.class))).thenReturn(Result.success(ClaimToken.Builder.newInstance().build()));
 
-        var result = protocolService.notifyRequested(createTransferRequestMessage(), TokenRepresentation.Builder.newInstance().build());
+        var result = protocolService.notifyRequested(participantContext, createTransferRequestMessage(), TokenRepresentation.Builder.newInstance().build());
 
         assertThat(result).isSucceeded();
         await().untilAsserted(() -> {
@@ -153,6 +156,7 @@ public class HttpProvisionerExtensionEndToEndTest {
                 .policy(policy)
                 .consumerId("consumer")
                 .providerId("provider")
+                .participantContextId("participantContextId")
                 .build();
 
         var contractOffer = ContractOffer.Builder.newInstance()

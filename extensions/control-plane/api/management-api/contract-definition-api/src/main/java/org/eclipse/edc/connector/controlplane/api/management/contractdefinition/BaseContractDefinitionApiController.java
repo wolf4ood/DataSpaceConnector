@@ -18,6 +18,7 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import org.eclipse.edc.api.model.IdResponse;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.offer.ContractDefinition;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.contractdefinition.ContractDefinitionService;
 import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.monitor.Monitor;
@@ -41,13 +42,15 @@ public abstract class BaseContractDefinitionApiController {
     protected final ContractDefinitionService service;
     protected final Monitor monitor;
     protected final JsonObjectValidatorRegistry validatorRegistry;
+    private final ParticipantContextSupplier participantContextSupplier;
 
     public BaseContractDefinitionApiController(TypeTransformerRegistry transformerRegistry, ContractDefinitionService service,
-                                               Monitor monitor, JsonObjectValidatorRegistry validatorRegistry) {
+                                               Monitor monitor, JsonObjectValidatorRegistry validatorRegistry, ParticipantContextSupplier participantContextSupplier) {
         this.transformerRegistry = transformerRegistry;
         this.service = service;
         this.monitor = monitor;
         this.validatorRegistry = validatorRegistry;
+        this.participantContextSupplier = participantContextSupplier;
     }
 
     public JsonArray queryContractDefinitions(JsonObject querySpecJson) {
@@ -83,7 +86,10 @@ public abstract class BaseContractDefinitionApiController {
                 .orElseThrow(ValidationFailureException::new);
 
         var transform = transformerRegistry.transform(createObject, ContractDefinition.class)
-                .orElseThrow(InvalidRequestException::new);
+                .orElseThrow(InvalidRequestException::new)
+                .toBuilder()
+                .participantContextId(participantContextSupplier.get().id())
+                .build();
 
         var responseDto = service.create(transform)
                 .map(contractDefinition -> IdResponse.Builder.newInstance()

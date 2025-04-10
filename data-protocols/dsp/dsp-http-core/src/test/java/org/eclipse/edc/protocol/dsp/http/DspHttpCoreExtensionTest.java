@@ -15,8 +15,10 @@
 package org.eclipse.edc.protocol.dsp.http;
 
 import org.eclipse.edc.boot.system.injection.ObjectFactory;
+import org.eclipse.edc.connector.controlplane.participants.spi.store.ParticipantContextStore;
 import org.eclipse.edc.junit.extensions.DependencyInjectionExtension;
 import org.eclipse.edc.protocol.dsp.http.message.DspRequestHandlerImpl;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.AudienceResolver;
 import org.eclipse.edc.spi.iam.IdentityService;
 import org.eclipse.edc.spi.result.Result;
@@ -40,19 +42,22 @@ class DspHttpCoreExtensionTest {
     public static final String SCOPE_CLAIM = "scope";
     private final IdentityService identityService = mock();
     private final AudienceResolver audienceResolver = mock();
+    private final ParticipantContextStore participantContextStore = mock();
     private DspHttpCoreExtension extension;
 
     @BeforeEach
     void setUp(ServiceExtensionContext context) {
         context.registerService(IdentityService.class, identityService);
         context.registerService(AudienceResolver.class, audienceResolver);
+        context.registerService(ParticipantContextStore.class, participantContextStore);
+        when(participantContextStore.findById(any())).thenReturn(new ParticipantContext("test", "test"));
     }
 
     @Test
     @DisplayName("Assert usage of the default (noop) token decorator")
     void createDispatcher_noTokenDecorator_shouldUseNoop(ServiceExtensionContext context, ObjectFactory factory) {
         when(audienceResolver.resolve(any())).thenReturn(Result.success("audience"));
-        when(identityService.obtainClientCredentials(any())).thenReturn(Result.failure("not-important"));
+        when(identityService.obtainClientCredentials(any(), any())).thenReturn(Result.failure("not-important"));
         context.registerService(TokenDecorator.class, null);
 
         extension = factory.constructInstance(DspHttpCoreExtension.class);
@@ -60,14 +65,14 @@ class DspHttpCoreExtensionTest {
         dispatcher.registerMessage(TestMessage.class, mock(), mock());
         dispatcher.dispatch(String.class, new TestMessage("protocol", "address", "counterPartyId"));
 
-        verify(identityService).obtainClientCredentials(argThat(tokenParams -> tokenParams.getStringClaim(SCOPE_CLAIM) == null));
+        verify(identityService).obtainClientCredentials(any(), argThat((tokenParams) -> tokenParams.getStringClaim(SCOPE_CLAIM) == null));
     }
 
     @Test
     @DisplayName("Assert usage of an injected TokenDecorator")
     void createDispatcher_withTokenDecorator_shouldUse(ServiceExtensionContext context, ObjectFactory factory) {
         when(audienceResolver.resolve(any())).thenReturn(Result.success("audience"));
-        when(identityService.obtainClientCredentials(any())).thenReturn(Result.failure("not-important"));
+        when(identityService.obtainClientCredentials(any(), any())).thenReturn(Result.failure("not-important"));
         context.registerService(TokenDecorator.class, (td) -> td.claims(SCOPE_CLAIM, "test-scope"));
 
         extension = factory.constructInstance(DspHttpCoreExtension.class);
@@ -75,7 +80,7 @@ class DspHttpCoreExtensionTest {
         dispatcher.registerMessage(TestMessage.class, mock(), mock());
         dispatcher.dispatch(String.class, new TestMessage("protocol", "address", "counterPartyId"));
 
-        verify(identityService).obtainClientCredentials(argThat(tokenParams -> tokenParams.getStringClaim(SCOPE_CLAIM).equals("test-scope")));
+        verify(identityService).obtainClientCredentials(any(), argThat(tokenParams -> tokenParams.getStringClaim(SCOPE_CLAIM).equals("test-scope")));
     }
 
     @Test

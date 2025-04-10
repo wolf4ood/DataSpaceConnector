@@ -17,6 +17,7 @@ package org.eclipse.edc.protocol.dsp.http.dispatcher;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.eclipse.edc.connector.controlplane.catalog.spi.CatalogRequestMessage;
+import org.eclipse.edc.connector.controlplane.participants.spi.store.ParticipantContextStore;
 import org.eclipse.edc.http.spi.EdcHttpClient;
 import org.eclipse.edc.policy.context.request.spi.RequestPolicyContext;
 import org.eclipse.edc.policy.engine.spi.PolicyEngine;
@@ -63,18 +64,21 @@ public class DspHttpRemoteMessageDispatcherImpl implements DspHttpRemoteMessageD
     private final PolicyEngine policyEngine;
     private final TokenDecorator tokenDecorator;
     private final AudienceResolver audienceResolver;
+    private final ParticipantContextStore participantContextStore;
 
 
     public DspHttpRemoteMessageDispatcherImpl(EdcHttpClient httpClient,
                                               IdentityService identityService,
                                               TokenDecorator decorator,
                                               PolicyEngine policyEngine,
-                                              AudienceResolver audienceResolver) {
+                                              AudienceResolver audienceResolver,
+                                              ParticipantContextStore participantContextStore) {
         this.httpClient = httpClient;
         this.identityService = identityService;
         this.policyEngine = policyEngine;
         this.tokenDecorator = decorator;
         this.audienceResolver = audienceResolver;
+        this.participantContextStore = participantContextStore;
     }
 
     @Override
@@ -113,9 +117,15 @@ public class DspHttpRemoteMessageDispatcherImpl implements DspHttpRemoteMessageD
             }
         }
 
+        var participantContext = participantContextStore.findById(message.getParticipantContextId());
+
+        if (participantContext == null) {
+            return failedFuture(new EdcException(format("No participant context found for id %s", message.getParticipantContextId())));
+        }
+
         return audienceResolver.resolve(message)
                 .map(audience -> tokenDecorator.decorate(tokenParametersBuilder).claims(AUDIENCE_CLAIM, audience).build()) // enforce the audience, ignore anything a decorator might have set
-                .compose(identityService::obtainClientCredentials)
+                .compose((tokenParameters) -> identityService.obtainClientCredentials(participantContext, tokenParameters))
                 .map(token -> {
                     var requestWithAuth = request.newBuilder()
                             .header("Authorization", token.getToken())
@@ -169,11 +179,13 @@ public class DspHttpRemoteMessageDispatcherImpl implements DspHttpRemoteMessageD
 
     private record MessageHandler<M extends RemoteMessage, R>(
             DspHttpRequestFactory<M> requestFactory,
-            DspHttpResponseBodyExtractor<R> bodyExtractor) { }
+            DspHttpResponseBodyExtractor<R> bodyExtractor) {
+    }
 
     private record PolicyScope<M extends RemoteMessage>(
             Class<M> messageClass,
             Function<M, Policy> policyProvider,
-            RequestPolicyContext.Provider contextProvider) { }
+            RequestPolicyContext.Provider contextProvider) {
+    }
 
 }

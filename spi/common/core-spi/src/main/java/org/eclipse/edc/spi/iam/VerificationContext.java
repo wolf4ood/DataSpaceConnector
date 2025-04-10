@@ -15,6 +15,7 @@
 package org.eclipse.edc.spi.iam;
 
 import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ public class VerificationContext {
     private final Map<Class<?>, Object> additional;
     private Policy policy;
     private Set<String> scopes = new HashSet<>();
+    private ParticipantContext participantContext;
 
     private VerificationContext() {
         additional = new HashMap<>();
@@ -51,6 +53,10 @@ public class VerificationContext {
      */
     public Set<String> getScopes() {
         return scopes;
+    }
+
+    public ParticipantContext getParticipantContext() {
+        return participantContext;
     }
 
     /**
@@ -93,9 +99,15 @@ public class VerificationContext {
             return this;
         }
 
+        public Builder participantContext(ParticipantContext participantContext) {
+            context.participantContext = participantContext;
+            return this;
+        }
+
         public VerificationContext build() {
 
             Objects.requireNonNull(this.context.policy, "Policy cannot be null");
+            Objects.requireNonNull(this.context.participantContext, "Participant context cannot be null");
             return context;
         }
     }

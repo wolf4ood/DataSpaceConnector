@@ -31,12 +31,16 @@ public class TestFunctions {
         return createContractDefinition(id, "access", "contract");
     }
 
-    public static ContractDefinition createContractDefinition(String id, String accessPolicyId, String contractPolicyId) {
+    public static ContractDefinition.Builder createContractDefinitionBuilder(String id) {
         return ContractDefinition.Builder.newInstance()
                 .id(id)
-                .accessPolicyId(accessPolicyId)
-                .contractPolicyId(contractPolicyId)
-                .build();
+                .participantContextId("participantContextId")
+                .accessPolicyId("access")
+                .contractPolicyId("contract");
+    }
+
+    public static ContractDefinition createContractDefinition(String id, String accessPolicyId, String contractPolicyId) {
+        return createContractDefinition(id, accessPolicyId, contractPolicyId, Map.of());
     }
 
     public static ContractDefinition createContractDefinition(String id, String accessPolicyId, String contractPolicyId, Map<String, Object> privateProperties) {
@@ -45,6 +49,7 @@ public class TestFunctions {
                 .accessPolicyId(accessPolicyId)
                 .contractPolicyId(contractPolicyId)
                 .privateProperties(privateProperties)
+                .participantContextId("participantContextId")
                 .build();
     }
 

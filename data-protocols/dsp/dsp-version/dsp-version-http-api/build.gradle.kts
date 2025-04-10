@@ -23,6 +23,7 @@ dependencies {
     api(project(":spi:common:transform-spi"))
     api(project(":spi:common:web-spi"))
     api(project(":data-protocols:dsp:dsp-http-spi"))
+    api(project(":spi:common:participant-context-spi"))
     implementation(project(":extensions:common:http:lib:jersey-providers-lib"))
 
     testImplementation(project(":core:common:junit"))

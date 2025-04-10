@@ -34,6 +34,7 @@ import org.eclipse.edc.dataaddress.httpdata.spi.HttpDataAddressSchema;
 import org.eclipse.edc.participant.spi.ParticipantAgent;
 import org.eclipse.edc.policy.model.Policy;
 import org.eclipse.edc.query.CriterionOperatorRegistryImpl;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.message.Range;
 import org.eclipse.edc.spi.query.Criterion;
 import org.eclipse.edc.spi.query.QuerySpec;
@@ -84,15 +85,21 @@ class DatasetResolverImplTest {
         return ContractDefinition.Builder.newInstance()
                 .id(id)
                 .accessPolicyId("access")
-                .contractPolicyId("contract");
+                .contractPolicyId("contract")
+                .participantContextId("participantContextId");
     }
 
     private Asset.Builder createAsset(String id) {
-        return Asset.Builder.newInstance().id(id).name("test asset " + id);
+        return Asset.Builder.newInstance().id(id).name("test asset " + id)
+                .participantContextId("participantContextId");
     }
 
     private ParticipantAgent createParticipantAgent() {
         return new ParticipantAgent(emptyMap(), emptyMap());
+    }
+
+    private ParticipantContext createParticipantContext() {
+        return new ParticipantContext("participantContextId", "participantContextId");
     }
 
     private DataService createDataService() {
@@ -112,12 +119,12 @@ class DatasetResolverImplTest {
             var contractDefinition = contractDefinitionBuilder("definitionId").contractPolicyId("contractPolicyId").build();
             var contractPolicy = Policy.Builder.newInstance().build();
             var distribution = Distribution.Builder.newInstance().dataService(dataService).format("format").build();
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
             when(assetIndex.queryAssets(isA(QuerySpec.class))).thenReturn(Stream.of(createAsset("assetId").property("key", "value").build()));
-            when(policyStore.findById("contractPolicyId")).thenReturn(PolicyDefinition.Builder.newInstance().policy(contractPolicy).build());
+            when(policyStore.findById("contractPolicyId")).thenReturn(PolicyDefinition.Builder.newInstance().policy(contractPolicy).participantContextId("participantContextId").build());
             when(distributionResolver.getDistributions(any(), isA(Asset.class))).thenReturn(List.of(distribution));
 
-            var datasets = datasetResolver.query(createParticipantAgent(), QuerySpec.none(), "protocol");
+            var datasets = datasetResolver.query(createParticipantContext(), createParticipantAgent(), QuerySpec.none(), "protocol");
 
             assertThat(datasets).isNotNull().hasSize(1).first().satisfies(dataset -> {
                 assertThat(dataset.getId()).isEqualTo("assetId");
@@ -133,9 +140,9 @@ class DatasetResolverImplTest {
 
         @Test
         void shouldNotQueryAssets_whenNoValidContractDefinition() {
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(emptyList()));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(emptyList()));
 
-            var datasets = datasetResolver.query(createParticipantAgent(), QuerySpec.none(), "protocol");
+            var datasets = datasetResolver.query(createParticipantContext(), createParticipantAgent(), QuerySpec.none(), "protocol");
 
             assertThat(datasets).isNotNull().isEmpty();
             verify(assetIndex, never()).queryAssets(any());
@@ -144,11 +151,11 @@ class DatasetResolverImplTest {
         @Test
         void shouldReturnNoDataset_whenPolicyNotFound() {
             var contractDefinition = contractDefinitionBuilder("definitionId").contractPolicyId("contractPolicyId").build();
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
             when(assetIndex.queryAssets(isA(QuerySpec.class))).thenReturn(Stream.of(createAsset("id").build()));
             when(policyStore.findById("contractPolicyId")).thenReturn(null);
 
-            var datasets = datasetResolver.query(createParticipantAgent(), QuerySpec.none(), "protocol");
+            var datasets = datasetResolver.query(createParticipantContext(), createParticipantAgent(), QuerySpec.none(), "protocol");
 
             assertThat(datasets).isNotNull().isEmpty();
         }
@@ -157,15 +164,15 @@ class DatasetResolverImplTest {
         void shouldReturnOneDataset_whenMultipleDefinitionsOnSameAsset() {
             var policy1 = Policy.Builder.newInstance().inheritsFrom("inherits1").build();
             var policy2 = Policy.Builder.newInstance().inheritsFrom("inherits2").build();
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(List.of(
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(List.of(
                     contractDefinitionBuilder("definition1").contractPolicyId("policy1").build(),
                     contractDefinitionBuilder("definition2").contractPolicyId("policy2").build()
             )));
             when(assetIndex.queryAssets(isA(QuerySpec.class))).thenAnswer(i -> Stream.of(createAsset("assetId").build()));
-            when(policyStore.findById("policy1")).thenReturn(PolicyDefinition.Builder.newInstance().policy(policy1).build());
-            when(policyStore.findById("policy2")).thenReturn(PolicyDefinition.Builder.newInstance().policy(policy2).build());
+            when(policyStore.findById("policy1")).thenReturn(PolicyDefinition.Builder.newInstance().policy(policy1).participantContextId("participantContextId").build());
+            when(policyStore.findById("policy2")).thenReturn(PolicyDefinition.Builder.newInstance().policy(policy2).participantContextId("participantContextId").build());
 
-            var datasets = datasetResolver.query(createParticipantAgent(), QuerySpec.none(), "protocol");
+            var datasets = datasetResolver.query(createParticipantContext(), createParticipantAgent(), QuerySpec.none(), "protocol");
 
             assertThat(datasets).hasSize(1).first().satisfies(dataset -> {
                 assertThat(dataset.getId()).isEqualTo("assetId");
@@ -188,13 +195,13 @@ class DatasetResolverImplTest {
                     .assetsSelector(List.of(definitionCriterion))
                     .contractPolicyId("contractPolicyId")
                     .build();
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
             when(assetIndex.queryAssets(isA(QuerySpec.class))).thenReturn(Stream.of(createAsset("id").property("key", "value").build()));
-            when(policyStore.findById("contractPolicyId")).thenReturn(PolicyDefinition.Builder.newInstance().policy(Policy.Builder.newInstance().build()).build());
+            when(policyStore.findById("contractPolicyId")).thenReturn(PolicyDefinition.Builder.newInstance().policy(Policy.Builder.newInstance().build()).participantContextId("participantContextId").build());
             var additionalCriterion = new Criterion(EDC_NAMESPACE + "key", "=", "value");
             var querySpec = QuerySpec.Builder.newInstance().filter(additionalCriterion).build();
 
-            datasetResolver.query(createParticipantAgent(), querySpec, "protocol");
+            datasetResolver.query(createParticipantContext(), createParticipantAgent(), querySpec, "protocol");
 
             verify(assetIndex).queryAssets(and(
                     isA(QuerySpec.class),
@@ -207,12 +214,12 @@ class DatasetResolverImplTest {
             var contractDefinition = contractDefinitionBuilder("definitionId").contractPolicyId("contractPolicyId").build();
             var contractPolicy = Policy.Builder.newInstance().build();
             var assets = range(0, 10).mapToObj(it -> createAsset(String.valueOf(it)).build()).toList();
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
             when(assetIndex.queryAssets(isA(QuerySpec.class))).thenAnswer(i -> assets.stream());
-            when(policyStore.findById("contractPolicyId")).thenReturn(PolicyDefinition.Builder.newInstance().policy(contractPolicy).build());
+            when(policyStore.findById("contractPolicyId")).thenReturn(PolicyDefinition.Builder.newInstance().policy(contractPolicy).participantContextId("participantContextId").build());
             var querySpec = QuerySpec.Builder.newInstance().range(new Range(2, 5)).build();
 
-            var datasets = datasetResolver.query(createParticipantAgent(), querySpec, "protocol");
+            var datasets = datasetResolver.query(createParticipantContext(), createParticipantAgent(), querySpec, "protocol");
 
             assertThat(datasets).hasSize(3).map(getId()).containsExactly("2", "3", "4");
         }
@@ -222,12 +229,12 @@ class DatasetResolverImplTest {
             var contractDefinition = contractDefinitionBuilder("definitionId").contractPolicyId("contractPolicyId").build();
             var contractPolicy = Policy.Builder.newInstance().build();
             var assets = range(0, 10).mapToObj(it -> createAsset(String.valueOf(it)).build()).toList();
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
             when(assetIndex.queryAssets(isA(QuerySpec.class))).thenAnswer(i -> assets.stream());
-            when(policyStore.findById(any())).thenReturn(PolicyDefinition.Builder.newInstance().policy(contractPolicy).build());
+            when(policyStore.findById(any())).thenReturn(PolicyDefinition.Builder.newInstance().policy(contractPolicy).participantContextId("participantContextId").build());
             var querySpec = QuerySpec.Builder.newInstance().range(new Range(7, 15)).build();
 
-            var datasets = datasetResolver.query(createParticipantAgent(), querySpec, "protocol");
+            var datasets = datasetResolver.query(createParticipantContext(), createParticipantAgent(), querySpec, "protocol");
 
             assertThat(datasets).hasSize(3).map(getId()).containsExactly("7", "8", "9");
         }
@@ -237,12 +244,12 @@ class DatasetResolverImplTest {
             var contractDefinitions = range(0, 2).mapToObj(it -> contractDefinitionBuilder(String.valueOf(it)).build()).toList();
             var contractPolicy = Policy.Builder.newInstance().build();
             var assets = range(0, 20).mapToObj(it -> createAsset(String.valueOf(it)).build()).toList();
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(contractDefinitions));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(contractDefinitions));
             when(assetIndex.queryAssets(isA(QuerySpec.class))).thenAnswer(i -> assets.stream());
-            when(policyStore.findById(any())).thenReturn(PolicyDefinition.Builder.newInstance().policy(contractPolicy).build());
+            when(policyStore.findById(any())).thenReturn(PolicyDefinition.Builder.newInstance().policy(contractPolicy).participantContextId("participantContextId").build());
             var querySpec = QuerySpec.Builder.newInstance().range(new Range(6, 14)).build();
 
-            var datasets = datasetResolver.query(createParticipantAgent(), querySpec, "protocol");
+            var datasets = datasetResolver.query(createParticipantContext(), createParticipantAgent(), querySpec, "protocol");
 
             assertThat(datasets).hasSize(8).map(getId()).containsExactly("6", "7", "8", "9", "10", "11", "12", "13");
         }
@@ -252,12 +259,12 @@ class DatasetResolverImplTest {
             var contractDefinitions = range(0, 2).mapToObj(it -> contractDefinitionBuilder(String.valueOf(it)).build()).toList();
             var contractPolicy = Policy.Builder.newInstance().build();
             var assets = range(0, 10).mapToObj(it -> createAsset(String.valueOf(it)).build()).toList();
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(contractDefinitions));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(contractDefinitions));
             when(assetIndex.queryAssets(isA(QuerySpec.class))).thenAnswer(i -> assets.stream());
-            when(policyStore.findById(any())).thenReturn(PolicyDefinition.Builder.newInstance().policy(contractPolicy).build());
+            when(policyStore.findById(any())).thenReturn(PolicyDefinition.Builder.newInstance().policy(contractPolicy).participantContextId("participantContextId").build());
             var querySpec = QuerySpec.Builder.newInstance().range(new Range(6, 8)).build();
 
-            var datasets = datasetResolver.query(createParticipantAgent(), querySpec, "protocol");
+            var datasets = datasetResolver.query(createParticipantContext(), createParticipantAgent(), querySpec, "protocol");
 
             assertThat(datasets).hasSize(2)
                     .allSatisfy(dataset -> assertThat(dataset.getOffers()).hasSize(2))
@@ -274,15 +281,15 @@ class DatasetResolverImplTest {
                             .build())
                     .format(HttpDataAddressSchema.HTTP_DATA_TYPE).build();
 
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
             when(assetIndex.queryAssets(isA(QuerySpec.class))).thenReturn(Stream.of(createAsset("assetId")
                     .property(Asset.PROPERTY_IS_CATALOG, true)
                     .dataAddress(DataAddress.Builder.newInstance().type(HttpDataAddressSchema.HTTP_DATA_TYPE).build())
                     .build()));
-            when(policyStore.findById("contractPolicyId")).thenReturn(PolicyDefinition.Builder.newInstance().policy(contractPolicy).build());
+            when(policyStore.findById("contractPolicyId")).thenReturn(PolicyDefinition.Builder.newInstance().policy(contractPolicy).participantContextId("participantContextId").build());
             when(distributionResolver.getDistributions(any(), isA(Asset.class))).thenReturn(List.of(distribution));
 
-            var datasets = datasetResolver.query(createParticipantAgent(), QuerySpec.none(), "protocol");
+            var datasets = datasetResolver.query(createParticipantContext(), createParticipantAgent(), QuerySpec.none(), "protocol");
 
             assertThat(datasets).isNotNull().hasSize(1).first().satisfies(dataset -> {
                 assertThat(dataset).isInstanceOf(Catalog.class);
@@ -301,11 +308,11 @@ class DatasetResolverImplTest {
             var contractDefinition = contractDefinitionBuilder("definitionId").accessPolicyId("samePolicy").contractPolicyId("samePolicy").build();
             var distribution = Distribution.Builder.newInstance().dataService(dataService).format("format").build();
             var cachedPolicies = new HashMap<>(Map.of("samePolicy", Policy.Builder.newInstance().build()));
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition), cachedPolicies));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition), cachedPolicies));
             when(assetIndex.queryAssets(isA(QuerySpec.class))).thenReturn(Stream.of(createAsset("assetId").property("key", "value").build()));
             when(distributionResolver.getDistributions(any(), isA(Asset.class))).thenReturn(List.of(distribution));
 
-            var datasets = datasetResolver.query(createParticipantAgent(), QuerySpec.none(), "protocol");
+            var datasets = datasetResolver.query(createParticipantContext(), createParticipantAgent(), QuerySpec.none(), "protocol");
 
             assertThat(datasets).hasSize(1);
             verify(policyStore, never()).findById(any());
@@ -318,16 +325,17 @@ class DatasetResolverImplTest {
         void shouldReturnDataset() {
             var policy1 = Policy.Builder.newInstance().inheritsFrom("inherits1").build();
             var policy2 = Policy.Builder.newInstance().inheritsFrom("inherits2").build();
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(List.of(
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(List.of(
                     contractDefinitionBuilder("definition1").contractPolicyId("policy1").build(),
                     contractDefinitionBuilder("definition2").contractPolicyId("policy2").build()
             )));
             when(assetIndex.findById(any())).thenReturn(createAsset("datasetId").build());
-            when(policyStore.findById("policy1")).thenReturn(PolicyDefinition.Builder.newInstance().policy(policy1).build());
-            when(policyStore.findById("policy2")).thenReturn(PolicyDefinition.Builder.newInstance().policy(policy2).build());
+            when(policyStore.findById("policy1")).thenReturn(PolicyDefinition.Builder.newInstance().policy(policy1).participantContextId("participantContextId").build());
+            when(policyStore.findById("policy2")).thenReturn(PolicyDefinition.Builder.newInstance().policy(policy2).participantContextId("participantContextId").build());
             var participantAgent = createParticipantAgent();
+            var participantContext = createParticipantContext();
 
-            var dataset = datasetResolver.getById(participantAgent, "datasetId", "protocol");
+            var dataset = datasetResolver.getById(participantContext, participantAgent, "datasetId", "protocol");
 
             assertThat(dataset).isNotNull();
             assertThat(dataset.getId()).isEqualTo("datasetId");
@@ -341,17 +349,17 @@ class DatasetResolverImplTest {
                         assertThat(policy.getInheritsFrom()).isEqualTo("inherits2");
                     });
             verify(assetIndex).findById("datasetId");
-            verify(definitionResolver).resolveFor(participantAgent);
+            verify(definitionResolver).resolveFor(participantContext, participantAgent);
         }
 
         @Test
         void shouldReturnNull_whenAssetNotFound() {
             var contractDefinition = contractDefinitionBuilder("definition1").contractPolicyId("policy1").build();
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
             when(assetIndex.findById(any())).thenReturn(null);
             var participantAgent = createParticipantAgent();
 
-            var dataset = datasetResolver.getById(participantAgent, "datasetId", "protocol");
+            var dataset = datasetResolver.getById(createParticipantContext(), participantAgent, "datasetId", "protocol");
 
             assertThat(dataset).isNull();
         }
@@ -360,9 +368,9 @@ class DatasetResolverImplTest {
         void shouldReturnNull_whenNoValidContractDefinition() {
             var participantAgent = createParticipantAgent();
 
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(emptyList()));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(emptyList()));
 
-            var dataset = datasetResolver.getById(participantAgent, "datasetId", "protocol");
+            var dataset = datasetResolver.getById(createParticipantContext(), participantAgent, "datasetId", "protocol");
 
             assertThat(dataset).isNull();
             verify(assetIndex, never()).findById(any());
@@ -372,6 +380,7 @@ class DatasetResolverImplTest {
         void shouldReturnNull_whenNoValidContractDefinitionForAsset() {
             var assetId = "assetId";
             var participantAgent = createParticipantAgent();
+            var participantContext = createParticipantContext();
 
             var contractDefinition = contractDefinitionBuilder("definition")
                     .assetsSelectorCriterion(Criterion.Builder.newInstance()
@@ -379,11 +388,12 @@ class DatasetResolverImplTest {
                             .operator("=")
                             .operandLeft("a-different-asset")
                             .build())
+                    .participantContextId("participantContextId")
                     .build();
-            when(definitionResolver.resolveFor(any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
+            when(definitionResolver.resolveFor(any(), any())).thenReturn(new ResolvedContractDefinitions(List.of(contractDefinition)));
             when(assetIndex.findById(any())).thenReturn(createAsset(assetId).build());
 
-            var dataset = datasetResolver.getById(participantAgent, assetId, "protocol");
+            var dataset = datasetResolver.getById(participantContext, participantAgent, assetId, "protocol");
 
             assertThat(dataset).isNull();
         }

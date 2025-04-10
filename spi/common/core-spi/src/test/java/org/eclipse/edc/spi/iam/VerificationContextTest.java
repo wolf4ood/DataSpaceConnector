@@ -15,6 +15,7 @@
 package org.eclipse.edc.spi.iam;
 
 import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,9 +32,18 @@ public class VerificationContextTest {
     }
 
     @Test
+    void assertMandatoryParticipantContext() {
+        assertThatNullPointerException().isThrownBy(() -> VerificationContext.Builder.newInstance()
+                        .policy(Policy.Builder.newInstance().build())
+                        .build())
+                .withMessageContaining("Participant context");
+    }
+
+    @Test
     void buildVerificationContext() {
         assertThatNoException().isThrownBy(() -> VerificationContext.Builder.newInstance()
                 .policy(Policy.Builder.newInstance().build())
+                .participantContext(new ParticipantContext("test", "test"))
                 .build());
     }
 
@@ -44,6 +54,7 @@ public class VerificationContextTest {
 
         var context = VerificationContext.Builder.newInstance()
                 .policy(Policy.Builder.newInstance().build())
+                .participantContext(new ParticipantContext("test", "test"))
                 .data(TestData.class, data)
                 .build();
 

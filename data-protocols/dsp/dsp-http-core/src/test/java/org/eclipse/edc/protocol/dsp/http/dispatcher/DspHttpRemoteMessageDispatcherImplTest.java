@@ -19,6 +19,7 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
 import org.eclipse.edc.connector.controlplane.catalog.spi.CatalogRequestMessage;
+import org.eclipse.edc.connector.controlplane.participants.spi.store.ParticipantContextStore;
 import org.eclipse.edc.http.spi.EdcHttpClient;
 import org.eclipse.edc.policy.context.request.spi.RequestPolicyContext;
 import org.eclipse.edc.policy.engine.spi.PolicyContext;
@@ -28,6 +29,7 @@ import org.eclipse.edc.protocol.dsp.http.spi.dispatcher.DspHttpRemoteMessageDisp
 import org.eclipse.edc.protocol.dsp.http.spi.dispatcher.DspHttpRequestFactory;
 import org.eclipse.edc.protocol.dsp.http.spi.dispatcher.response.DspHttpResponseBodyExtractor;
 import org.eclipse.edc.spi.EdcException;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.AudienceResolver;
 import org.eclipse.edc.spi.iam.IdentityService;
 import org.eclipse.edc.spi.iam.RequestContext;
@@ -76,10 +78,11 @@ class DspHttpRemoteMessageDispatcherImplTest {
     private final TokenDecorator tokenDecorator = mock();
     private final DspHttpRequestFactory<TestMessage> requestFactory = mock();
     private final AudienceResolver audienceResolver = mock();
+    private final ParticipantContextStore participantContextStore = mock();
     private final Duration timeout = Duration.of(5, SECONDS);
 
     private final DspHttpRemoteMessageDispatcher dispatcher =
-            new DspHttpRemoteMessageDispatcherImpl(httpClient, identityService, tokenDecorator, policyEngine, audienceResolver);
+            new DspHttpRemoteMessageDispatcherImpl(httpClient, identityService, tokenDecorator, policyEngine, audienceResolver, participantContextStore);
 
     private static okhttp3.Response dummyResponse(int code) {
         return dummyResponseBuilder(code)
@@ -99,6 +102,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
     @BeforeEach
     void setUp() {
         when(tokenDecorator.decorate(any())).thenAnswer(a -> a.getArgument(0));
+        when(participantContextStore.findById(any())).thenReturn(new ParticipantContext("participantContextId", "participantContextId"));
     }
 
     @Test
@@ -110,7 +114,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
         when(tokenDecorator.decorate(any())).thenAnswer(a -> a.getArgument(0, TokenParameters.Builder.class).claims(additional));
         when(requestFactory.createRequest(any())).thenReturn(new Request.Builder().url("http://url").build());
         when(httpClient.executeAsync(any(), isA(List.class))).thenReturn(completedFuture(dummyResponse(200)));
-        when(identityService.obtainClientCredentials(any()))
+        when(identityService.obtainClientCredentials(any(), any()))
                 .thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token(authToken).build()));
 
         dispatcher.registerPolicyScope(TestMessage.class, (m) -> policy, TestPolicyContext::new);
@@ -125,7 +129,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
         assertThat(result).succeedsWithin(timeout);
 
         var captor = ArgumentCaptor.forClass(TokenParameters.class);
-        verify(identityService).obtainClientCredentials(captor.capture());
+        verify(identityService).obtainClientCredentials(any(), captor.capture());
         verify(httpClient).executeAsync(argThat(r -> authToken.equals(r.headers().get("Authorization"))), isA(List.class));
         verify(requestFactory).createRequest(message);
         assertThat(captor.getValue()).satisfies(tr -> {
@@ -145,7 +149,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
         when(tokenDecorator.decorate(any())).thenAnswer(a -> a.getArgument(0, TokenParameters.Builder.class).claims(additional).claims(SCOPE_CLAIM, "test-scope"));
         when(requestFactory.createRequest(any())).thenReturn(new Request.Builder().url("http://url").build());
         when(httpClient.executeAsync(any(), isA(List.class))).thenReturn(completedFuture(dummyResponse(200)));
-        when(identityService.obtainClientCredentials(any()))
+        when(identityService.obtainClientCredentials(any(), any()))
                 .thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token(authToken).build()));
 
         dispatcher.registerPolicyScope(TestMessage.class, (m) -> policy, TestPolicyContext::new);
@@ -164,7 +168,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
         assertThat(result).succeedsWithin(timeout);
 
         var captor = ArgumentCaptor.forClass(TokenParameters.class);
-        verify(identityService).obtainClientCredentials(captor.capture());
+        verify(identityService).obtainClientCredentials(any(), captor.capture());
         verify(httpClient).executeAsync(argThat(r -> authToken.equals(r.headers().get("Authorization"))), isA(List.class));
         verify(requestFactory).createRequest(message);
         assertThat(captor.getValue()).satisfies(tr -> {
@@ -184,7 +188,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
         when(tokenDecorator.decorate(any())).thenAnswer(a -> a.getArgument(0, TokenParameters.Builder.class).claims(additional));
         when(requestFactory.createRequest(any())).thenReturn(new Request.Builder().url("http://url").build());
         when(httpClient.executeAsync(any(), isA(List.class))).thenReturn(completedFuture(dummyResponse(200)));
-        when(identityService.obtainClientCredentials(any()))
+        when(identityService.obtainClientCredentials(any(), any()))
                 .thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token(authToken).build()));
 
         dispatcher.registerPolicyScope(TestMessage.class, (m) -> policy, TestPolicyContext::new);
@@ -203,7 +207,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
         assertThat(result).succeedsWithin(timeout);
 
         var captor = ArgumentCaptor.forClass(TokenParameters.class);
-        verify(identityService).obtainClientCredentials(captor.capture());
+        verify(identityService).obtainClientCredentials(any(), captor.capture());
         verify(httpClient).executeAsync(argThat(r -> authToken.equals(r.headers().get("Authorization"))), isA(List.class));
         verify(requestFactory).createRequest(message);
         verify(policyEngine).evaluate(any(), AdditionalMatchers.and(isA(RequestPolicyContext.class), argThat(ctx -> {
@@ -231,7 +235,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
         dispatcher.registerMessage(TestMessage.class, requestFactory, mock());
         when(audienceResolver.resolve(any())).thenReturn(Result.success(AUDIENCE_VALUE));
         when(requestFactory.createRequest(any())).thenReturn(new Request.Builder().url("http://url").build());
-        when(identityService.obtainClientCredentials(any())).thenReturn(Result.failure("error"));
+        when(identityService.obtainClientCredentials(any(), any())).thenReturn(Result.failure("error"));
 
         assertThat(dispatcher.dispatch(String.class, new TestMessage())).failsWithin(timeout)
                 .withThrowableThat().withCauseInstanceOf(EdcException.class).withMessageContaining("credentials");
@@ -256,7 +260,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
         when(audienceResolver.resolve(any())).thenReturn(Result.success(AUDIENCE_VALUE));
         when(requestFactory.createRequest(any())).thenReturn(new Request.Builder().url("http://url").build());
         when(httpClient.executeAsync(any(), isA(List.class))).thenReturn(completedFuture(dummyResponse(200)));
-        when(identityService.obtainClientCredentials(any()))
+        when(identityService.obtainClientCredentials(any(), any()))
                 .thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token("any").build()));
         dispatcher.registerMessage(TestMessage.class, requestFactory, mock());
 
@@ -276,7 +280,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
         when(tokenDecorator.decorate(any())).thenAnswer(a -> a.getArgument(0, TokenParameters.Builder.class).claims(additional));
         when(rqFactory.createRequest(any())).thenReturn(new Request.Builder().url("http://url").build());
         when(httpClient.executeAsync(any(), isA(List.class))).thenReturn(completedFuture(dummyResponse(200)));
-        when(identityService.obtainClientCredentials(any()))
+        when(identityService.obtainClientCredentials(any(), any()))
                 .thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token(authToken).build()));
 
         dispatcher.registerPolicyScope(CatalogRequestMessage.class, (m) -> policy, TestPolicyContext::new);
@@ -295,7 +299,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
         assertThat(result).succeedsWithin(timeout);
 
         var captor = ArgumentCaptor.forClass(TokenParameters.class);
-        verify(identityService).obtainClientCredentials(captor.capture());
+        verify(identityService).obtainClientCredentials(any(), captor.capture());
         verify(httpClient).executeAsync(argThat(r -> authToken.equals(r.headers().get("Authorization"))), isA(List.class));
         verify(rqFactory).createRequest(message);
         verify(policyEngine).evaluate(any(), and(isA(RequestPolicyContext.class), argThat(ctx -> {
@@ -315,7 +319,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
         when(audienceResolver.resolve(any())).thenReturn(Result.success(AUDIENCE_VALUE));
         when(requestFactory.createRequest(any())).thenReturn(new Request.Builder().url("http://url").build());
         when(httpClient.executeAsync(any(), isA(List.class))).thenReturn(completedFuture(dummyResponse(200)));
-        when(identityService.obtainClientCredentials(any()))
+        when(identityService.obtainClientCredentials(any(), any()))
                 .thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token("any").build()));
         when(policyEngine.evaluate(eq(policy), isA(RequestPolicyContext.class))).thenAnswer((a -> {
             a.getArgument(1, RequestPolicyContext.class).requestScopeBuilder().scope("test-scope");
@@ -328,7 +332,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
         var result = dispatcher.dispatch(String.class, new TestMessage());
 
         var captor = ArgumentCaptor.forClass(TokenParameters.class);
-        verify(identityService).obtainClientCredentials(captor.capture());
+        verify(identityService).obtainClientCredentials(any(), captor.capture());
         assertThat(result).succeedsWithin(timeout);
         verify(policyEngine).evaluate(eq(policy), and(isA(PolicyContext.class),
                 and(isA(RequestPolicyContext.class), argThat(c -> c.requestScopeBuilder() != null))));
@@ -350,6 +354,11 @@ class DspHttpRemoteMessageDispatcherImplTest {
 
         @Override
         public String getCounterPartyId() {
+            return null;
+        }
+
+        @Override
+        public String getParticipantContextId() {
             return null;
         }
     }
@@ -432,7 +441,7 @@ class DspHttpRemoteMessageDispatcherImplTest {
             when(audienceResolver.resolve(any())).thenReturn(Result.success(AUDIENCE_VALUE));
             when(requestFactory.createRequest(any())).thenReturn(new Request.Builder().url("http://url").build());
             when(httpClient.executeAsync(any(), isA(List.class))).thenReturn(completedFuture(response));
-            when(identityService.obtainClientCredentials(any()))
+            when(identityService.obtainClientCredentials(any(), any()))
                     .thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token("token").build()));
             dispatcher.registerMessage(TestMessage.class, requestFactory, bodyExtractor);
         }

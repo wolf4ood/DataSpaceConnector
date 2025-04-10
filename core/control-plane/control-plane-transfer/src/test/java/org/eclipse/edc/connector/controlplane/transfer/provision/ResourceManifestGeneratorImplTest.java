@@ -52,7 +52,9 @@ class ResourceManifestGeneratorImplTest {
 
     @Test
     void shouldGenerateResourceManifestForConsumerManagedTransferProcess() {
-        var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination()).build();
+        var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination())
+                .participantContextId("participantContextId")
+                .build();
         var resourceDefinition = TestResourceDefinition.Builder.newInstance().id(UUID.randomUUID().toString()).build();
         when(consumerGenerator.canGenerate(any(), any())).thenReturn(true);
         when(consumerGenerator.generate(any(), any())).thenReturn(resourceDefinition);
@@ -67,7 +69,9 @@ class ResourceManifestGeneratorImplTest {
 
     @Test
     void shouldGenerateEmptyResourceManifestForNotGeneratedFilter() {
-        var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination()).build();
+        var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination())
+                .participantContextId("participantContextId")
+                .build();
         when(consumerGenerator.canGenerate(any(), any())).thenReturn(false);
         when(policyEngine.evaluate(any(), isA(PolicyContext.class))).thenReturn(Result.success());
 
@@ -79,7 +83,9 @@ class ResourceManifestGeneratorImplTest {
 
     @Test
     void shouldReturnFailedResultForConsumerWhenPolicyEvaluationFailed() {
-        var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination()).build();
+        var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination())
+                .participantContextId("participantContextId")
+                .build();
         var resourceDefinition = TestResourceDefinition.Builder.newInstance().id(UUID.randomUUID().toString()).build();
         when(consumerGenerator.generate(any(), any())).thenReturn(resourceDefinition);
         when(policyEngine.evaluate(any(), isA(PolicyContext.class))).thenReturn(Result.failure("error"));
@@ -91,7 +97,9 @@ class ResourceManifestGeneratorImplTest {
 
     @Test
     void shouldGenerateResourceManifestForProviderTransferProcess() {
-        var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination()).build();
+        var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination())
+                .participantContextId("participantContextId")
+                .build();
         var resourceDefinition = TestResourceDefinition.Builder.newInstance().id(UUID.randomUUID().toString()).build();
         when(providerGenerator.canGenerate(any(), any(), any())).thenReturn(true);
         when(providerGenerator.generate(any(), any(), any())).thenReturn(resourceDefinition);
@@ -104,7 +112,9 @@ class ResourceManifestGeneratorImplTest {
 
     @Test
     void shouldGenerateEmptyResourceManifestForProviderTransferProcess() {
-        var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination()).build();
+        var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination())
+                .participantContextId("participantContextId")
+                .build();
         when(providerGenerator.canGenerate(any(), any(), any())).thenReturn(false);
 
         var resourceManifest = generator.generateProviderResourceManifest(transferProcess, dataAddress, policy);

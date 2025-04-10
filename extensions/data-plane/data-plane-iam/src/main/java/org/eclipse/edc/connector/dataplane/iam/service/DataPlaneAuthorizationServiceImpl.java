@@ -14,6 +14,7 @@
 
 package org.eclipse.edc.connector.dataplane.iam.service;
 
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.dataplane.spi.Endpoint;
 import org.eclipse.edc.connector.dataplane.spi.iam.DataPlaneAccessControlService;
 import org.eclipse.edc.connector.dataplane.spi.iam.DataPlaneAccessTokenService;
@@ -31,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.eclipse.edc.spi.constants.CoreConstants.DEFAULT_DATASPACE_CONTEXT;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
 import static org.eclipse.edc.spi.result.Result.success;
 
@@ -43,18 +45,18 @@ public class DataPlaneAuthorizationServiceImpl implements DataPlaneAuthorization
     private final DataPlaneAccessTokenService accessTokenService;
     private final PublicEndpointGeneratorService endpointGenerator;
     private final DataPlaneAccessControlService accessControlService;
-    private final String ownParticipantId;
+    private final ParticipantContextSupplier participantContextSupplier;
     private final Clock clock;
 
     public DataPlaneAuthorizationServiceImpl(DataPlaneAccessTokenService accessTokenService,
                                              PublicEndpointGeneratorService endpointGenerator,
                                              DataPlaneAccessControlService accessControlService,
-                                             String ownParticipantId,
+                                             ParticipantContextSupplier participantContextSupplier,
                                              Clock clock) {
         this.accessTokenService = accessTokenService;
         this.endpointGenerator = endpointGenerator;
         this.accessControlService = accessControlService;
-        this.ownParticipantId = ownParticipantId;
+        this.participantContextSupplier = participantContextSupplier;
         this.clock = clock;
     }
 
@@ -135,6 +137,8 @@ public class DataPlaneAuthorizationServiceImpl implements DataPlaneAuthorization
     }
 
     private TokenParameters createTokenParams(DataFlowStartMessage message) {
+        // TODO change signaling spec
+        var ownParticipantId = participantContextSupplier.get().getIdentity(DEFAULT_DATASPACE_CONTEXT);
         return TokenParameters.Builder.newInstance()
                 .claims(JwtRegisteredClaimNames.JWT_ID, UUID.randomUUID().toString())
                 .claims(JwtRegisteredClaimNames.AUDIENCE, message.getParticipantId())

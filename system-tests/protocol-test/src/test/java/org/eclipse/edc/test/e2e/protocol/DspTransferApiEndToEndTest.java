@@ -46,6 +46,7 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPA
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CONSUMER_PID_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_PROPERTY_CONTRACT_AGREEMENT_ID_TERM;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
+import static org.eclipse.edc.test.e2e.protocol.DspRuntime.PARTICIPANT_ID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
@@ -89,6 +90,7 @@ public class DspTransferApiEndToEndTest {
                 .contractId(contractId)
                 .dataDestination(DataAddress.Builder.newInstance().type("any").build())
                 .state(REQUESTED.code())
+                .participantContextId(PARTICIPANT_ID)
                 .build();
         runtime.getService(TransferProcessStore.class).save(transfer);
         runtime.getService(ContractNegotiationStore.class).save(createNegotiationWithAgreement(contractId));

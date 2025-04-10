@@ -16,6 +16,7 @@ package org.eclipse.edc.protocol.dsp.catalog.http.api.v2025;
 
 import org.eclipse.edc.connector.controlplane.catalog.spi.DataService;
 import org.eclipse.edc.connector.controlplane.catalog.spi.DataServiceRegistry;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.catalog.CatalogProtocolService;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolVersionRegistry;
 import org.eclipse.edc.jsonld.spi.JsonLd;
@@ -82,6 +83,9 @@ public class DspCatalogApi2025Extension implements ServiceExtension {
     @Inject
     private ProtocolWebhookRegistry protocolWebhookRegistry;
 
+    @Inject
+    private ParticipantContextSupplier participantContextSupplier;
+
     @Override
     public String name() {
         return NAME;
@@ -91,7 +95,7 @@ public class DspCatalogApi2025Extension implements ServiceExtension {
     public void initialize(ServiceExtensionContext context) {
         registerValidators();
 
-        webService.registerResource(ApiContext.PROTOCOL, new DspCatalogApiController20251(service, dspRequestHandler, continuationTokenManager(monitor)));
+        webService.registerResource(ApiContext.PROTOCOL, new DspCatalogApiController20251(service, dspRequestHandler, continuationTokenManager(monitor), participantContextSupplier));
         webService.registerDynamicResource(ApiContext.PROTOCOL, DspCatalogApiController20251.class, new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_2025_1));
 
         versionRegistry.register(V_2025_1);

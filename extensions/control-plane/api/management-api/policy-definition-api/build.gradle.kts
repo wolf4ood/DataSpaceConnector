@@ -24,6 +24,7 @@ dependencies {
     api(project(":spi:control-plane:policy-spi"))
     api(project(":spi:common:transaction-spi"))
     api(project(":spi:common:policy-model"))
+    api(project(":spi:common:participant-context-spi"))
 
     implementation(project(":core:common:lib:api-lib"))
     implementation(project(":core:common:lib:util-lib"))

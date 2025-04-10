@@ -49,6 +49,8 @@ public class BaseSqlDialectStatements implements SqlPolicyStoreStatements {
                 .column(getTypeColumn())
                 .column(getCreatedAtColumn())
                 .jsonColumn(getPrivatePropertiesColumn())
+                .column(getParticipantContextIdColumn())
+                .column(getDataspaceContextColumn())
                 .insertInto(getPolicyTable());
     }
 

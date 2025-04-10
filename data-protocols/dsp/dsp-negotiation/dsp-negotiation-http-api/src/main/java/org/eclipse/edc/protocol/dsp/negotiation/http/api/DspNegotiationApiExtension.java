@@ -14,6 +14,7 @@
 
 package org.eclipse.edc.protocol.dsp.negotiation.http.api;
 
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.contractnegotiation.ContractNegotiationProtocolService;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolVersionRegistry;
 import org.eclipse.edc.jsonld.spi.JsonLd;
@@ -76,6 +77,9 @@ public class DspNegotiationApiExtension implements ServiceExtension {
     @Inject
     private TypeManager typeManager;
 
+    @Inject
+    private ParticipantContextSupplier participantContextSupplier;
+
     @Override
     public String name() {
         return NAME;
@@ -87,8 +91,8 @@ public class DspNegotiationApiExtension implements ServiceExtension {
         registerValidators(DSP_NAMESPACE_V_08);
         registerValidators(DSP_NAMESPACE_V_2024_1);
 
-        webService.registerResource(ApiContext.PROTOCOL, new DspNegotiationApiController(protocolService, dspRequestHandler));
-        webService.registerResource(ApiContext.PROTOCOL, new DspNegotiationApiController20241(protocolService, dspRequestHandler));
+        webService.registerResource(ApiContext.PROTOCOL, new DspNegotiationApiController(protocolService, dspRequestHandler, participantContextSupplier));
+        webService.registerResource(ApiContext.PROTOCOL, new DspNegotiationApiController20241(protocolService, dspRequestHandler, participantContextSupplier));
         webService.registerDynamicResource(ApiContext.PROTOCOL, DspNegotiationApiController.class, new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_08));
         webService.registerDynamicResource(ApiContext.PROTOCOL, DspNegotiationApiController20241.class, new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_2024_1));
 

@@ -39,7 +39,7 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> extends Mutabl
 
     protected StatefulEntity() {
     }
-    
+
     public int getState() {
         return state;
     }
@@ -61,12 +61,12 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> extends Mutabl
         return errorDetail;
     }
 
-    public boolean isPending() {
-        return pending;
-    }
-
     public void setErrorDetail(String errorDetail) {
         this.errorDetail = errorDetail;
+    }
+
+    public boolean isPending() {
+        return pending;
     }
 
     public void setPending(boolean pending) {

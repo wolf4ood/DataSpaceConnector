@@ -45,6 +45,7 @@ import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.VOCAB;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspCatalogPropertyAndTypeNames.DSPACE_PROPERTY_FILTER_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspCatalogPropertyAndTypeNames.DSPACE_TYPE_CATALOG_REQUEST_MESSAGE_TERM;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
+import static org.eclipse.edc.test.e2e.protocol.DspRuntime.PARTICIPANT_ID;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -61,7 +62,7 @@ public class DspCatalogApiEndToEndTest {
             ":data-protocols:dsp:dsp-catalog:dsp-catalog-http-api",
             ":data-protocols:dsp:dsp-catalog:dsp-catalog-transform"
     ));
-    
+
     @ParameterizedTest
     @ArgumentsSource(ProtocolVersionProvider.class)
     void shouldExposeVersion(String basePath, JsonLdNamespace namespace) {
@@ -90,12 +91,12 @@ public class DspCatalogApiEndToEndTest {
         var assetIndex = runtime.getService(AssetIndex.class);
 
         range(0, 8)
-                .mapToObj(i -> Asset.Builder.newInstance().id(i + "").dataAddress(DataAddress.Builder.newInstance().type("any").build()).build())
+                .mapToObj(i -> Asset.Builder.newInstance().id(i + "").participantContextId(PARTICIPANT_ID).dataAddress(DataAddress.Builder.newInstance().type("any").build()).build())
                 .forEach(assetIndex::create);
         var policyDefinitionStore = runtime.getService(PolicyDefinitionStore.class);
         policyDefinitionStore.create(PolicyDefinition.Builder.newInstance().policy(Policy.Builder.newInstance().build()).build())
                 .onSuccess(policy -> {
-                    var contractDefinition = ContractDefinition.Builder.newInstance().accessPolicyId(policy.getId()).contractPolicyId(policy.getId()).build();
+                    var contractDefinition = ContractDefinition.Builder.newInstance().accessPolicyId(policy.getId()).participantContextId(PARTICIPANT_ID).contractPolicyId(policy.getId()).build();
                     runtime.getService(ContractDefinitionStore.class).save(contractDefinition);
                 });
 

@@ -18,6 +18,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.transferprocess.TransferProcessProtocolService;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
 import org.eclipse.edc.protocol.dsp.spi.version.DspVersions;
@@ -36,7 +37,7 @@ import static org.eclipse.edc.protocol.dsp.transferprocess.http.api.TransferProc
 @Path(DspVersions.V_2025_1_PATH + BASE_PATH)
 public class DspTransferProcessApiController20251 extends BaseDspTransferProcessApiController {
 
-    public DspTransferProcessApiController20251(TransferProcessProtocolService protocolService, DspRequestHandler dspRequestHandler) {
-        super(protocolService, dspRequestHandler, DATASPACE_PROTOCOL_HTTP_V_2025_1, DSP_NAMESPACE_V_2025_1);
+    public DspTransferProcessApiController20251(TransferProcessProtocolService protocolService, DspRequestHandler dspRequestHandler, ParticipantContextSupplier participantContextSupplier) {
+        super(protocolService, dspRequestHandler, DATASPACE_PROTOCOL_HTTP_V_2025_1, DSP_NAMESPACE_V_2025_1, participantContextSupplier);
     }
 }

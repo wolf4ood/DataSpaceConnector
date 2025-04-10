@@ -49,7 +49,9 @@ class DataFlowManagerImplTest {
             var dataAddress = DataAddress.Builder.newInstance().type("test-type").build();
             var transferProcess = TransferProcess.Builder.newInstance()
                     .dataDestination(DataAddress.Builder.newInstance().type("test-dest-type").build())
-                    .contentDataAddress(dataAddress).build();
+                    .contentDataAddress(dataAddress)
+                    .participantContextId("participantContextId")
+                    .build();
 
             when(controller.canHandle(any())).thenReturn(true);
             when(controller.start(any(), any())).thenReturn(StatusResult.success(DataFlowResponse.Builder.newInstance().build()));
@@ -66,7 +68,9 @@ class DataFlowManagerImplTest {
             var dataDestination = DataAddress.Builder.newInstance().type("test-dest-type").build();
             var dataAddress = DataAddress.Builder.newInstance().type("test-type").build();
             var policy = Policy.Builder.newInstance().build();
-            var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination).contentDataAddress(dataAddress).build();
+            var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination).contentDataAddress(dataAddress)
+                    .participantContextId("participantContextId")
+                    .build();
 
             when(controller.canHandle(any())).thenReturn(false);
             manager.register(controller);
@@ -83,7 +87,7 @@ class DataFlowManagerImplTest {
             var dataDestination = DataAddress.Builder.newInstance().type("test-dest-type").build();
             var dataAddress = DataAddress.Builder.newInstance().type("test-type").build();
             var policy = Policy.Builder.newInstance().build();
-            var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination).contentDataAddress(dataAddress).build();
+            var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination).contentDataAddress(dataAddress).participantContextId("participantContextId").build();
 
             var errorMsg = "Test Error Message";
             when(controller.canHandle(any())).thenReturn(true);
@@ -104,7 +108,9 @@ class DataFlowManagerImplTest {
             manager.register(1, lowPriority);
             manager.register(2, highPriority);
 
-            manager.start(TransferProcess.Builder.newInstance().build(), Policy.Builder.newInstance().build());
+            manager.start(TransferProcess.Builder.newInstance()
+                    .participantContextId("participantContextId")
+                    .build(), Policy.Builder.newInstance().build());
 
             verify(highPriority).start(any(), any());
             verifyNoInteractions(lowPriority);
@@ -125,7 +131,9 @@ class DataFlowManagerImplTest {
             var controller = mock(DataFlowController.class);
             var dataDestination = DataAddress.Builder.newInstance().type("test-dest-type").build();
             var dataAddress = DataAddress.Builder.newInstance().type("test-type").build();
-            var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination).contentDataAddress(dataAddress).build();
+            var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination).contentDataAddress(dataAddress)
+                    .participantContextId("participantContextId")
+                    .build();
             var policy = Policy.Builder.newInstance().build();
 
             when(controller.canHandle(any())).thenReturn(true);
@@ -146,7 +154,9 @@ class DataFlowManagerImplTest {
             var controller = mock(DataFlowController.class);
             var dataDestination = DataAddress.Builder.newInstance().type("test-dest-type").build();
             var dataAddress = DataAddress.Builder.newInstance().type("test-type").build();
-            var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination).contentDataAddress(dataAddress).build();
+            var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination).contentDataAddress(dataAddress)
+                    .participantContextId("participantContextId")
+                    .build();
 
             when(controller.canHandle(any())).thenReturn(true);
             when(controller.suspend(any())).thenReturn(StatusResult.success());
@@ -166,7 +176,9 @@ class DataFlowManagerImplTest {
             var controller = mock(DataFlowController.class);
             var dataDestination = DataAddress.Builder.newInstance().type("test-dest-type").build();
             var dataAddress = DataAddress.Builder.newInstance().type("test-type").build();
-            var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination).contentDataAddress(dataAddress).build();
+            var transferProcess = TransferProcess.Builder.newInstance().dataDestination(dataDestination).contentDataAddress(dataAddress)
+                    .participantContextId("participantContextId")
+                    .build();
 
             when(controller.canHandle(any())).thenReturn(true);
             when(controller.terminate(any())).thenReturn(StatusResult.success());
@@ -189,7 +201,7 @@ class DataFlowManagerImplTest {
             when(controllerTwo.transferTypesFor(any())).thenReturn(Set.of("Type2", "Type3"));
             manager.register(controllerOne);
             manager.register(controllerTwo);
-            var asset = Asset.Builder.newInstance().build();
+            var asset = Asset.Builder.newInstance().participantContextId("participantContextId").build();
 
 
             var result = manager.transferTypesFor(asset);

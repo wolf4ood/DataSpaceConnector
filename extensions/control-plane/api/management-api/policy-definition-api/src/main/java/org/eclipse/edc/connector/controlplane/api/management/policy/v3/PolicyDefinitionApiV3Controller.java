@@ -25,6 +25,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import org.eclipse.edc.connector.controlplane.api.management.policy.BasePolicyDefinitionApiController;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.policydefinition.PolicyDefinitionService;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
@@ -36,8 +37,9 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 @Produces(APPLICATION_JSON)
 @Path("/v3/policydefinitions")
 public class PolicyDefinitionApiV3Controller extends BasePolicyDefinitionApiController implements PolicyDefinitionApiV3 {
-    public PolicyDefinitionApiV3Controller(Monitor monitor, TypeTransformerRegistry transformerRegistry, PolicyDefinitionService service, JsonObjectValidatorRegistry validatorRegistry) {
-        super(monitor, transformerRegistry, service, validatorRegistry);
+    public PolicyDefinitionApiV3Controller(Monitor monitor, TypeTransformerRegistry transformerRegistry, PolicyDefinitionService service,
+                                           JsonObjectValidatorRegistry validatorRegistry, ParticipantContextSupplier participantContextSupplier) {
+        super(monitor, transformerRegistry, service, validatorRegistry, participantContextSupplier);
     }
 
     @POST

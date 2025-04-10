@@ -29,6 +29,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class InMemoryDataAddressResolverTest {
     private InMemoryAssetIndex resolver;
 
+    private static Asset.Builder createAssetBuilder(String name, String id) {
+        return Asset.Builder.newInstance().id(id).name(name).version("1").contentType("type");
+    }
+
     @BeforeEach
     void setUp() {
         var registry = CriterionOperatorRegistryImpl.ofDefaults();
@@ -40,7 +44,7 @@ class InMemoryDataAddressResolverTest {
     void resolveForAsset() {
         var id = UUID.randomUUID().toString();
         var address = createDataAddress();
-        var testAsset = createAssetBuilder("foobar", id).dataAddress(address).build();
+        var testAsset = createAssetBuilder("foobar", id).dataAddress(address).participantContextId("participantContextId").build();
         resolver.create(testAsset);
 
         assertThat(resolver.resolveForAsset(testAsset.getId())).isEqualTo(address);
@@ -50,7 +54,7 @@ class InMemoryDataAddressResolverTest {
     void resolveForAsset_assetNull_raisesException() {
         var id = UUID.randomUUID().toString();
         var address = createDataAddress();
-        var testAsset = createAssetBuilder("foobar", id).dataAddress(address).build();
+        var testAsset = createAssetBuilder("foobar", id).dataAddress(address).participantContextId("participantContextId").build();
         resolver.create(testAsset);
 
         assertThatThrownBy(() -> resolver.resolveForAsset(null)).isInstanceOf(NullPointerException.class);
@@ -59,15 +63,13 @@ class InMemoryDataAddressResolverTest {
     @Test
     void resolveForAsset_whenAssetDeleted_raisesException() {
         var address = createDataAddress();
-        var testAsset = createAssetBuilder("foobar", UUID.randomUUID().toString()).dataAddress(address).build();
+        var testAsset = createAssetBuilder("foobar", UUID.randomUUID().toString()).dataAddress(address)
+                .participantContextId("participantContextId")
+                .build();
         resolver.create(testAsset);
         resolver.deleteById(testAsset.getId());
 
         assertThat(resolver.resolveForAsset(testAsset.getId())).isNull();
-    }
-
-    private static Asset.Builder createAssetBuilder(String name, String id) {
-        return Asset.Builder.newInstance().id(id).name(name).version("1").contentType("type");
     }
 
     private DataAddress createDataAddress() {

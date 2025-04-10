@@ -44,6 +44,7 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTyp
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CALLBACK_ADDRESS_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspPropertyAndTypeNames.DSPACE_PROPERTY_CONSUMER_PID_TERM;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
+import static org.eclipse.edc.test.e2e.protocol.DspRuntime.PARTICIPANT_ID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
@@ -66,6 +67,7 @@ public class DspNegotiationApiEndToEndTest {
         var negotiation = ContractNegotiation.Builder.newInstance()
                 .id(id).counterPartyId("any").counterPartyAddress("any").protocol("any").state(REQUESTED.code())
                 .correlationId(UUID.randomUUID().toString())
+                .participantContextId(PARTICIPANT_ID)
                 .contractOffer(ContractOffer.Builder.newInstance()
                         .id(UUID.randomUUID().toString()).assetId(UUID.randomUUID().toString())
                         .policy(Policy.Builder.newInstance().build())

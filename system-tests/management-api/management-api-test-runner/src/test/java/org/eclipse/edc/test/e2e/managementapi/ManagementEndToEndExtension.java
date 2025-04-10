@@ -31,11 +31,33 @@ import static org.eclipse.edc.util.io.Ports.getFreePort;
 
 public abstract class ManagementEndToEndExtension extends RuntimePerClassExtension {
 
+    public static final String PARTICIPANT_CONTEXT_ID = "participantContextId";
     private final ManagementEndToEndTestContext context;
 
     protected ManagementEndToEndExtension(ManagementEndToEndTestContext context) {
         super(context.runtime());
         this.context = context;
+    }
+
+    static Config runtimeConfig() {
+        var managementPort = getFreePort();
+        var protocolPort = getFreePort();
+
+        var settings = new HashMap<String, String>() {
+            {
+                put("edc.participant.id", PARTICIPANT_CONTEXT_ID);
+                put("web.http.path", "/");
+                put("web.http.port", String.valueOf(getFreePort()));
+                put("web.http.protocol.path", "/protocol");
+                put("web.http.protocol.port", String.valueOf(protocolPort));
+                put("web.http.control.port", String.valueOf(getFreePort()));
+                put("edc.dsp.callback.address", "http://localhost:" + protocolPort + "/protocol");
+                put("web.http.management.path", "/management");
+                put("web.http.management.port", String.valueOf(managementPort));
+            }
+        };
+
+        return ConfigFactory.fromMap(settings);
     }
 
     @Override
@@ -86,25 +108,5 @@ public abstract class ManagementEndToEndExtension extends RuntimePerClassExtensi
                     .configurationProvider(ManagementEndToEndExtension::runtimeConfig);
         }
 
-    }
-
-    static Config runtimeConfig() {
-        var managementPort = getFreePort();
-        var protocolPort = getFreePort();
-
-        var settings = new HashMap<String, String>() {
-            {
-                put("web.http.path", "/");
-                put("web.http.port", String.valueOf(getFreePort()));
-                put("web.http.protocol.path", "/protocol");
-                put("web.http.protocol.port", String.valueOf(protocolPort));
-                put("web.http.control.port", String.valueOf(getFreePort()));
-                put("edc.dsp.callback.address", "http://localhost:" + protocolPort + "/protocol");
-                put("web.http.management.path", "/management");
-                put("web.http.management.port", String.valueOf(managementPort));
-            }
-        };
-
-        return ConfigFactory.fromMap(settings);
     }
 }

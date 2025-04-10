@@ -44,7 +44,9 @@ class CompleteProvisionCommandHandlerTest {
         var newDestination = DataAddress.Builder.newInstance().type("new").build();
         var originalDestination = DataAddress.Builder.newInstance().type("original").build();
         var command = new CompleteProvisionCommand("test-id", newDestination);
-        var entity = TransferProcess.Builder.newInstance().state(PROVISIONING_REQUESTED.code()).dataDestination(originalDestination).build();
+        var entity = TransferProcess.Builder.newInstance().state(PROVISIONING_REQUESTED.code()).dataDestination(originalDestination)
+                .participantContextId("participantContextId")
+                .build();
 
         var result = handler.modify(entity, command);
 
@@ -57,7 +59,9 @@ class CompleteProvisionCommandHandlerTest {
     void shouldNotUpdateDestination_whenItIsMissing() {
         var command = new CompleteProvisionCommand("test-id", null);
         var originalDestination = DataAddress.Builder.newInstance().type("original").build();
-        var entity = TransferProcess.Builder.newInstance().state(PROVISIONING_REQUESTED.code()).dataDestination(originalDestination).build();
+        var entity = TransferProcess.Builder.newInstance().state(PROVISIONING_REQUESTED.code()).dataDestination(originalDestination)
+                .participantContextId("participantContextId")
+                .build();
 
         var result = handler.modify(entity, command);
 
@@ -69,7 +73,9 @@ class CompleteProvisionCommandHandlerTest {
     @Test
     void postAction_shouldCallProvisioned() {
         var command = new CompleteProvisionCommand("test-id", null);
-        var entity = TransferProcess.Builder.newInstance().state(PROVISIONING_REQUESTED.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(PROVISIONING_REQUESTED.code())
+                .participantContextId("participantContextId")
+                .build();
         var listener = mock(TransferProcessListener.class);
         observable.registerListener(listener);
 

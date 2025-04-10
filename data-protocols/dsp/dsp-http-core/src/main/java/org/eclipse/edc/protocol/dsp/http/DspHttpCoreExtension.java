@@ -22,6 +22,7 @@ import org.eclipse.edc.connector.controlplane.contract.spi.types.agreement.Contr
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractNegotiationTerminationMessage;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractRequestMessage;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.protocol.ContractRemoteMessage;
+import org.eclipse.edc.connector.controlplane.participants.spi.store.ParticipantContextStore;
 import org.eclipse.edc.connector.controlplane.protocolversion.spi.ProtocolVersionRequestMessage;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolVersionRegistry;
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.protocol.TransferCompletionMessage;
@@ -117,6 +118,9 @@ public class DspHttpCoreExtension implements ServiceExtension {
     @Inject
     private ProtocolVersionRegistry versionRegistry;
 
+    @Inject
+    private ParticipantContextStore participantContextStore;
+
     private DspProtocolTypeTransformerRegistry dspTransformerRegistry;
     private DspProtocolParser dspProtocolParser;
 
@@ -141,7 +145,7 @@ public class DspHttpCoreExtension implements ServiceExtension {
             td = bldr -> bldr;
         }
 
-        var dispatcher = new DspHttpRemoteMessageDispatcherImpl(httpClient, identityService, td, policyEngine, audienceResolver);
+        var dispatcher = new DspHttpRemoteMessageDispatcherImpl(httpClient, identityService, td, policyEngine, audienceResolver, participantContextStore);
         registerNegotiationPolicyScopes(dispatcher);
         registerTransferProcessPolicyScopes(dispatcher);
         registerCatalogPolicyScopes(dispatcher);

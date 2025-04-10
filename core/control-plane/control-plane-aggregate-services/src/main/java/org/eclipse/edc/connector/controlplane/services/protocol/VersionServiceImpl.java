@@ -17,6 +17,7 @@ package org.eclipse.edc.connector.controlplane.services.protocol;
 import org.eclipse.edc.connector.controlplane.protocolversion.spi.ProtocolVersionRequest;
 import org.eclipse.edc.connector.controlplane.protocolversion.spi.ProtocolVersionRequestMessage;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.VersionService;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.message.RemoteMessageDispatcherRegistry;
 import org.eclipse.edc.spi.response.StatusResult;
 
@@ -31,9 +32,10 @@ public class VersionServiceImpl implements VersionService {
     }
 
     @Override
-    public CompletableFuture<StatusResult<byte[]>> requestVersions(ProtocolVersionRequest request) {
+    public CompletableFuture<StatusResult<byte[]>> requestVersions(ParticipantContext participantContext, ProtocolVersionRequest request) {
         var message = ProtocolVersionRequestMessage.Builder.newInstance()
                 .protocol(request.getProtocol())
+                .participantContextId(participantContext.id())
                 .counterPartyId(request.getCounterPartyId())
                 .counterPartyAddress(request.getCounterPartyAddress())
                 .build();

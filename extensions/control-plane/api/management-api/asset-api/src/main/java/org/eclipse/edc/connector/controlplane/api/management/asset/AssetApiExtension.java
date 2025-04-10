@@ -19,6 +19,7 @@ package org.eclipse.edc.connector.controlplane.api.management.asset;
 import org.eclipse.edc.api.validation.DataAddressValidator;
 import org.eclipse.edc.connector.controlplane.api.management.asset.v3.AssetApiController;
 import org.eclipse.edc.connector.controlplane.api.management.asset.validation.AssetValidator;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.asset.AssetService;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
@@ -49,6 +50,9 @@ public class AssetApiExtension implements ServiceExtension {
     @Inject
     private JsonObjectValidatorRegistry validator;
 
+    @Inject
+    private ParticipantContextSupplier participantContextSupplier;
+
     @Override
     public String name() {
         return NAME;
@@ -64,6 +68,6 @@ public class AssetApiExtension implements ServiceExtension {
         var managementTypeTransformerRegistry = transformerRegistry.forContext("management-api");
 
         webService.registerResource(ApiContext.MANAGEMENT, new AssetApiController(assetService,
-                managementTypeTransformerRegistry, monitor, validator));
+                managementTypeTransformerRegistry, monitor, validator, participantContextSupplier));
     }
 }

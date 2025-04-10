@@ -14,6 +14,7 @@
 
 package org.eclipse.edc.spi.types.domain.secret;
 
+import org.eclipse.edc.spi.entity.AbstractParticipantResource;
 import org.eclipse.edc.spi.entity.Entity;
 
 import java.util.Objects;
@@ -25,7 +26,7 @@ import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
 /**
  * The {@link Secret} contains the metadata and describes the data itself or a collection of data.
  */
-public class Secret extends Entity {
+public class Secret extends AbstractParticipantResource {
     public static final String EDC_SECRET_TYPE = EDC_NAMESPACE + "Secret";
     public static final String EDC_SECRET_VALUE = EDC_NAMESPACE + "value";
 

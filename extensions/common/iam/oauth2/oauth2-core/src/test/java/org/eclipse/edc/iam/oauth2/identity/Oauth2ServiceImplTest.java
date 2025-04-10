@@ -33,6 +33,7 @@ import org.eclipse.edc.iam.oauth2.spi.client.Oauth2CredentialsRequest;
 import org.eclipse.edc.iam.oauth2.spi.client.PrivateKeyOauth2CredentialsRequest;
 import org.eclipse.edc.keys.spi.PublicKeyResolver;
 import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.TokenParameters;
 import org.eclipse.edc.spi.iam.TokenRepresentation;
 import org.eclipse.edc.spi.iam.VerificationContext;
@@ -76,6 +77,7 @@ class Oauth2ServiceImplTest {
 
     private static final String TEST_PRIVATE_KEY_ID = "test-private-key-id";
     private static final VerificationContext VERIFICATION_CONTEXT = VerificationContext.Builder.newInstance()
+            .participantContext(new ParticipantContext("test", "test"))
             .policy(Policy.Builder.newInstance().build())
             .build();
     private static final String OAUTH2_SERVER_URL = "http://oauth2-server.com";
@@ -130,7 +132,7 @@ class Oauth2ServiceImplTest {
 
         when(client.requestToken(any())).thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token("accessToken").build()));
 
-        var result = authService.obtainClientCredentials(tokenParameters);
+        var result = authService.obtainClientCredentials(mock(), tokenParameters);
 
         assertThat(result.succeeded()).isTrue();
         assertThat(result.getContent().getToken()).isEqualTo("accessToken");
@@ -159,7 +161,7 @@ class Oauth2ServiceImplTest {
 
         when(client.requestToken(any())).thenReturn(Result.failure("test error"));
 
-        var result = authService.obtainClientCredentials(tokenParameters);
+        var result = authService.obtainClientCredentials(mock(), tokenParameters);
 
         assertThat(result.failed()).isTrue();
         assertThat(result.getFailureDetail()).contains("test error");

@@ -43,6 +43,8 @@ public class TestFunctions {
                 .assetId("assetId")
                 .type(TransferProcess.Type.CONSUMER.name())
                 .contractId("agreementId")
+                .participantContextId("participantId")
+                .dataspaceContext("dataspaceId")
                 .callbackAddresses(callbacks);
     }
 

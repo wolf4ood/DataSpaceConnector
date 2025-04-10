@@ -61,4 +61,9 @@ public class CallbackEventRemoteMessage<T extends Event> implements RemoteMessag
     public String getCounterPartyId() {
         return null;
     }
+
+    @Override
+    public String getParticipantContextId() {
+        return null;
+    }
 }

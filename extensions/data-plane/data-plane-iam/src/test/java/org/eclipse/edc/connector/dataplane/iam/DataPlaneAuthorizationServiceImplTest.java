@@ -20,6 +20,7 @@ import org.eclipse.edc.connector.dataplane.spi.Endpoint;
 import org.eclipse.edc.connector.dataplane.spi.iam.DataPlaneAccessControlService;
 import org.eclipse.edc.connector.dataplane.spi.iam.DataPlaneAccessTokenService;
 import org.eclipse.edc.connector.dataplane.spi.iam.PublicEndpointGeneratorService;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.ClaimToken;
 import org.eclipse.edc.spi.iam.TokenRepresentation;
 import org.eclipse.edc.spi.result.Result;
@@ -57,7 +58,8 @@ class DataPlaneAuthorizationServiceImplTest {
     private final DataPlaneAccessTokenService accessTokenService = mock();
     private final PublicEndpointGeneratorService endpointGenerator = mock();
     private final DataPlaneAccessControlService accessControlService = mock();
-    private final DataPlaneAuthorizationServiceImpl authorizationService = new DataPlaneAuthorizationServiceImpl(accessTokenService, endpointGenerator, accessControlService, OWN_PARTICIPANT_ID, Clock.systemUTC());
+    private final DataPlaneAuthorizationServiceImpl authorizationService = new DataPlaneAuthorizationServiceImpl(accessTokenService, endpointGenerator,
+            accessControlService, () -> new ParticipantContext(OWN_PARTICIPANT_ID, OWN_PARTICIPANT_ID), Clock.systemUTC());
 
     @BeforeEach
     void setup() {

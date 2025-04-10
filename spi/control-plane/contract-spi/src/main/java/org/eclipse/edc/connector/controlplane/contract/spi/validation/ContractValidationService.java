@@ -20,6 +20,7 @@ import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.Con
 import org.eclipse.edc.connector.controlplane.contract.spi.types.offer.ContractOffer;
 import org.eclipse.edc.participant.spi.ParticipantAgent;
 import org.eclipse.edc.runtime.metamodel.annotation.ExtensionPoint;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.result.Result;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +38,7 @@ public interface ContractValidationService {
      * @return The referenced {@link ValidatedConsumerOffer}.
      */
     @NotNull
-    Result<ValidatedConsumerOffer> validateInitialOffer(ParticipantAgent agent, ValidatableConsumerOffer consumerOffer);
+    Result<ValidatedConsumerOffer> validateInitialOffer(ParticipantContext participantContext, ParticipantAgent agent, ValidatableConsumerOffer consumerOffer);
 
     /**
      * Validates the contract agreement that the consumer referenced in its transfer request.

@@ -22,6 +22,7 @@ import org.eclipse.edc.iam.oauth2.spi.client.Oauth2CredentialsRequest;
 import org.eclipse.edc.iam.oauth2.spi.client.PrivateKeyOauth2CredentialsRequest.Builder;
 import org.eclipse.edc.jwt.spi.JwtRegisteredClaimNames;
 import org.eclipse.edc.keys.spi.PublicKeyResolver;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.ClaimToken;
 import org.eclipse.edc.spi.iam.IdentityService;
 import org.eclipse.edc.spi.iam.TokenParameters;
@@ -81,7 +82,7 @@ public class Oauth2ServiceImpl implements IdentityService {
     }
 
     @Override
-    public Result<TokenRepresentation> obtainClientCredentials(TokenParameters parameters) {
+    public Result<TokenRepresentation> obtainClientCredentials(ParticipantContext participantContext, TokenParameters parameters) {
         return generateClientAssertion()
                 .map(assertion -> createRequest(parameters, assertion))
                 .compose(client::requestToken);

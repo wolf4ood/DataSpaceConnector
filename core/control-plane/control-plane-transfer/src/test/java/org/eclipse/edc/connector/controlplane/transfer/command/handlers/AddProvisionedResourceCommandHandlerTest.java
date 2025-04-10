@@ -36,7 +36,9 @@ class AddProvisionedResourceCommandHandlerTest {
 
     @Test
     void modify_shouldInvokeProvisionResultHandler() {
-        var entity = TransferProcess.Builder.newInstance().state(PROVISIONING.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(PROVISIONING.code())
+                .participantContextId("participantContextId")
+                .build();
         var provisionResponse = ProvisionResponse.Builder.newInstance().inProcess(true).build();
         var command = new AddProvisionedResourceCommand("id", provisionResponse);
         when(provisionResponsesHandler.handle(any(), any())).thenReturn(true);
@@ -49,7 +51,9 @@ class AddProvisionedResourceCommandHandlerTest {
 
     @Test
     void postActions_shouldInvokeProvisionResultHandler() {
-        var entity = TransferProcess.Builder.newInstance().state(PROVISIONING.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(PROVISIONING.code())
+                .participantContextId("participantContextId")
+                .build();
         var provisionResponse = ProvisionResponse.Builder.newInstance().inProcess(true).build();
         var command = new AddProvisionedResourceCommand("id", provisionResponse);
 
@@ -60,7 +64,9 @@ class AddProvisionedResourceCommandHandlerTest {
 
     @Test
     void modify_shouldReturnFalse_whenProvisionResultHandlerCannotHandle() {
-        var entity = TransferProcess.Builder.newInstance().state(PROVISIONING.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(PROVISIONING.code())
+                .participantContextId("participantContextId")
+                .build();
         var provisionResponse = ProvisionResponse.Builder.newInstance().inProcess(true).build();
         var command = new AddProvisionedResourceCommand("id", provisionResponse);
         when(provisionResponsesHandler.handle(any(), any())).thenReturn(false);

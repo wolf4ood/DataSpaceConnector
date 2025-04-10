@@ -26,6 +26,7 @@ dependencies {
     api(project(":extensions:common:json-ld"))
     api(project(":data-protocols:dsp:dsp-spi"))
     api(project(":data-protocols:dsp:dsp-http-spi"))
+    api(project(":spi:common:participant-context-spi"))
 
     testImplementation(project(":core:common:junit"))
     testImplementation(project(":core:common:lib:json-ld-lib"))

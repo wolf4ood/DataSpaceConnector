@@ -102,6 +102,11 @@ public class CatalogRequestMessage extends ProtocolRemoteMessage {
             return this;
         }
 
+        public CatalogRequestMessage.Builder participantContextId(String participantContextId) {
+            this.message.participantContextId = participantContextId;
+            return this;
+        }
+
         public CatalogRequestMessage.Builder counterPartyAddress(String callbackAddress) {
             this.message.counterPartyAddress = callbackAddress;
             return this;

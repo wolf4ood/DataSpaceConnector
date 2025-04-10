@@ -21,6 +21,8 @@ dependencies {
     api(project(":spi:common:jwt-signer-spi"))
     api(project(":spi:common:token-spi"))
     api(project(":spi:data-plane:data-plane-spi"))
+    // TODO hack
+    api(project(":spi:common:participant-context-spi"))
 
     implementation(project(":core:common:lib:token-lib"))
 

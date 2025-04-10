@@ -19,6 +19,7 @@ import jakarta.json.Json;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.transferprocess.TransferProcessProtocolService;
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.TransferProcess;
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.protocol.TransferCompletionMessage;
@@ -30,6 +31,7 @@ import org.eclipse.edc.jsonld.spi.JsonLdNamespace;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
 import org.eclipse.edc.protocol.dsp.http.spi.message.GetDspRequest;
 import org.eclipse.edc.protocol.dsp.http.spi.message.PostDspRequest;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.web.jersey.testfixtures.RestControllerTestBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -62,10 +64,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public abstract class DspTransferProcessApiControllerBaseTest extends RestControllerTestBase {
-    
+
     private static final String PROCESS_ID = "testId";
     protected final TransferProcessProtocolService protocolService = mock();
     protected final DspRequestHandler dspRequestHandler = mock();
+    protected final ParticipantContextSupplier participantContextSupplier = () -> new ParticipantContext("participantId", "participantId");
 
     @Test
     void getTransferProcess_shouldGetResource() {

@@ -25,7 +25,7 @@ import static org.eclipse.edc.protocol.dsp.transferprocess.http.api.TransferProc
 
 @ApiTest
 class DspTransferProcessApiControllerTest {
-    
+
     @ApiTest
     @Nested
     class DspTransferProcessApiControllerV08Test extends DspTransferProcessApiControllerBaseTest {
@@ -42,7 +42,7 @@ class DspTransferProcessApiControllerTest {
 
         @Override
         protected Object controller() {
-            return new DspTransferProcessApiController(protocolService, dspRequestHandler);
+            return new DspTransferProcessApiController(protocolService, dspRequestHandler, participantContextSupplier);
         }
     }
 
@@ -62,7 +62,7 @@ class DspTransferProcessApiControllerTest {
 
         @Override
         protected Object controller() {
-            return new DspTransferProcessApiController20241(protocolService, dspRequestHandler);
+            return new DspTransferProcessApiController20241(protocolService, dspRequestHandler, participantContextSupplier);
         }
     }
 }

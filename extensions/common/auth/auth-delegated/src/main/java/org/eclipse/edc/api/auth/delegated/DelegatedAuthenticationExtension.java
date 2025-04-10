@@ -84,6 +84,7 @@ public class DelegatedAuthenticationExtension implements ServiceExtension {
     @Inject
     private Clock clock;
 
+
     @Override
     public String name() {
         return NAME;
@@ -102,11 +103,12 @@ public class DelegatedAuthenticationExtension implements ServiceExtension {
         }
 
         if (audience == null) {
-            monitor.warning("No audience configured for delegated authentication, defaulting to the participantId");
-            audience = context.getParticipantId();
+            var message = "No audience configured for delegated authentication, audience check will be skipped";
+            monitor.warning(message);
+        } else {
+            tokenValidationRulesRegistry.addRule(MANAGEMENT_API_CONTEXT, new AudienceValidationRule(audience));
         }
 
-        tokenValidationRulesRegistry.addRule(MANAGEMENT_API_CONTEXT, new AudienceValidationRule(audience));
         tokenValidationRulesRegistry.addRule(MANAGEMENT_API_CONTEXT, new NotBeforeValidationRule(clock, validationTolerance, true));
         tokenValidationRulesRegistry.addRule(MANAGEMENT_API_CONTEXT, new ExpirationIssuedAtValidationRule(clock, validationTolerance, true));
 

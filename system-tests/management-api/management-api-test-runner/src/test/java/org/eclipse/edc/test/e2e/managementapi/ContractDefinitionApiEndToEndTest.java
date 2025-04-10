@@ -214,7 +214,8 @@ public class ContractDefinitionApiEndToEndTest {
                     .accessPolicyId(UUID.randomUUID().toString())
                     .contractPolicyId(UUID.randomUUID().toString())
                     .assetsSelectorCriterion(criterion("foo", "=", "bar"))
-                    .assetsSelectorCriterion(criterion("bar", "=", "baz"));
+                    .assetsSelectorCriterion(criterion("bar", "=", "baz"))
+                    .participantContextId("participant-context-id");
         }
     }
 

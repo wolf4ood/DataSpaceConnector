@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public interface DspRuntime {
+    String PARTICIPANT_ID = "participantId";
 
     static EmbeddedRuntime createRuntimeWith(int protocolPort, String... additionalModules) {
         var baseModules = Stream.of(
@@ -32,12 +33,14 @@ public interface DspRuntime {
                 ":core:control-plane:control-plane-core",
                 ":extensions:common:http",
                 ":core:common:connector-core",
+                ":core:common:participant-context-core",
                 ":core:common:runtime-core"
         );
 
         var modules = Stream.concat(baseModules, Arrays.stream(additionalModules)).toArray(String[]::new);
 
         return new EmbeddedRuntime("runtime", modules).configurationProvider(() -> ConfigFactory.fromMap(Map.of(
+                "edc.participant.id", PARTICIPANT_ID,
                 "web.http.protocol.path", "/protocol",
                 "web.http.protocol.port", String.valueOf(protocolPort)
         )));

@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
+import static org.eclipse.edc.spi.constants.CoreConstants.DEFAULT_DATASPACE_CONTEXT;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
 
 /**
@@ -45,6 +46,8 @@ public class ContractAgreement {
     private String consumerId;
     private long contractSigningDate;
     private String assetId;
+    private String participantContextId;
+    private String dataspaceContext = DEFAULT_DATASPACE_CONTEXT;
     private Policy policy;
 
     private ContractAgreement() {
@@ -112,6 +115,15 @@ public class ContractAgreement {
         return policy;
     }
 
+
+    public String getParticipantContextId() {
+        return participantContextId;
+    }
+
+    public String getDataspaceContext() {
+        return dataspaceContext;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(id, providerId, consumerId, contractSigningDate, assetId, policy);
@@ -129,6 +141,18 @@ public class ContractAgreement {
         return contractSigningDate == that.contractSigningDate &&
                 Objects.equals(id, that.id) && Objects.equals(providerId, that.providerId) && Objects.equals(consumerId, that.consumerId) &&
                 Objects.equals(assetId, that.assetId) && Objects.equals(policy, that.policy);
+    }
+
+    public Builder toBuilder() {
+        return new Builder()
+                .id(id)
+                .providerId(providerId)
+                .consumerId(consumerId)
+                .contractSigningDate(contractSigningDate)
+                .assetId(assetId)
+                .policy(policy)
+                .participantContextId(participantContextId)
+                .dataspaceContext(dataspaceContext);
     }
 
     @JsonPOJOBuilder(withPrefix = "")
@@ -172,6 +196,16 @@ public class ContractAgreement {
 
         public Builder policy(Policy policy) {
             this.instance.policy = policy;
+            return this;
+        }
+
+        public Builder participantContextId(String participantContextId) {
+            this.instance.participantContextId = participantContextId;
+            return this;
+        }
+
+        public Builder dataspaceContext(String dataspaceContext) {
+            this.instance.dataspaceContext = dataspaceContext;
             return this;
         }
 

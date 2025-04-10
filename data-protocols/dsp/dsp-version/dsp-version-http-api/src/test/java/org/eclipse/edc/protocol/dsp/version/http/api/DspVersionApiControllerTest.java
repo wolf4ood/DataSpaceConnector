@@ -17,10 +17,12 @@ package org.eclipse.edc.protocol.dsp.version.http.api;
 import io.restassured.specification.RequestSpecification;
 import jakarta.json.Json;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.VersionProtocolService;
 import org.eclipse.edc.junit.annotations.ApiTest;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
 import org.eclipse.edc.protocol.dsp.http.spi.message.GetDspRequest;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.web.jersey.testfixtures.RestControllerTestBase;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -40,6 +42,8 @@ class DspVersionApiControllerTest extends RestControllerTestBase {
 
     private final VersionProtocolService service = mock();
     private final DspRequestHandler requestHandler = mock();
+
+    private final ParticipantContextSupplier participantContextSupplier = () -> new ParticipantContext("participantId", "participantId");
 
     @Test
     void shouldInvokeRequestHandler() {
@@ -62,7 +66,7 @@ class DspVersionApiControllerTest extends RestControllerTestBase {
 
     @Override
     protected Object controller() {
-        return new DspVersionApiController(requestHandler, service);
+        return new DspVersionApiController(requestHandler, service, participantContextSupplier);
     }
 
     private RequestSpecification baseRequest() {

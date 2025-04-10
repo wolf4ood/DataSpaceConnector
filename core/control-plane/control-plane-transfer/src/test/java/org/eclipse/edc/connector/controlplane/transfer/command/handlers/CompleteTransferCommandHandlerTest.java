@@ -32,7 +32,9 @@ class CompleteTransferCommandHandlerTest {
     @Test
     void shouldModify_whenItIsCompletable() {
         var command = new CompleteTransferCommand("test-id");
-        var entity = TransferProcess.Builder.newInstance().state(STARTED.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(STARTED.code())
+                .participantContextId("participantContextId")
+                .build();
 
         var result = handler.modify(entity, command);
 
@@ -44,7 +46,9 @@ class CompleteTransferCommandHandlerTest {
     @Test
     void shouldNotModify_whenItIsNotCompletable() {
         var command = new CompleteTransferCommand("test-id");
-        var entity = TransferProcess.Builder.newInstance().state(TERMINATED.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(TERMINATED.code())
+                .participantContextId("participantContextId")
+                .build();
 
         var result = handler.modify(entity, command);
 

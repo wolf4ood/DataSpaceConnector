@@ -17,6 +17,7 @@ package org.eclipse.edc.connector.controlplane.services.protocol;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolTokenValidator;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolVersionRegistry;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolVersions;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.TokenRepresentation;
 import org.eclipse.edc.spi.result.ServiceFailure;
 import org.eclipse.edc.spi.result.ServiceResult;
@@ -39,20 +40,23 @@ class VersionProtocolServiceImplTest {
 
     @Test
     void shouldReturnAllProtocolVersions() {
-        when(tokenValidator.verify(any(), any())).thenReturn(ServiceResult.success());
+        when(tokenValidator.verify(any(), any(), any())).thenReturn(ServiceResult.success());
+        var participantContext = new ParticipantContext("participantContext", "participantContext");
         var protocolVersions = new ProtocolVersions(Collections.emptyList());
         when(registry.getAll()).thenReturn(protocolVersions);
 
-        var result = service.getAll(TokenRepresentation.Builder.newInstance().build());
+        var result = service.getAll(participantContext, TokenRepresentation.Builder.newInstance().build());
 
         assertThat(result).isSucceeded().isSameAs(protocolVersions);
     }
 
     @Test
     void shouldReturnUnauthorized_whenTokenIsNotValid() {
-        when(tokenValidator.verify(any(), any())).thenReturn(ServiceResult.unauthorized("unauthorized"));
+        var participantContext = new ParticipantContext("participantContext", "participantContext");
 
-        var result = service.getAll(TokenRepresentation.Builder.newInstance().build());
+        when(tokenValidator.verify(any(), any(), any())).thenReturn(ServiceResult.unauthorized("unauthorized"));
+
+        var result = service.getAll(participantContext, TokenRepresentation.Builder.newInstance().build());
 
         assertThat(result).isFailed().extracting(ServiceFailure::getReason).isEqualTo(UNAUTHORIZED);
         verifyNoInteractions(registry);

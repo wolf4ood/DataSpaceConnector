@@ -20,6 +20,7 @@ import org.eclipse.edc.participant.spi.ParticipantAgentService;
 import org.eclipse.edc.policy.context.request.spi.RequestPolicyContext;
 import org.eclipse.edc.policy.engine.spi.PolicyEngine;
 import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.IdentityService;
 import org.eclipse.edc.spi.iam.RequestContext;
 import org.eclipse.edc.spi.iam.RequestScope;
@@ -50,7 +51,7 @@ public class ProtocolTokenValidatorImpl implements ProtocolTokenValidator {
     }
 
     @Override
-    public ServiceResult<ParticipantAgent> verify(TokenRepresentation tokenRepresentation, RequestPolicyContext.Provider policyContextProvider, Policy policy, RemoteMessage message) {
+    public ServiceResult<ParticipantAgent> verify(ParticipantContext participantContext, TokenRepresentation tokenRepresentation, RequestPolicyContext.Provider policyContextProvider, Policy policy, RemoteMessage message) {
         var requestScopeBuilder = RequestScope.Builder.newInstance();
         var requestContext = RequestContext.Builder.newInstance().message(message).direction(RequestContext.Direction.Ingress).build();
         var policyContext = policyContextProvider.instantiate(requestContext, requestScopeBuilder);
@@ -58,6 +59,7 @@ public class ProtocolTokenValidatorImpl implements ProtocolTokenValidator {
         var verificationContext = VerificationContext.Builder.newInstance()
                 .policy(policy)
                 .scopes(policyContext.requestScopeBuilder().build().getScopes())
+                .participantContext(participantContext)
                 .build();
         var tokenValidation = identityService.verifyJwtToken(tokenRepresentation, verificationContext);
         if (tokenValidation.failed()) {

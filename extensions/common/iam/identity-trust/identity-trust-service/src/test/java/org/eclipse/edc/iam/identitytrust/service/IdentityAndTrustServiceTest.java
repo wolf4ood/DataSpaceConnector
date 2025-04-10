@@ -28,6 +28,7 @@ import org.eclipse.edc.iam.verifiablecredentials.spi.model.CredentialSubject;
 import org.eclipse.edc.iam.verifiablecredentials.spi.model.VerifiableCredential;
 import org.eclipse.edc.iam.verifiablecredentials.spi.model.VerifiablePresentationContainer;
 import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.ClaimToken;
 import org.eclipse.edc.spi.iam.TokenParameters;
 import org.eclipse.edc.spi.iam.TokenRepresentation;
@@ -95,6 +96,7 @@ class IdentityAndTrustServiceTest {
 
     private VerificationContext verificationContext() {
         return VerificationContext.Builder.newInstance()
+                .participantContext(new ParticipantContext("test", "test"))
                 .policy(Policy.Builder.newInstance().build())
                 .build();
     }
@@ -109,7 +111,7 @@ class IdentityAndTrustServiceTest {
                     .claims(SCOPE, scope)
                     .claims(AUDIENCE, "test-audience")
                     .build();
-            assertThat(service.obtainClientCredentials(tp))
+            assertThat(service.obtainClientCredentials(mock(), tp))
                     .isNotNull()
                     .isFailed()
                     .detail().contains("Scope string invalid");
@@ -125,7 +127,7 @@ class IdentityAndTrustServiceTest {
                     .claims(SCOPE, scope)
                     .claims(AUDIENCE, "test-audience")
                     .build();
-            assertThat(service.obtainClientCredentials(tp))
+            assertThat(service.obtainClientCredentials(mock(), tp))
                     .isNotNull()
                     .isFailed()
                     .detail().contains("Scope string invalid");
@@ -140,7 +142,7 @@ class IdentityAndTrustServiceTest {
                     .claims(AUDIENCE, "test-audience")
                     .build();
             when(mockedSts.createToken(any(), any())).thenReturn(success(createJwt()));
-            assertThat(service.obtainClientCredentials(tp)).isSucceeded();
+            assertThat(service.obtainClientCredentials(mock(), tp)).isSucceeded();
             verify(mockedSts).createToken(argThat(m -> m.get("iss").equals(EXPECTED_OWN_DID) &&
                     m.get("sub").equals(EXPECTED_OWN_DID) &&
                     m.get("aud").equals(tp.getStringClaim(AUDIENCE))), eq(scope));

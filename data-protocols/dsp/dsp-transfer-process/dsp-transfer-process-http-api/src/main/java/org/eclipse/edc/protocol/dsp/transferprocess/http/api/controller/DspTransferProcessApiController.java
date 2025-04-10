@@ -18,6 +18,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.transferprocess.TransferProcessProtocolService;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
 
@@ -29,13 +30,14 @@ import static org.eclipse.edc.protocol.dsp.transferprocess.http.api.TransferProc
  * Provides the endpoints for receiving messages regarding transfers, like initiating, completing
  * and terminating a transfer process.
  */
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON })
+@Consumes({MediaType.APPLICATION_JSON})
+@Produces({MediaType.APPLICATION_JSON})
 @Path(BASE_PATH)
 public class DspTransferProcessApiController extends BaseDspTransferProcessApiController {
 
-    public DspTransferProcessApiController(TransferProcessProtocolService protocolService, DspRequestHandler dspRequestHandler) {
-        super(protocolService, dspRequestHandler, DATASPACE_PROTOCOL_HTTP, DSP_NAMESPACE_V_08);
+    public DspTransferProcessApiController(TransferProcessProtocolService protocolService, DspRequestHandler dspRequestHandler,
+                                           ParticipantContextSupplier participantContextSupplier) {
+        super(protocolService, dspRequestHandler, DATASPACE_PROTOCOL_HTTP, DSP_NAMESPACE_V_08, participantContextSupplier);
     }
 
 }

@@ -16,6 +16,7 @@
 
 package org.eclipse.edc.iam.mock;
 
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.ClaimToken;
 import org.eclipse.edc.spi.iam.IdentityService;
 import org.eclipse.edc.spi.iam.TokenParameters;
@@ -24,25 +25,25 @@ import org.eclipse.edc.spi.iam.VerificationContext;
 import org.eclipse.edc.spi.result.Result;
 import org.eclipse.edc.spi.types.TypeManager;
 
+import static org.eclipse.edc.spi.constants.CoreConstants.DEFAULT_DATASPACE_CONTEXT;
+
 public class MockIdentityService implements IdentityService {
     private final String region;
     private final TypeManager typeManager;
-    private final String clientId;
     private final String faultyClientId;
 
-    public MockIdentityService(TypeManager typeManager, String region, String clientId, String faultyClientId) {
+    public MockIdentityService(TypeManager typeManager, String region, String faultyClientId) {
         this.typeManager = typeManager;
         this.region = region;
-        this.clientId = clientId;
         this.faultyClientId = faultyClientId;
     }
 
     @Override
-    public Result<TokenRepresentation> obtainClientCredentials(TokenParameters parameters) {
+    public Result<TokenRepresentation> obtainClientCredentials(ParticipantContext participantContext, TokenParameters parameters) {
         var token = new MockToken();
         token.setAudience(parameters.getStringClaim("aud"));
         token.setRegion(region);
-        token.setClientId(clientId);
+        token.setClientId(participantContext.getIdentity(DEFAULT_DATASPACE_CONTEXT));
         TokenRepresentation tokenRepresentation = TokenRepresentation.Builder.newInstance()
                 .token(typeManager.writeValueAsString(token))
                 .build();

@@ -84,12 +84,13 @@ public class CatalogApiEndToEndTest {
                     .id(UUID.randomUUID().toString())
                     .contractPolicyId(policyId)
                     .accessPolicyId(policyId)
+                    .participantContextId("participantContextId")
                     .build();
 
             var policy = Policy.Builder.newInstance()
                     .build();
 
-            policyDefinitionStore.create(PolicyDefinition.Builder.newInstance().id(policyId).policy(policy).build());
+            policyDefinitionStore.create(PolicyDefinition.Builder.newInstance().id(policyId).participantContextId(cd.getParticipantContextId()).policy(policy).build());
             contractDefinitionStore.save(cd);
 
             assetIndex.create(createAsset("id-1", "test-type").build());
@@ -136,11 +137,12 @@ public class CatalogApiEndToEndTest {
             // create and store policy
             var policyId = UUID.randomUUID().toString();
             var policy = Policy.Builder.newInstance().build();
-            policyDefinitionStore.create(PolicyDefinition.Builder.newInstance().id(policyId).policy(policy).build());
+            policyDefinitionStore.create(PolicyDefinition.Builder.newInstance().id(policyId).participantContextId("participantContextId").policy(policy).build());
 
             // create CatalogAsset
             var catalogAssetId = "catalog-asset-" + UUID.randomUUID();
             var httpData = createAsset(catalogAssetId, "HttpData")
+                    .participantContextId("participantContextId")
                     .property(Asset.PROPERTY_IS_CATALOG, true)
                     .build();
             httpData.getDataAddress().getProperties().put(EDC_NAMESPACE + "baseUrl", "http://quizzqua.zz/buzz");
@@ -156,6 +158,7 @@ public class CatalogApiEndToEndTest {
                     .contractPolicyId(policyId)
                     .accessPolicyId(policyId)
                     .assetsSelector(List.of(Criterion.criterion("id", "in", List.of(catalogAssetId, normalAssetId))))
+                    .participantContextId("participantContextId")
                     .build();
             contractDefinitionStore.save(cd);
 
@@ -217,6 +220,7 @@ public class CatalogApiEndToEndTest {
         private Asset.Builder createAsset(String id, String sourceType) {
             return Asset.Builder.newInstance()
                     .dataAddress(DataAddress.Builder.newInstance().type(sourceType).build())
+                    .participantContextId("participantContextId")
                     .id(id);
         }
 

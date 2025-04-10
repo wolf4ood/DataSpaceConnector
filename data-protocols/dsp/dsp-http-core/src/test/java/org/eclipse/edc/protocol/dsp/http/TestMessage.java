@@ -31,4 +31,9 @@ public record TestMessage(String protocol, String counterPartyAddress, String co
     public String getCounterPartyId() {
         return counterPartyId;
     }
+
+    @Override
+    public String getParticipantContextId() {
+        return null;
+    }
 }

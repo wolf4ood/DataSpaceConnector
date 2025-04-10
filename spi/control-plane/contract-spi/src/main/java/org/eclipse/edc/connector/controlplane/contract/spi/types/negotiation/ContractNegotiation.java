@@ -353,7 +353,9 @@ public class ContractNegotiation extends StatefulEntity<ContractNegotiation> {
                 .contractAgreement(contractAgreement)
                 .contractOffers(contractOffers)
                 .callbackAddresses(callbackAddresses)
-                .protocolMessages(protocolMessages);
+                .protocolMessages(protocolMessages)
+                .dataspaceContext(dataspaceContext)
+                .participantContextId(participantContextId);
         return copy(builder);
     }
 

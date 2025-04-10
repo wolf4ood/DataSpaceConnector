@@ -18,6 +18,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.contractnegotiation.ContractNegotiationProtocolService;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
 import org.eclipse.edc.protocol.dsp.spi.version.DspVersions;
@@ -29,12 +30,12 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_NAMESPACE_V
 /**
  * Versioned Negotiation endpoint for 2024/1 protocol version
  */
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON })
+@Consumes({MediaType.APPLICATION_JSON})
+@Produces({MediaType.APPLICATION_JSON})
 @Path(DspVersions.V_2024_1_PATH + BASE_PATH)
 public class DspNegotiationApiController20241 extends BaseDspNegotiationApiController {
 
-    public DspNegotiationApiController20241(ContractNegotiationProtocolService protocolService, DspRequestHandler dspRequestHandler) {
-        super(protocolService, dspRequestHandler, DATASPACE_PROTOCOL_HTTP_V_2024_1, DSP_NAMESPACE_V_2024_1);
+    public DspNegotiationApiController20241(ContractNegotiationProtocolService protocolService, DspRequestHandler dspRequestHandler, ParticipantContextSupplier participantContextSupplier) {
+        super(protocolService, dspRequestHandler, DATASPACE_PROTOCOL_HTTP_V_2024_1, DSP_NAMESPACE_V_2024_1, participantContextSupplier);
     }
 }

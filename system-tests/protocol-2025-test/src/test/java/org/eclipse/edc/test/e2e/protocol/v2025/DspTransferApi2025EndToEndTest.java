@@ -47,6 +47,7 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAn
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_ERROR_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_PROCESS_TERM;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
+import static org.eclipse.edc.test.e2e.protocol.v2025.Dsp2025Runtime.PARTICIPANT_ID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
@@ -72,6 +73,7 @@ public class DspTransferApi2025EndToEndTest {
                 .id(id)
                 .contractId(contractId)
                 .dataDestination(DataAddress.Builder.newInstance().type("any").build())
+                .participantContextId(PARTICIPANT_ID)
                 .state(REQUESTED.code())
                 .build();
         runtime.getService(TransferProcessStore.class).save(transfer);

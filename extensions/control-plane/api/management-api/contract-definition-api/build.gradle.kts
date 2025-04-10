@@ -20,6 +20,7 @@ plugins {
 dependencies {
     api(project(":spi:control-plane:control-plane-spi"))
     api(project(":spi:common:transaction-spi"))
+    api(project(":spi:common:participant-context-spi"))
 
     implementation(project(":extensions:common:api:lib:management-api-lib"))
     implementation(project(":core:common:lib:api-lib"))

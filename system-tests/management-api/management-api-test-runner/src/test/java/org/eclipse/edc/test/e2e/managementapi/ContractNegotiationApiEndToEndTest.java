@@ -196,6 +196,7 @@ public class ContractNegotiationApiEndToEndTest {
                             .build()))
                     .protocol("dataspace-protocol-http")
                     .state(REQUESTED.code())
+                    .participantContextId("participantContextId")
                     .contractOffer(contractOfferBuilder().build());
         }
 
@@ -213,6 +214,7 @@ public class ContractNegotiationApiEndToEndTest {
                     .consumerId(randomUUID() + "-consumer")
                     .providerId(randomUUID() + "-provider")
                     .policy(Policy.Builder.newInstance().build())
+                    .participantContextId("participantContextId")
                     .build();
         }
 
@@ -245,7 +247,8 @@ public class ContractNegotiationApiEndToEndTest {
     @Nested
     @EndToEndTest
     @ExtendWith(ManagementEndToEndExtension.InMemory.class)
-    class InMemory extends Tests { }
+    class InMemory extends Tests {
+    }
 
     @Nested
     @PostgresqlIntegrationTest

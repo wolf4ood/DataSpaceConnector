@@ -48,6 +48,8 @@ public class BaseSqlDialectStatements implements EndpointDataReferenceEntryState
                 .column(getAgreementIdColumn())
                 .column(getContractNegotiationIdColumn())
                 .column(getCreatedAtColumn())
+                .column(getParticipantContextIdColumn())
+                .column(getDataspaceContextColumn())
                 .insertInto(getEdrEntryTable());
     }
 

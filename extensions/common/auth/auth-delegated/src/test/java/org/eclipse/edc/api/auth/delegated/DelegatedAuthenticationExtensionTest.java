@@ -81,7 +81,7 @@ class DelegatedAuthenticationExtensionTest {
 
         extension.initialize(context);
 
-        verify(monitor, never()).warning("No audience configured for delegated authentication, defaulting to the participantId");
+        verify(monitor, never()).warning("No audience configured for delegated authentication, audience check will be skipped");
         verify(tokenValidationRulesRegistry).addRule(eq(MANAGEMENT_API_CONTEXT), any(AudienceValidationRule.class));
 
     }
@@ -89,7 +89,7 @@ class DelegatedAuthenticationExtensionTest {
     @Test
     public void initializeWithNoAudience(DelegatedAuthenticationExtension extension, ServiceExtensionContext context) {
         extension.initialize(context);
-        verify(monitor).warning("No audience configured for delegated authentication, defaulting to the participantId");
-        verify(tokenValidationRulesRegistry).addRule(eq(MANAGEMENT_API_CONTEXT), any(AudienceValidationRule.class));
+        verify(monitor).warning("No audience configured for delegated authentication, audience check will be skipped");
+        verify(tokenValidationRulesRegistry, never()).addRule(eq(MANAGEMENT_API_CONTEXT), any(AudienceValidationRule.class));
     }
 }

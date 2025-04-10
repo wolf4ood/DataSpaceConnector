@@ -30,6 +30,7 @@ import org.eclipse.edc.dataaddress.httpdata.spi.HttpDataAddressSchema;
 import org.eclipse.edc.participant.spi.ParticipantAgent;
 import org.eclipse.edc.policy.model.Policy;
 import org.eclipse.edc.policy.model.PolicyType;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.query.CriterionOperatorRegistry;
 import org.eclipse.edc.spi.query.QuerySpec;
 import org.jetbrains.annotations.NotNull;
@@ -63,8 +64,8 @@ public class DatasetResolverImpl implements DatasetResolver {
 
     @Override
     @NotNull
-    public Stream<Dataset> query(ParticipantAgent agent, QuerySpec querySpec, String protocol) {
-        var resolved = contractDefinitionResolver.resolveFor(agent);
+    public Stream<Dataset> query(ParticipantContext participantContext, ParticipantAgent agent, QuerySpec querySpec, String protocol) {
+        var resolved = contractDefinitionResolver.resolveFor(participantContext, agent);
         var contractDefinitions = resolved.contractDefinitions();
         if (contractDefinitions.isEmpty()) {
             return Stream.empty();
@@ -79,8 +80,8 @@ public class DatasetResolverImpl implements DatasetResolver {
     }
 
     @Override
-    public Dataset getById(ParticipantAgent agent, String id, String protocol) {
-        var resolved = contractDefinitionResolver.resolveFor(agent);
+    public Dataset getById(ParticipantContext participantContext, ParticipantAgent agent, String id, String protocol) {
+        var resolved = contractDefinitionResolver.resolveFor(participantContext, agent);
         var contractDefinitions = resolved.contractDefinitions();
         if (contractDefinitions.isEmpty()) {
             return null;

@@ -38,7 +38,9 @@ class ResumeTransferCommandHandlerTest {
     @Test
     void shouldModify_ifItCanBeResumed() {
         var command = new ResumeTransferCommand("test-id");
-        var entity = TransferProcess.Builder.newInstance().state(SUSPENDED.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(SUSPENDED.code())
+                .participantContextId("participantContextId")
+                .build();
 
         var result = handler.modify(entity, command);
 
@@ -49,7 +51,9 @@ class ResumeTransferCommandHandlerTest {
     @Test
     void shouldNotModify_ifItCannotBeResumed() {
         var command = new ResumeTransferCommand("test-id");
-        var entity = TransferProcess.Builder.newInstance().state(COMPLETED.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(COMPLETED.code())
+                .participantContextId("participantContextId")
+                .build();
 
         var result = handler.modify(entity, command);
 

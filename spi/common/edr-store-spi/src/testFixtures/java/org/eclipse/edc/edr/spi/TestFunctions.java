@@ -29,15 +29,34 @@ public class TestFunctions {
                 .transferProcessId(transferProcessId)
                 .providerId(UUID.randomUUID().toString())
                 .contractNegotiationId(contractNegotiationId)
+                .participantContextId(UUID.randomUUID().toString())
                 .build();
+    }
+
+    public static EndpointDataReferenceEntry.Builder edrEntryBuilder(String assetId, String agreementId, String transferProcessId, String contractNegotiationId, String providerId) {
+        return EndpointDataReferenceEntry.Builder.newInstance()
+                .assetId(assetId)
+                .agreementId(agreementId)
+                .transferProcessId(transferProcessId)
+                .providerId(UUID.randomUUID().toString())
+                .contractNegotiationId(contractNegotiationId)
+                .participantContextId(UUID.randomUUID().toString());
     }
 
     public static EndpointDataReferenceEntry edrEntry(String assetId, String agreementId, String transferProcessId, String contractNegotiationId) {
         return edrEntry(assetId, agreementId, transferProcessId, contractNegotiationId, UUID.randomUUID().toString());
     }
 
+    public static EndpointDataReferenceEntry.Builder edrEntryBuilder(String assetId, String agreementId, String transferProcessId, String contractNegotiationId) {
+        return edrEntryBuilder(assetId, agreementId, transferProcessId, contractNegotiationId, UUID.randomUUID().toString());
+    }
+
     public static EndpointDataReferenceEntry edrEntry() {
         return edrEntry("assetId", "agreementId", "transferProcessId", "contractNegotiationId");
+    }
+
+    public static EndpointDataReferenceEntry.Builder edrEntryBuilder() {
+        return edrEntryBuilder("assetId", "agreementId", "transferProcessId", "contractNegotiationId");
     }
 
     public static DataAddress dataAddress() {

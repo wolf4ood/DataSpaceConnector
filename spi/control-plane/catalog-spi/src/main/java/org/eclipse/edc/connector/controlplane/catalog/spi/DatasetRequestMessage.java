@@ -21,16 +21,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+import static org.eclipse.edc.spi.constants.CoreConstants.DEFAULT_DATASPACE_CONTEXT;
+
 /**
  * A request for a participant's {@link Dataset}.
  */
 public class DatasetRequestMessage implements RemoteMessage {
 
+    private final Policy policy;
+    protected String dataspaceContext = DEFAULT_DATASPACE_CONTEXT;
+    protected String participantContextId;
     private String datasetId;
     private String protocol;
     private String counterPartyAddress;
     private String counterPartyId;
-    private final Policy policy;
 
     private DatasetRequestMessage() {
         // at this time, this is just a placeholder.
@@ -49,6 +53,19 @@ public class DatasetRequestMessage implements RemoteMessage {
 
     public void setProtocol(String protocol) {
         this.protocol = protocol;
+    }
+
+    @Override
+    public String getParticipantContextId() {
+        return participantContextId;
+    }
+
+    public void setParticipantContextId(String participantContextId) {
+        this.participantContextId = participantContextId;
+    }
+
+    public String getDataspaceContext() {
+        return dataspaceContext;
     }
 
     @NotNull
@@ -92,6 +109,16 @@ public class DatasetRequestMessage implements RemoteMessage {
 
         public DatasetRequestMessage.Builder protocol(String protocol) {
             this.message.protocol = protocol;
+            return this;
+        }
+
+        public DatasetRequestMessage.Builder dataspaceContext(String dataspaceContext) {
+            this.message.dataspaceContext = dataspaceContext;
+            return this;
+        }
+
+        public DatasetRequestMessage.Builder participantContextId(String participantContextId) {
+            this.message.participantContextId = participantContextId;
             return this;
         }
 

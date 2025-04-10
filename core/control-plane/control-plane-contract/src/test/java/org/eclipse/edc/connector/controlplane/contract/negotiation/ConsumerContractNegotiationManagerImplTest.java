@@ -31,6 +31,7 @@ import org.eclipse.edc.connector.controlplane.contract.spi.types.protocol.Contra
 import org.eclipse.edc.connector.controlplane.policy.spi.store.PolicyDefinitionStore;
 import org.eclipse.edc.policy.model.Policy;
 import org.eclipse.edc.spi.EdcException;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.message.RemoteMessageDispatcherRegistry;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.protocol.ProtocolWebhookRegistry;
@@ -86,7 +87,6 @@ import static org.mockito.Mockito.when;
 
 class ConsumerContractNegotiationManagerImplTest {
 
-    private static final String PARTICIPANT_ID = "participantId";
     private static final int RETRY_LIMIT = 1;
 
     private final ContractNegotiationStore store = mock();
@@ -105,7 +105,6 @@ class ConsumerContractNegotiationManagerImplTest {
         observable.registerListener(listener);
 
         manager = ConsumerContractNegotiationManagerImpl.Builder.newInstance()
-                .participantId(PARTICIPANT_ID)
                 .dispatcherRegistry(dispatcherRegistry)
                 .monitor(mock(Monitor.class))
                 .observable(observable)
@@ -120,6 +119,7 @@ class ConsumerContractNegotiationManagerImplTest {
     @Test
     void initiate_shouldSaveNewNegotiationInInitialState() {
         var contractOffer = contractOffer();
+        var participantContext = new ParticipantContext("providerId", "providerId");
 
         var request = ContractRequest.Builder.newInstance()
                 .counterPartyAddress("callbackAddress")
@@ -130,7 +130,7 @@ class ConsumerContractNegotiationManagerImplTest {
                         .build()))
                 .build();
 
-        var result = manager.initiate(request);
+        var result = manager.initiate(participantContext, request);
 
         assertThat(result.succeeded()).isTrue();
         verify(store).save(argThat(negotiation ->
@@ -332,7 +332,7 @@ class ConsumerContractNegotiationManagerImplTest {
     }
 
     private Criterion[] stateIs(int state) {
-        return aryEq(new Criterion[]{ hasState(state), isNotPending(), new Criterion("type", "=", "CONSUMER") });
+        return aryEq(new Criterion[]{hasState(state), isNotPending(), new Criterion("type", "=", "CONSUMER")});
     }
 
     private ContractNegotiation.Builder contractNegotiationBuilder() {
@@ -342,6 +342,7 @@ class ConsumerContractNegotiationManagerImplTest {
                 .counterPartyId("connectorId")
                 .counterPartyAddress("callbackAddress")
                 .protocol("protocol")
+                .participantContextId("participantContextId")
                 .stateTimestamp(Instant.now().toEpochMilli());
     }
 

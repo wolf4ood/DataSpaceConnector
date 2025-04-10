@@ -26,6 +26,7 @@ import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.Con
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractRequest;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractRequestMessage;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.protocol.ContractNegotiationAck;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.response.StatusResult;
 import org.eclipse.edc.statemachine.StateMachineManager;
 
@@ -46,6 +47,7 @@ import static org.eclipse.edc.connector.controlplane.contract.spi.types.negotiat
  */
 public class ConsumerContractNegotiationManagerImpl extends AbstractContractNegotiationManager implements ConsumerContractNegotiationManager {
 
+
     private ConsumerContractNegotiationManagerImpl() {
     }
 
@@ -58,10 +60,11 @@ public class ConsumerContractNegotiationManagerImpl extends AbstractContractNego
      */
     @WithSpan
     @Override
-    public StatusResult<ContractNegotiation> initiate(ContractRequest request) {
+    public StatusResult<ContractNegotiation> initiate(ParticipantContext participantContext, ContractRequest request) {
         var id = UUID.randomUUID().toString();
         var negotiation = ContractNegotiation.Builder.newInstance()
                 .id(id)
+                .participantContextId(participantContext.id())
                 .protocol(request.getProtocol())
                 .counterPartyId(request.getProviderId())
                 .counterPartyAddress(request.getCounterPartyAddress())

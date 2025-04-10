@@ -35,6 +35,7 @@ import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolToke
 import org.eclipse.edc.participant.spi.ParticipantAgent;
 import org.eclipse.edc.policy.context.request.spi.RequestContractNegotiationPolicyContext;
 import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.TokenRepresentation;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.result.ServiceResult;
@@ -81,13 +82,13 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<ContractNegotiation> notifyRequested(ContractRequestMessage message, TokenRepresentation tokenRepresentation) {
-        return transactionContext.execute(() -> fetchValidatableOffer(message)
-                .compose(validatableOffer -> verifyRequest(tokenRepresentation, validatableOffer.getContractPolicy(), message)
-                        .compose(agent -> validateOffer(agent, validatableOffer))
+    public ServiceResult<ContractNegotiation> notifyRequested(ParticipantContext participantContext, ContractRequestMessage message, TokenRepresentation tokenRepresentation) {
+        return transactionContext.execute(() -> fetchValidatableOffer(participantContext, message)
+                .compose(validatableOffer -> verifyRequest(participantContext, tokenRepresentation, validatableOffer.getContractPolicy(), message)
+                        .compose(agent -> validateOffer(participantContext, agent, validatableOffer))
                         .compose(validatedOffer -> {
                             var result = message.getProviderPid() == null
-                                    ? createNegotiation(message, validatedOffer.getConsumerIdentity(), PROVIDER, message.getCallbackAddress())
+                                    ? createNegotiation(participantContext, message, validatedOffer.getConsumerIdentity(), PROVIDER, message.getCallbackAddress())
                                     : getAndLeaseNegotiation(message.getProviderPid());
 
                             return result.onSuccess(negotiation -> {
@@ -107,11 +108,11 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<ContractNegotiation> notifyOffered(ContractOfferMessage message, TokenRepresentation tokenRepresentation) {
-        return transactionContext.execute(() -> verifyRequest(tokenRepresentation, message.getContractOffer().getPolicy(), message)
+    public ServiceResult<ContractNegotiation> notifyOffered(ParticipantContext participantContext, ContractOfferMessage message, TokenRepresentation tokenRepresentation) {
+        return transactionContext.execute(() -> verifyRequest(participantContext, tokenRepresentation, message.getContractOffer().getPolicy(), message)
                 .compose(agent -> {
                     ServiceResult<ContractNegotiation> result = message.getConsumerPid() == null
-                            ? createNegotiation(message, agent.getIdentity(), CONSUMER, message.getCallbackAddress())
+                            ? createNegotiation(participantContext, message, agent.getIdentity(), CONSUMER, message.getCallbackAddress())
                             : getAndLeaseNegotiation(message.getConsumerPid())
                             .compose(negotiation -> validateRequest(agent, negotiation).map(it -> negotiation));
 
@@ -131,9 +132,9 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<ContractNegotiation> notifyAccepted(ContractNegotiationEventMessage message, TokenRepresentation tokenRepresentation) {
-        return transactionContext.execute(() -> getNegotiation(message.getProcessId())
-                .compose(contractNegotiation -> verifyRequest(tokenRepresentation, contractNegotiation.getLastContractOffer().getPolicy(), message)
+    public ServiceResult<ContractNegotiation> notifyAccepted(ParticipantContext participantContext, ContractNegotiationEventMessage message, TokenRepresentation tokenRepresentation) {
+        return transactionContext.execute(() -> getNegotiation(participantContext, message.getProcessId())
+                .compose(contractNegotiation -> verifyRequest(participantContext, tokenRepresentation, contractNegotiation.getLastContractOffer().getPolicy(), message)
                         .compose(agent -> validateRequest(agent, contractNegotiation)))
                 .compose(cn -> onMessageDo(message, contractNegotiation -> acceptedAction(message, contractNegotiation))));
 
@@ -142,9 +143,9 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<ContractNegotiation> notifyAgreed(ContractAgreementMessage message, TokenRepresentation tokenRepresentation) {
-        return transactionContext.execute(() -> getNegotiation(message.getProcessId())
-                .compose(contractNegotiation -> verifyRequest(tokenRepresentation, contractNegotiation.getLastContractOffer().getPolicy(), message)
+    public ServiceResult<ContractNegotiation> notifyAgreed(ParticipantContext participantContext, ContractAgreementMessage message, TokenRepresentation tokenRepresentation) {
+        return transactionContext.execute(() -> getNegotiation(participantContext, message.getProcessId())
+                .compose(contractNegotiation -> verifyRequest(participantContext, tokenRepresentation, contractNegotiation.getLastContractOffer().getPolicy(), message)
                         .compose(agent -> validateAgreed(message, agent, contractNegotiation)))
                 .compose(cn -> onMessageDo(message, contractNegotiation -> agreedAction(message, contractNegotiation))));
     }
@@ -152,9 +153,9 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<ContractNegotiation> notifyVerified(ContractAgreementVerificationMessage message, TokenRepresentation tokenRepresentation) {
-        return transactionContext.execute(() -> getNegotiation(message.getProcessId())
-                .compose(contractNegotiation -> verifyRequest(tokenRepresentation, contractNegotiation.getLastContractOffer().getPolicy(), message)
+    public ServiceResult<ContractNegotiation> notifyVerified(ParticipantContext participantContext, ContractAgreementVerificationMessage message, TokenRepresentation tokenRepresentation) {
+        return transactionContext.execute(() -> getNegotiation(participantContext, message.getProcessId())
+                .compose(contractNegotiation -> verifyRequest(participantContext, tokenRepresentation, contractNegotiation.getLastContractOffer().getPolicy(), message)
                         .compose(agent -> validateRequest(agent, contractNegotiation)))
                 .compose(cn -> onMessageDo(message, contractNegotiation -> verifiedAction(message, contractNegotiation))));
     }
@@ -162,9 +163,9 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<ContractNegotiation> notifyFinalized(ContractNegotiationEventMessage message, TokenRepresentation tokenRepresentation) {
-        return transactionContext.execute(() -> getNegotiation(message.getProcessId())
-                .compose(contractNegotiation -> verifyRequest(tokenRepresentation, contractNegotiation.getLastContractOffer().getPolicy(), message)
+    public ServiceResult<ContractNegotiation> notifyFinalized(ParticipantContext participantContext, ContractNegotiationEventMessage message, TokenRepresentation tokenRepresentation) {
+        return transactionContext.execute(() -> getNegotiation(participantContext, message.getProcessId())
+                .compose(contractNegotiation -> verifyRequest(participantContext, tokenRepresentation, contractNegotiation.getLastContractOffer().getPolicy(), message)
                         .compose(agent -> validateRequest(agent, contractNegotiation)))
                 .compose(cn -> onMessageDo(message, contractNegotiation -> finalizedAction(message, contractNegotiation))));
     }
@@ -172,9 +173,9 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<ContractNegotiation> notifyTerminated(ContractNegotiationTerminationMessage message, TokenRepresentation tokenRepresentation) {
-        return transactionContext.execute(() -> getNegotiation(message.getProcessId())
-                .compose(contractNegotiation -> verifyRequest(tokenRepresentation, contractNegotiation.getLastContractOffer().getPolicy(), message)
+    public ServiceResult<ContractNegotiation> notifyTerminated(ParticipantContext participantContext, ContractNegotiationTerminationMessage message, TokenRepresentation tokenRepresentation) {
+        return transactionContext.execute(() -> getNegotiation(participantContext, message.getProcessId())
+                .compose(contractNegotiation -> verifyRequest(participantContext, tokenRepresentation, contractNegotiation.getLastContractOffer().getPolicy(), message)
                         .compose(agent -> validateRequest(agent, contractNegotiation)))
                 .compose(cn -> onMessageDo(message, contractNegotiation -> terminatedAction(message, contractNegotiation))));
     }
@@ -182,9 +183,9 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<ContractNegotiation> findById(String id, TokenRepresentation tokenRepresentation) {
-        return transactionContext.execute(() -> getNegotiation(id)
-                .compose(contractNegotiation -> verifyRequest(tokenRepresentation, contractNegotiation.getLastContractOffer().getPolicy(), null)
+    public ServiceResult<ContractNegotiation> findById(ParticipantContext participantContext, String id, TokenRepresentation tokenRepresentation) {
+        return transactionContext.execute(() -> getNegotiation(participantContext, id)
+                .compose(contractNegotiation -> verifyRequest(participantContext, tokenRepresentation, contractNegotiation.getLastContractOffer().getPolicy(), null)
                         .compose(agent -> validateRequest(agent, contractNegotiation)
                                 .map(it -> contractNegotiation))));
     }
@@ -202,8 +203,9 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
     }
 
     @NotNull
-    private ServiceResult<ContractNegotiation> createNegotiation(ContractRemoteMessage message, String counterPartyIdentity, ContractNegotiation.Type type, String callbackAddress) {
+    private ServiceResult<ContractNegotiation> createNegotiation(ParticipantContext participantContext, ContractRemoteMessage message, String counterPartyIdentity, ContractNegotiation.Type type, String callbackAddress) {
         var negotiation = ContractNegotiation.Builder.newInstance()
+                .participantContextId(participantContext.id())
                 .id(UUID.randomUUID().toString())
                 .correlationId(message.getConsumerPid())
                 .counterPartyId(counterPartyIdentity)
@@ -217,8 +219,8 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
     }
 
     @NotNull
-    private ServiceResult<ValidatedConsumerOffer> validateOffer(ParticipantAgent agent, ValidatableConsumerOffer consumerOffer) {
-        var result = validationService.validateInitialOffer(agent, consumerOffer);
+    private ServiceResult<ValidatedConsumerOffer> validateOffer(ParticipantContext participantContext, ParticipantAgent agent, ValidatableConsumerOffer consumerOffer) {
+        var result = validationService.validateInitialOffer(participantContext, agent, consumerOffer);
         if (result.failed()) {
             monitor.debug("[Provider] Contract offer rejected as invalid: " + result.getFailureDetail());
             return ServiceResult.badRequest("Contract offer is not valid: " + result.getFailureDetail());
@@ -228,7 +230,7 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
     }
 
     @NotNull
-    private ServiceResult<ValidatableConsumerOffer> fetchValidatableOffer(ContractRequestMessage message) {
+    private ServiceResult<ValidatableConsumerOffer> fetchValidatableOffer(ParticipantContext participantContext, ContractRequestMessage message) {
         var offerId = message.getContractOffer().getId();
 
         var result = consumerOfferResolver.resolveOffer(offerId);
@@ -236,7 +238,11 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
             monitor.debug(() -> "Failed to resolve offer: %s".formatted(result.getFailureDetail()));
             return ServiceResult.notFound("Not found");
         } else {
-            return result;
+            if (participantContext.id().equals(result.getContent().getContractDefinition().getParticipantContextId())) {
+                return result;
+            }
+            monitor.debug(() -> "Offer %s does not belong to participantContext %s".formatted(offerId, participantContext.id()));
+            return ServiceResult.notFound("Not found");
         }
     }
 
@@ -274,8 +280,13 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
 
     @NotNull
     private ServiceResult<ContractNegotiation> agreedAction(ContractAgreementMessage message, ContractNegotiation negotiation) {
+
+        var agreement = message.getContractAgreement().toBuilder()
+                .participantContextId(negotiation.getParticipantContextId())
+                .build();
+
         negotiation.protocolMessageReceived(message.getId());
-        negotiation.setContractAgreement(message.getContractAgreement());
+        negotiation.setContractAgreement(agreement);
         negotiation.transitionAgreed();
         update(negotiation);
         observable.invokeForEach(l -> l.agreed(negotiation));
@@ -309,18 +320,20 @@ public class ContractNegotiationProtocolServiceImpl implements ContractNegotiati
         return ServiceResult.success(negotiation);
     }
 
+    // TODO check participant context
     private ServiceResult<ContractNegotiation> getAndLeaseNegotiation(String negotiationId) {
         return store.findByIdAndLease(negotiationId)
                 .flatMap(ServiceResult::from);
     }
 
-    private ServiceResult<ParticipantAgent> verifyRequest(TokenRepresentation tokenRepresentation, Policy policy, RemoteMessage message) {
-        return protocolTokenValidator.verify(tokenRepresentation, RequestContractNegotiationPolicyContext::new, policy, message)
+    private ServiceResult<ParticipantAgent> verifyRequest(ParticipantContext participantContext, TokenRepresentation tokenRepresentation, Policy policy, RemoteMessage message) {
+        return protocolTokenValidator.verify(participantContext, tokenRepresentation, RequestContractNegotiationPolicyContext::new, policy, message)
                 .onFailure(failure -> monitor.debug(() -> "Verification Failed: %s".formatted(failure.getFailureDetail())));
     }
 
-    private ServiceResult<ContractNegotiation> getNegotiation(String negotiationId) {
+    private ServiceResult<ContractNegotiation> getNegotiation(ParticipantContext participantContext, String negotiationId) {
         return Optional.ofNullable(store.findById(negotiationId))
+                .filter(cn -> participantContext.id().equals(cn.getParticipantContextId()))
                 .map(ServiceResult::success)
                 .orElseGet(() -> ServiceResult.notFound("No negotiation with id %s found".formatted(negotiationId)));
     }

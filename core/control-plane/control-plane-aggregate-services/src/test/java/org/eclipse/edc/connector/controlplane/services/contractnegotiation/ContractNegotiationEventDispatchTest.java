@@ -35,6 +35,7 @@ import org.eclipse.edc.junit.extensions.RuntimeExtension;
 import org.eclipse.edc.junit.extensions.RuntimePerMethodExtension;
 import org.eclipse.edc.participant.spi.ParticipantAgentService;
 import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.event.EventRouter;
 import org.eclipse.edc.spi.event.EventSubscriber;
 import org.eclipse.edc.spi.iam.ClaimToken;
@@ -79,10 +80,10 @@ class ContractNegotiationEventDispatchTest {
 
     private final TokenRepresentation tokenRepresentation = TokenRepresentation.Builder.newInstance().token(UUID.randomUUID().toString()).build();
 
-
     @BeforeEach
     void setUp(RuntimeExtension extension) {
         extension.setConfiguration(Map.of(
+                "edc.participant.id", "participantContextId",
                 "web.http.port", String.valueOf(getFreePort()),
                 "web.http.path", "/api",
                 "edc.negotiation.consumer.send.retry.limit", "0",
@@ -103,6 +104,7 @@ class ContractNegotiationEventDispatchTest {
                                                                        PolicyDefinitionStore policyDefinitionStore,
                                                                        AssetIndex assetIndex) {
         dispatcherRegistry.register("test", succeedingDispatcher());
+        var participantContext = new ParticipantContext("participantContextId", "participantContextId");
 
         when(identityService.verifyJwtToken(eq(tokenRepresentation), isA(VerificationContext.class))).thenReturn(Result.success(token));
         eventRouter.register(ContractNegotiationEvent.class, eventSubscriber);
@@ -112,12 +114,13 @@ class ContractNegotiationEventDispatchTest {
                 .contractPolicyId("policyId")
                 .accessPolicyId("policyId")
                 .assetsSelector(emptyList())
+                .participantContextId(participantContext.id())
                 .build();
         contractDefinitionStore.save(contractDefinition);
         policyDefinitionStore.create(PolicyDefinition.Builder.newInstance().id("policyId").policy(policy).build());
-        assetIndex.create(Asset.Builder.newInstance().id("assetId").dataAddress(DataAddress.Builder.newInstance().type("any").build()).build());
+        assetIndex.create(Asset.Builder.newInstance().id("assetId").participantContextId(participantContext.id()).dataAddress(DataAddress.Builder.newInstance().type("any").build()).build());
 
-        service.notifyRequested(createContractOfferRequest(policy, "assetId"), tokenRepresentation);
+        service.notifyRequested(participantContext, createContractOfferRequest(policy, "assetId"), tokenRepresentation);
 
         await().untilAsserted(() -> {
             verify(eventSubscriber).on(argThat(isEnvelopeOf(ContractNegotiationRequested.class)));

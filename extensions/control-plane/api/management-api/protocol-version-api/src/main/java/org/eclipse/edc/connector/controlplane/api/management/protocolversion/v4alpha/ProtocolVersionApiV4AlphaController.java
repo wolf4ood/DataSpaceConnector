@@ -21,6 +21,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.Suspended;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.protocolversion.spi.ProtocolVersionRequest;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.VersionService;
 import org.eclipse.edc.spi.EdcException;
@@ -41,11 +42,13 @@ public class ProtocolVersionApiV4AlphaController implements ProtocolVersionApiV4
     private final VersionService service;
     private final TypeTransformerRegistry transformerRegistry;
     private final JsonObjectValidatorRegistry validatorRegistry;
+    private final ParticipantContextSupplier participantContextSupplier;
 
-    public ProtocolVersionApiV4AlphaController(VersionService service, TypeTransformerRegistry transformerRegistry, JsonObjectValidatorRegistry validatorRegistry) {
+    public ProtocolVersionApiV4AlphaController(VersionService service, TypeTransformerRegistry transformerRegistry, JsonObjectValidatorRegistry validatorRegistry, ParticipantContextSupplier participantContextSupplier) {
         this.service = service;
         this.transformerRegistry = transformerRegistry;
         this.validatorRegistry = validatorRegistry;
+        this.participantContextSupplier = participantContextSupplier;
     }
 
     @POST
@@ -57,7 +60,7 @@ public class ProtocolVersionApiV4AlphaController implements ProtocolVersionApiV4
         var request = transformerRegistry.transform(requestBody, ProtocolVersionRequest.class)
                 .orElseThrow(InvalidRequestException::new);
 
-        service.requestVersions(request)
+        service.requestVersions(participantContextSupplier.get(), request)
                 .whenComplete((result, throwable) -> {
                     try {
                         response.resume(toResponse(result, throwable));

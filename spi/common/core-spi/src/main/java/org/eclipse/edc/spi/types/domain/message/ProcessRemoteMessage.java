@@ -51,7 +51,7 @@ public abstract class ProcessRemoteMessage extends ProtocolRemoteMessage {
     public @NotNull String getId() {
         return id;
     }
-    
+
     /**
      * Returns the process id for this instance, that could be consumerPid or providerPid.
      *
@@ -122,6 +122,11 @@ public abstract class ProcessRemoteMessage extends ProtocolRemoteMessage {
 
         public B protocol(String protocol) {
             this.message.protocol = protocol;
+            return (B) this;
+        }
+
+        public B participantContextId(String participantContextId) {
+            this.message.participantContextId = participantContextId;
             return (B) this;
         }
 

@@ -19,6 +19,7 @@ import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolVers
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolVersions;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.VersionProtocolService;
 import org.eclipse.edc.policy.context.request.spi.RequestVersionPolicyContext;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.TokenRepresentation;
 import org.eclipse.edc.spi.result.ServiceResult;
 
@@ -33,8 +34,8 @@ public class VersionProtocolServiceImpl implements VersionProtocolService {
     }
 
     @Override
-    public ServiceResult<ProtocolVersions> getAll(TokenRepresentation tokenRepresentation) {
-        return tokenValidator.verify(tokenRepresentation, RequestVersionPolicyContext::new)
+    public ServiceResult<ProtocolVersions> getAll(ParticipantContext participantContext, TokenRepresentation tokenRepresentation) {
+        return tokenValidator.verify(participantContext, tokenRepresentation, RequestVersionPolicyContext::new)
                 .map(it -> registry.getAll());
     }
 }

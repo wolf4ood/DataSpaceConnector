@@ -45,6 +45,7 @@ import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.TYPE;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspCatalogPropertyAndTypeNames.DSPACE_PROPERTY_FILTER_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspCatalogPropertyAndTypeNames.DSPACE_TYPE_CATALOG_ERROR_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspCatalogPropertyAndTypeNames.DSPACE_TYPE_CATALOG_REQUEST_MESSAGE_TERM;
+import static org.eclipse.edc.test.e2e.protocol.v2025.Dsp2025Runtime.PARTICIPANT_ID;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -95,7 +96,9 @@ public class DspCatalogApi2025EndToEndTest {
         var policyDefinitionStore = runtime.getService(PolicyDefinitionStore.class);
         policyDefinitionStore.create(PolicyDefinition.Builder.newInstance().policy(Policy.Builder.newInstance().build()).build())
                 .onSuccess(policy -> {
-                    var contractDefinition = ContractDefinition.Builder.newInstance().accessPolicyId(policy.getId()).contractPolicyId(policy.getId()).build();
+                    var contractDefinition = ContractDefinition.Builder.newInstance().accessPolicyId(policy.getId())
+                            .participantContextId(PARTICIPANT_ID)
+                            .contractPolicyId(policy.getId()).build();
                     runtime.getService(ContractDefinitionStore.class).save(contractDefinition);
                 });
 

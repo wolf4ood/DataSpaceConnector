@@ -21,8 +21,10 @@ import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
 import org.eclipse.edc.api.model.IdResponse;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.offer.ContractDefinition;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.contractdefinition.ContractDefinitionService;
 import org.eclipse.edc.junit.annotations.ApiTest;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.query.QuerySpec;
 import org.eclipse.edc.spi.result.Result;
 import org.eclipse.edc.spi.result.ServiceResult;
@@ -66,9 +68,10 @@ public abstract class BaseContractDefinitionApiControllerTest extends RestContro
     protected final ContractDefinitionService service = mock();
     protected final TypeTransformerRegistry transformerRegistry = mock();
     protected final JsonObjectValidatorRegistry validatorRegistry = mock();
+    protected final ParticipantContextSupplier participantContextSupplier = () -> new ParticipantContext("participantContext", "participantContext");
 
     @ParameterizedTest
-    @ValueSource(strings = { "", "{}" })
+    @ValueSource(strings = {"", "{}"})
     void queryAllContractDefinitions(String body) {
         when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.success());
         when(service.search(any())).thenReturn(ServiceResult.success(List.of(createContractDefinition().build())));

@@ -15,6 +15,7 @@
 package org.eclipse.edc.connector.controlplane.services.spi.protocol;
 
 import org.eclipse.edc.connector.controlplane.protocolversion.spi.ProtocolVersionRequest;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.response.StatusResult;
 
 import java.util.concurrent.CompletableFuture;
@@ -30,6 +31,6 @@ public interface VersionService {
      * @param request the protocol version request {@link ProtocolVersionRequest}.
      * @return the supported versions.
      */
-    CompletableFuture<StatusResult<byte[]>> requestVersions(ProtocolVersionRequest request);
+    CompletableFuture<StatusResult<byte[]>> requestVersions(ParticipantContext participantContext, ProtocolVersionRequest request);
 
 }

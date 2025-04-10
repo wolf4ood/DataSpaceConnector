@@ -20,6 +20,7 @@ import org.eclipse.edc.connector.controlplane.api.management.catalog.v3.CatalogA
 import org.eclipse.edc.connector.controlplane.api.management.catalog.v31alpha.CatalogApiV31AlphaController;
 import org.eclipse.edc.connector.controlplane.api.management.catalog.validation.CatalogRequestValidator;
 import org.eclipse.edc.connector.controlplane.api.management.catalog.validation.DatasetRequestValidator;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.catalog.CatalogService;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
@@ -54,6 +55,9 @@ public class CatalogApiExtension implements ServiceExtension {
     @Inject
     private CriterionOperatorRegistry criterionOperatorRegistry;
 
+    @Inject
+    private ParticipantContextSupplier participantContextSupplier;
+
     @Override
     public String name() {
         return NAME;
@@ -65,8 +69,8 @@ public class CatalogApiExtension implements ServiceExtension {
         transformerRegistry.register(new JsonObjectToDatasetRequestTransformer());
 
         var managementApiTransformerRegistry = transformerRegistry.forContext("management-api");
-        webService.registerResource(ApiContext.MANAGEMENT, new CatalogApiV3Controller(service, managementApiTransformerRegistry, validatorRegistry));
-        webService.registerResource(ApiContext.MANAGEMENT, new CatalogApiV31AlphaController(service, managementApiTransformerRegistry, validatorRegistry));
+        webService.registerResource(ApiContext.MANAGEMENT, new CatalogApiV3Controller(service, managementApiTransformerRegistry, validatorRegistry, participantContextSupplier));
+        webService.registerResource(ApiContext.MANAGEMENT, new CatalogApiV31AlphaController(service, managementApiTransformerRegistry, validatorRegistry, participantContextSupplier));
 
         validatorRegistry.register(CATALOG_REQUEST_TYPE, CatalogRequestValidator.instance(criterionOperatorRegistry));
         validatorRegistry.register(DATASET_REQUEST_TYPE, DatasetRequestValidator.instance());

@@ -19,6 +19,7 @@ import org.eclipse.edc.participant.spi.ParticipantAgentService;
 import org.eclipse.edc.policy.context.request.spi.RequestPolicyContext;
 import org.eclipse.edc.policy.engine.spi.PolicyEngine;
 import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.iam.ClaimToken;
 import org.eclipse.edc.spi.iam.IdentityService;
 import org.eclipse.edc.spi.iam.RequestContext;
@@ -51,13 +52,15 @@ class ProtocolTokenValidatorImplTest {
     @Test
     void shouldVerifyToken() {
         var participantAgent = new ParticipantAgent(emptyMap(), emptyMap());
+        var participantContext = new ParticipantContext("participantContext", "participantContext");
+
         var claimToken = ClaimToken.Builder.newInstance().build();
         var policy = Policy.Builder.newInstance().build();
         var tokenRepresentation = TokenRepresentation.Builder.newInstance().build();
         when(identityService.verifyJwtToken(any(), any())).thenReturn(Result.success(claimToken));
         when(agentService.createFor(any())).thenReturn(participantAgent);
 
-        var result = validator.verify(tokenRepresentation, TestRequestPolicyContext::new, policy, new TestMessage());
+        var result = validator.verify(participantContext, tokenRepresentation, TestRequestPolicyContext::new, policy, new TestMessage());
 
         assertThat(result).isSucceeded().isSameAs(participantAgent);
         verify(agentService).createFor(claimToken);
@@ -70,9 +73,11 @@ class ProtocolTokenValidatorImplTest {
 
     @Test
     void shouldReturnUnauthorized_whenTokenIsNotValid() {
+        var participantContext = new ParticipantContext("participantContext", "participantContext");
+
         when(identityService.verifyJwtToken(any(), any())).thenReturn(Result.failure("failure"));
 
-        var result = validator.verify(TokenRepresentation.Builder.newInstance().build(), TestRequestPolicyContext::new, Policy.Builder.newInstance().build(), new TestMessage());
+        var result = validator.verify(participantContext, TokenRepresentation.Builder.newInstance().build(), TestRequestPolicyContext::new, Policy.Builder.newInstance().build(), new TestMessage());
 
         assertThat(result).isFailed().extracting(ServiceFailure::getReason).isEqualTo(UNAUTHORIZED);
     }
@@ -96,6 +101,11 @@ class ProtocolTokenValidatorImplTest {
 
         @Override
         public String getCounterPartyId() {
+            return null;
+        }
+
+        @Override
+        public String getParticipantContextId() {
             return null;
         }
     }

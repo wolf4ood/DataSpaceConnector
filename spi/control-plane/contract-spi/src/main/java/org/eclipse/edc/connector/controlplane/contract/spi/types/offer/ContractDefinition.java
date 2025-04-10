@@ -17,7 +17,7 @@ package org.eclipse.edc.connector.controlplane.contract.spi.types.offer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import org.eclipse.edc.spi.entity.Entity;
+import org.eclipse.edc.spi.entity.AbstractParticipantResource;
 import org.eclipse.edc.spi.query.Criterion;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,19 +42,17 @@ import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
  * Note that the id must be a UUID.
  */
 @JsonDeserialize(builder = ContractDefinition.Builder.class)
-public class ContractDefinition extends Entity {
+public class ContractDefinition extends AbstractParticipantResource {
 
     public static final String CONTRACT_DEFINITION_TYPE = EDC_NAMESPACE + "ContractDefinition";
     public static final String CONTRACT_DEFINITION_ACCESSPOLICY_ID = EDC_NAMESPACE + "accessPolicyId";
     public static final String CONTRACT_DEFINITION_CONTRACTPOLICY_ID = EDC_NAMESPACE + "contractPolicyId";
     public static final String CONTRACT_DEFINITION_ASSETS_SELECTOR = EDC_NAMESPACE + "assetsSelector";
     public static final String CONTRACT_DEFINITION_PRIVATE_PROPERTIES = EDC_NAMESPACE + "privateProperties";
-
+    private final List<Criterion> assetsSelector = new ArrayList<>();
+    private final Map<String, Object> privateProperties = new HashMap<>();
     private String accessPolicyId;
     private String contractPolicyId;
-    private final List<Criterion> assetsSelector = new ArrayList<>();
-
-    private final Map<String, Object> privateProperties = new HashMap<>();
 
     private ContractDefinition() {
     }
@@ -113,8 +111,19 @@ public class ContractDefinition extends Entity {
                 '}';
     }
 
+    public Builder toBuilder() {
+        return new Builder()
+                .id(id)
+                .accessPolicyId(accessPolicyId)
+                .contractPolicyId(contractPolicyId)
+                .assetsSelector(assetsSelector)
+                .privateProperties(privateProperties)
+                .participantContextId(participantContextId)
+                .dataspaceContext(dataspaceContext);
+    }
+
     @JsonPOJOBuilder(withPrefix = "")
-    public static class Builder extends Entity.Builder<ContractDefinition, Builder> {
+    public static class Builder extends AbstractParticipantResource.Builder<ContractDefinition, Builder> {
 
         private Builder() {
             super(new ContractDefinition());

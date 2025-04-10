@@ -17,6 +17,7 @@
 package org.eclipse.edc.spi.iam;
 
 import org.eclipse.edc.runtime.metamodel.annotation.ExtensionPoint;
+import org.eclipse.edc.spi.entity.ParticipantContext;
 import org.eclipse.edc.spi.result.Result;
 
 /**
@@ -32,7 +33,7 @@ public interface IdentityService {
      * @param parameters parameter object defining the token properties.
      * @return generated client token.
      */
-    Result<TokenRepresentation> obtainClientCredentials(TokenParameters parameters);
+    Result<TokenRepresentation> obtainClientCredentials(ParticipantContext participantContext, TokenParameters parameters);
 
     /**
      * Verifies a JWT bearer token.

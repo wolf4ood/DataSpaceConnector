@@ -26,6 +26,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import org.eclipse.edc.api.model.IdResponse;
 import org.eclipse.edc.connector.controlplane.asset.spi.domain.Asset;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.asset.AssetService;
 import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.monitor.Monitor;
@@ -52,13 +53,15 @@ public class AssetApiController implements AssetApi {
     private final AssetService service;
     private final Monitor monitor;
     private final JsonObjectValidatorRegistry validator;
+    private final ParticipantContextSupplier participantContextSupplier;
 
     public AssetApiController(AssetService service, TypeTransformerRegistry transformerRegistry,
-                              Monitor monitor, JsonObjectValidatorRegistry validator) {
+                              Monitor monitor, JsonObjectValidatorRegistry validator, ParticipantContextSupplier participantContextSupplier) {
         this.transformerRegistry = transformerRegistry;
         this.service = service;
         this.monitor = monitor;
         this.validator = validator;
+        this.participantContextSupplier = participantContextSupplier;
     }
 
     @POST
@@ -67,7 +70,10 @@ public class AssetApiController implements AssetApi {
         validator.validate(EDC_ASSET_TYPE, assetJson).orElseThrow(ValidationFailureException::new);
 
         var asset = transformerRegistry.transform(assetJson, Asset.class)
-                .orElseThrow(InvalidRequestException::new);
+                .orElseThrow(InvalidRequestException::new)
+                .toBuilder()
+                .participantContextId(participantContextSupplier.get().id())
+                .build();
 
         var idResponse = service.create(asset)
                 .map(a -> IdResponse.Builder.newInstance()

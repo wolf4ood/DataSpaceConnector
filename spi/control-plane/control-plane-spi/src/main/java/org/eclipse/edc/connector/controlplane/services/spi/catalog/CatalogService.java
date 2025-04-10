@@ -30,7 +30,7 @@ public interface CatalogService {
      * @param additionalScopes    optional list of additional scope values that are intended for use with the IAM subsystem
      * @return the provider's catalog
      */
-    CompletableFuture<StatusResult<byte[]>> requestCatalog(String counterPartyId, String counterPartyAddress, String protocol, QuerySpec querySpec, String... additionalScopes);
+    CompletableFuture<StatusResult<byte[]>> requestCatalog(String participantContextId, String counterPartyId, String counterPartyAddress, String protocol, QuerySpec querySpec, String... additionalScopes);
 
     /**
      * Return the dataset
@@ -40,5 +40,5 @@ public interface CatalogService {
      * @param protocol            the protocol.
      * @return the provider dataset.
      */
-    CompletableFuture<StatusResult<byte[]>> requestDataset(String id, String counterPartyId, String counterPartyAddress, String protocol);
+    CompletableFuture<StatusResult<byte[]>> requestDataset(String participantContextId, String id, String counterPartyId, String counterPartyAddress, String protocol);
 }

@@ -16,6 +16,7 @@ package org.eclipse.edc.protocol.dsp.catalog.http.api;
 
 import org.eclipse.edc.connector.controlplane.catalog.spi.DataService;
 import org.eclipse.edc.connector.controlplane.catalog.spi.DataServiceRegistry;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.catalog.CatalogProtocolService;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolVersionRegistry;
 import org.eclipse.edc.jsonld.spi.JsonLd;
@@ -86,6 +87,8 @@ public class DspCatalogApiExtension implements ServiceExtension {
     private TypeManager typeManager;
     @Inject
     private JsonLd jsonLd;
+    @Inject
+    private ParticipantContextSupplier participantContextSupplier;
 
     @Override
     public String name() {
@@ -97,8 +100,8 @@ public class DspCatalogApiExtension implements ServiceExtension {
         registerValidators(DSP_NAMESPACE_V_08);
         registerValidators(DSP_NAMESPACE_V_2024_1);
 
-        webService.registerResource(ApiContext.PROTOCOL, new DspCatalogApiController(service, dspRequestHandler, continuationTokenManager(monitor, DSP_TRANSFORMER_CONTEXT_V_08, DSP_NAMESPACE_V_08)));
-        webService.registerResource(ApiContext.PROTOCOL, new DspCatalogApiController20241(service, dspRequestHandler, continuationTokenManager(monitor, DSP_TRANSFORMER_CONTEXT_V_2024_1, DSP_NAMESPACE_V_2024_1)));
+        webService.registerResource(ApiContext.PROTOCOL, new DspCatalogApiController(service, dspRequestHandler, continuationTokenManager(monitor, DSP_TRANSFORMER_CONTEXT_V_08, DSP_NAMESPACE_V_08), participantContextSupplier));
+        webService.registerResource(ApiContext.PROTOCOL, new DspCatalogApiController20241(service, dspRequestHandler, continuationTokenManager(monitor, DSP_TRANSFORMER_CONTEXT_V_2024_1, DSP_NAMESPACE_V_2024_1), participantContextSupplier));
         webService.registerDynamicResource(ApiContext.PROTOCOL, DspCatalogApiController.class, new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_08));
         webService.registerDynamicResource(ApiContext.PROTOCOL, DspCatalogApiController20241.class, new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_2024_1));
 

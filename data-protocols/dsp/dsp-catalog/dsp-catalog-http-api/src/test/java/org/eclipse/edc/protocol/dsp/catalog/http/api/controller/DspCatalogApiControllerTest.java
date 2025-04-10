@@ -42,7 +42,7 @@ class DspCatalogApiControllerTest {
 
         @Override
         protected Object controller() {
-            return new DspCatalogApiController(service, dspRequestHandler, continuationTokenManager);
+            return new DspCatalogApiController(service, dspRequestHandler, continuationTokenManager, participantContextSupplier);
         }
     }
 
@@ -62,7 +62,7 @@ class DspCatalogApiControllerTest {
 
         @Override
         protected Object controller() {
-            return new DspCatalogApiController20241(service, dspRequestHandler, continuationTokenManager);
+            return new DspCatalogApiController20241(service, dspRequestHandler, continuationTokenManager, participantContextSupplier);
         }
     }
 }

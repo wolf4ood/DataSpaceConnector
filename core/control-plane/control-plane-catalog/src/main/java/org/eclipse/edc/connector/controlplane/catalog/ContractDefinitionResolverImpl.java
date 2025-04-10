@@ -24,7 +24,8 @@ import org.eclipse.edc.connector.controlplane.policy.spi.store.PolicyDefinitionS
 import org.eclipse.edc.participant.spi.ParticipantAgent;
 import org.eclipse.edc.policy.engine.spi.PolicyEngine;
 import org.eclipse.edc.policy.model.Policy;
-import org.eclipse.edc.spi.query.QuerySpec;
+import org.eclipse.edc.spi.entity.ParticipantContext;
+import org.eclipse.edc.spi.entity.ParticipantResource;
 import org.eclipse.edc.spi.result.Result;
 
 import java.util.HashMap;
@@ -49,9 +50,10 @@ public class ContractDefinitionResolverImpl implements ContractDefinitionResolve
     }
 
     @Override
-    public ResolvedContractDefinitions resolveFor(ParticipantAgent agent) {
+    public ResolvedContractDefinitions resolveFor(ParticipantContext participantContext, ParticipantAgent agent) {
         var policies = new HashMap<String, Policy>();
-        var definitions = definitionStore.findAll(QuerySpec.max())
+        var query = ParticipantResource.queryByParticipantContextId(participantContext.id()).limit(Integer.MAX_VALUE).build();
+        var definitions = definitionStore.findAll(query)
                 .filter(definition -> {
                     var accessResult = Optional.of(definition.getAccessPolicyId())
                             .map(policyId -> policies.computeIfAbsent(policyId,

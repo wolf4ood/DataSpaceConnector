@@ -22,6 +22,7 @@ dependencies {
     }
 
     implementation(project(":extensions:data-plane:data-plane-kafka"))
+
 }
 
 edcBuild {

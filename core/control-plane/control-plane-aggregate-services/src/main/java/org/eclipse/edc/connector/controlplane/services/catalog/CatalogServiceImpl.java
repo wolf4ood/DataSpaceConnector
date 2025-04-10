@@ -33,24 +33,26 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public CompletableFuture<StatusResult<byte[]>> requestCatalog(String counterPartyId, String counterPartyAddress, String protocol, QuerySpec querySpec, String... additionalScopes) {
+    public CompletableFuture<StatusResult<byte[]>> requestCatalog(String participantContextId, String counterPartyId, String counterPartyAddress, String protocol, QuerySpec querySpec, String... additionalScopes) {
         var request = CatalogRequestMessage.Builder.newInstance()
                 .protocol(protocol)
                 .counterPartyId(counterPartyId)
                 .counterPartyAddress(counterPartyAddress)
                 .querySpec(querySpec)
                 .additionalScopes(additionalScopes)
+                .participantContextId(participantContextId)
                 .build();
 
         return dispatcher.dispatch(byte[].class, request);
     }
 
     @Override
-    public CompletableFuture<StatusResult<byte[]>> requestDataset(String id, String counterPartyId, String counterPartyAddress, String protocol) {
+    public CompletableFuture<StatusResult<byte[]>> requestDataset(String participantContextId, String id, String counterPartyId, String counterPartyAddress, String protocol) {
         var request = DatasetRequestMessage.Builder.newInstance()
                 .datasetId(id)
                 .protocol(protocol)
                 .counterPartyId(counterPartyId)
+                .participantContextId(participantContextId)
                 .counterPartyAddress(counterPartyAddress)
                 .build();
 

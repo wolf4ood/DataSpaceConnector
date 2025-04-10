@@ -19,6 +19,7 @@ import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolVersions;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.VersionProtocolService;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.VersionsError;
@@ -35,17 +36,20 @@ public class DspVersionApiController {
 
     private final DspRequestHandler requestHandler;
     private final VersionProtocolService service;
+    private final ParticipantContextSupplier participantContextSupplier;
 
-    public DspVersionApiController(DspRequestHandler requestHandler, VersionProtocolService service) {
+    public DspVersionApiController(DspRequestHandler requestHandler, VersionProtocolService service, ParticipantContextSupplier participantContextSupplier) {
         this.requestHandler = requestHandler;
         this.service = service;
+        this.participantContextSupplier = participantContextSupplier;
     }
 
     @GET
     public Response getProtocolVersions(@HeaderParam(AUTHORIZATION) String token) {
         var request = GetDspRequest.Builder.newInstance(ProtocolVersions.class, VersionsError.class)
                 .token(token)
-                .serviceCall((id, tokenRepresentation) -> service.getAll(tokenRepresentation))
+                .participantContextProvider(participantContextSupplier)
+                .serviceCall((p, id, tokenRepresentation) -> service.getAll(p, tokenRepresentation))
                 .protocol(DATASPACE_PROTOCOL_HTTP)
                 .errorProvider(VersionsError.Builder::newInstance)
                 .build();
