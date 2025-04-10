@@ -39,12 +39,29 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.eclipse.edc.spi.entity.ParticipantResource.filterByParticipantContextId;
 import static org.eclipse.edc.spi.query.Criterion.criterion;
 import static org.eclipse.edc.spi.result.StoreFailure.Reason.ALREADY_EXISTS;
 import static org.eclipse.edc.spi.result.StoreFailure.Reason.NOT_FOUND;
 
 
 public abstract class PolicyDefinitionStoreTestBase {
+
+    protected abstract PolicyDefinitionStore getPolicyDefinitionStore();
+
+    private String getRandomId() {
+        return UUID.randomUUID().toString();
+    }
+
+    private PolicyDefinition createPolicyDef(String id, String target) {
+        return PolicyDefinition.Builder.newInstance().id(id).policy(Policy.Builder.newInstance().target(target).build())
+                .participantContextId("participantContextId")
+                .build();
+    }
+
+    private QuerySpec createQuery(Criterion criterion) {
+        return QuerySpec.Builder.newInstance().filter(criterion).build();
+    }
 
     @Nested
     class Create {
@@ -69,12 +86,14 @@ public abstract class PolicyDefinitionStoreTestBase {
                             .target("Target1")
                             .build())
                     .id(id)
+                    .participantContextId("participantContextId")
                     .build();
             var policy2 = PolicyDefinition.Builder.newInstance()
                     .policy(Policy.Builder.newInstance()
                             .target("Target2")
                             .build())
                     .id(id)
+                    .participantContextId("participantContextId")
                     .build();
             var spec = QuerySpec.Builder.newInstance().build();
 
@@ -300,7 +319,9 @@ public abstract class PolicyDefinitionStoreTestBase {
                     .extensibleProperty("updatedKey", "updatedValue")
                     .build();
 
-            var result = store.update(PolicyDefinition.Builder.newInstance().id(policyId).policy(updatedPolicy).build());
+            var result = store.update(PolicyDefinition.Builder.newInstance().id(policyId).policy(updatedPolicy)
+                    .participantContextId("participantContextId")
+                    .build());
             assertThat(result.succeeded()).isTrue();
             var content = result.getContent().getPolicy();
             assertThat(content).isEqualTo(updatedPolicy);
@@ -393,7 +414,9 @@ public abstract class PolicyDefinitionStoreTestBase {
                     .assigner("test-assigner")
                     .assignee("test-assignee")
                     .build();
-            var policyDef1 = PolicyDefinition.Builder.newInstance().id("test-policy").policy(policy).build();
+            var policyDef1 = PolicyDefinition.Builder.newInstance().id("test-policy").policy(policy)
+                    .participantContextId("participantContextId")
+                    .build();
             getPolicyDefinitionStore().create(policyDef1);
 
             var criterion = criterion("notexist", "=", "foobar");
@@ -415,6 +438,53 @@ public abstract class PolicyDefinitionStoreTestBase {
         }
 
         @Test
+        void queryByParticipantContextId() {
+            var definitionsExpected = TestFunctions.createPolicies(10);
+            definitionsExpected.forEach(getPolicyDefinitionStore()::create);
+
+            var p = TestFunctions.createPolicyBuilder("test-policy")
+                    .build();
+
+            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p)
+                    .participantContextId("customParticipantContextId")
+                    .build();
+
+            getPolicyDefinitionStore().create(policyDef);
+
+            // query by prohibition assignee
+            var query = createQuery(filterByParticipantContextId("customParticipantContextId"));
+            var result = getPolicyDefinitionStore().findAll(query);
+            assertThat(result).hasSize(1)
+                    .usingRecursiveFieldByFieldElementComparator()
+                    .containsExactly(policyDef);
+
+        }
+
+        @Test
+        void queryByDataspaceContext() {
+            var definitionsExpected = TestFunctions.createPolicies(10);
+            definitionsExpected.forEach(getPolicyDefinitionStore()::create);
+
+            var p = TestFunctions.createPolicyBuilder("test-policy")
+                    .build();
+
+            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p)
+                    .participantContextId("participantContextId")
+                    .dataspaceContext("customDataspaceContext")
+                    .build();
+
+            getPolicyDefinitionStore().create(policyDef);
+
+            // query by prohibition assignee
+            var query = createQuery(criterion("dataspaceContext", "=", "customDataspaceContext"));
+            var result = getPolicyDefinitionStore().findAll(query);
+            assertThat(result).hasSize(1)
+                    .usingRecursiveFieldByFieldElementComparator()
+                    .containsExactly(policyDef);
+
+        }
+
+        @Test
         void queryByProhibitions() {
             var p = TestFunctions.createPolicyBuilder("test-policy")
                     .prohibition(TestFunctions.createProhibitionBuilder("prohibition1")
@@ -422,7 +492,9 @@ public abstract class PolicyDefinitionStoreTestBase {
                             .build())
                     .build();
 
-            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p).build();
+            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p)
+                    .participantContextId("participantContextId")
+                    .build();
             getPolicyDefinitionStore().create(policyDef);
 
             // query by prohibition assignee
@@ -448,7 +520,9 @@ public abstract class PolicyDefinitionStoreTestBase {
                             .build())
                     .build();
 
-            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p).build();
+            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p)
+                    .participantContextId("participantContextId")
+                    .build();
             getPolicyDefinitionStore().create(policyDef);
 
             // query by prohibition assignee
@@ -465,7 +539,9 @@ public abstract class PolicyDefinitionStoreTestBase {
                             .build())
                     .build();
 
-            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p).build();
+            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p)
+                    .participantContextId("participantContextId")
+                    .build();
             getPolicyDefinitionStore().create(policyDef);
 
             // query by prohibition assignee
@@ -491,7 +567,9 @@ public abstract class PolicyDefinitionStoreTestBase {
                             .build())
                     .build();
 
-            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p).build();
+            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p)
+                    .participantContextId("participantContextId")
+                    .build();
             getPolicyDefinitionStore().create(policyDef);
 
             // query by prohibition assignee
@@ -508,7 +586,9 @@ public abstract class PolicyDefinitionStoreTestBase {
                             .build())
                     .build();
 
-            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p).build();
+            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p)
+                    .participantContextId("participantContextId")
+                    .build();
             getPolicyDefinitionStore().create(policyDef);
             getPolicyDefinitionStore().create(TestFunctions.createPolicy("another-policy"));
 
@@ -535,7 +615,9 @@ public abstract class PolicyDefinitionStoreTestBase {
                             .build())
                     .build();
 
-            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p).build();
+            var policyDef = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p)
+                    .participantContextId("participantContextId")
+                    .build();
             getPolicyDefinitionStore().create(policyDef);
 
             // query by prohibition assignee
@@ -551,13 +633,13 @@ public abstract class PolicyDefinitionStoreTestBase {
                     .assignee("test-assignee")
                     .build();
 
-            var policyDef1 = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p1).build();
+            var policyDef1 = PolicyDefinition.Builder.newInstance().id("test-policy").policy(p1).participantContextId("participantContextId").build();
             var p2 = TestFunctions.createPolicyBuilder("test-policy")
                     .assigner("another-test-assigner")
                     .assignee("another-test-assignee")
                     .build();
 
-            var policyDef2 = PolicyDefinition.Builder.newInstance().id("test-policy2").policy(p2).build();
+            var policyDef2 = PolicyDefinition.Builder.newInstance().id("test-policy2").policy(p2).participantContextId("participantContextId").build();
             getPolicyDefinitionStore().create(policyDef1);
             getPolicyDefinitionStore().create(policyDef2);
 
@@ -575,7 +657,9 @@ public abstract class PolicyDefinitionStoreTestBase {
                     .assignee("test-assignee")
                     .build();
 
-            var policyDef1 = PolicyDefinition.Builder.newInstance().id("test-policy").policy(policy).build();
+            var policyDef1 = PolicyDefinition.Builder.newInstance().id("test-policy").policy(policy)
+                    .participantContextId("participantContextId")
+                    .build();
             getPolicyDefinitionStore().create(policyDef1);
 
             // query by prohibition assignee
@@ -779,19 +863,5 @@ public abstract class PolicyDefinitionStoreTestBase {
                     .extracting(StoreResult::reason)
                     .isEqualTo(NOT_FOUND);
         }
-    }
-
-    protected abstract PolicyDefinitionStore getPolicyDefinitionStore();
-
-    private String getRandomId() {
-        return UUID.randomUUID().toString();
-    }
-
-    private PolicyDefinition createPolicyDef(String id, String target) {
-        return PolicyDefinition.Builder.newInstance().id(id).policy(Policy.Builder.newInstance().target(target).build()).build();
-    }
-
-    private QuerySpec createQuery(Criterion criterion) {
-        return QuerySpec.Builder.newInstance().filter(criterion).build();
     }
 }

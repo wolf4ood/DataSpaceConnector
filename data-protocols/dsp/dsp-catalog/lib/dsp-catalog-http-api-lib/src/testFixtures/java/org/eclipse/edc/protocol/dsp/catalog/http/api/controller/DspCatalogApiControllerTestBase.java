@@ -22,6 +22,8 @@ import jakarta.ws.rs.core.Response;
 import org.eclipse.edc.connector.controlplane.catalog.spi.Catalog;
 import org.eclipse.edc.connector.controlplane.catalog.spi.CatalogRequestMessage;
 import org.eclipse.edc.connector.controlplane.catalog.spi.Dataset;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
+import org.eclipse.edc.connector.controlplane.participants.spi.domain.ParticipantContext;
 import org.eclipse.edc.connector.controlplane.services.spi.catalog.CatalogProtocolService;
 import org.eclipse.edc.jsonld.spi.JsonLdKeywords;
 import org.eclipse.edc.jsonld.spi.JsonLdNamespace;
@@ -62,6 +64,7 @@ public abstract class DspCatalogApiControllerTestBase extends RestControllerTest
     protected final CatalogProtocolService service = mock();
     protected final DspRequestHandler dspRequestHandler = mock();
     protected final ContinuationTokenManager continuationTokenManager = mock();
+    protected final ParticipantContextSupplier participantContextSupplier = () -> new ParticipantContext("participantId", "participantId");
 
     @Test
     void getDataset_shouldGetResource() {

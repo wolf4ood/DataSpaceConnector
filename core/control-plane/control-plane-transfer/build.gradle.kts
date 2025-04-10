@@ -20,6 +20,7 @@ dependencies {
     api(project(":spi:control-plane:policy-spi"))
     api(project(":spi:control-plane:transfer-spi"))
     api(project(":spi:common:transform-spi"))
+    api(project(":spi:common:participant-context-spi"))
 
     implementation(project(":core:common:lib:state-machine-lib"))
     implementation(project(":core:common:lib:util-lib"))

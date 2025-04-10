@@ -38,6 +38,7 @@ class TerminateNegotiationCommandHandlerTest {
                 .counterPartyId("counter-party")
                 .counterPartyAddress("https://counter-party")
                 .protocol("test-protocol")
+                .participantContextId("participantContextId")
                 .build();
 
         var command = new TerminateNegotiationCommand("test", "reason");

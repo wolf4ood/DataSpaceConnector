@@ -14,6 +14,7 @@
 
 package org.eclipse.edc.connector.dataplane.iam;
 
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.dataplane.iam.service.DataPlaneAuthorizationServiceImpl;
 import org.eclipse.edc.connector.dataplane.spi.iam.DataPlaneAccessControlService;
 import org.eclipse.edc.connector.dataplane.spi.iam.DataPlaneAccessTokenService;
@@ -41,6 +42,9 @@ public class DataPlaneIamExtension implements ServiceExtension {
     @Inject
     private PublicEndpointGeneratorService endpointGenerator;
 
+    @Inject
+    private ParticipantContextSupplier participantContextSupplier;
+
     @Override
     public String name() {
         return NAME;
@@ -48,7 +52,7 @@ public class DataPlaneIamExtension implements ServiceExtension {
 
     @Provider
     public DataPlaneAuthorizationService authorizationService(ServiceExtensionContext context) {
-        return new DataPlaneAuthorizationServiceImpl(accessTokenService, endpointGenerator, accessControlService, context.getParticipantId(), clock);
+        return new DataPlaneAuthorizationServiceImpl(accessTokenService, endpointGenerator, accessControlService, participantContextSupplier, clock);
     }
 
 }

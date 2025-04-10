@@ -241,7 +241,9 @@ public class AssetApiEndToEndTest {
         void queryAsset_byContentType(ManagementEndToEndTestContext context, AssetIndex assetIndex) {
             //insert one asset into the index
             var id = UUID.randomUUID().toString();
-            var asset = Asset.Builder.newInstance().id(id).contentType("application/octet-stream").dataAddress(createDataAddress().build()).build();
+            var asset = Asset.Builder.newInstance().id(id).contentType("application/octet-stream").dataAddress(createDataAddress().build())
+                    .participantContextId("participantContextId")
+                    .build();
             assetIndex.create(asset);
 
             var query = createObjectBuilder()
@@ -274,6 +276,7 @@ public class AssetApiEndToEndTest {
                     .contentType("application/octet-stream")
                     .property("myProp", "myVal")
                     .dataAddress(createDataAddress().build())
+                    .participantContextId("participantContextId")
                     .build());
 
             context.baseRequest()
@@ -334,6 +337,7 @@ public class AssetApiEndToEndTest {
                     .property(Asset.PROPERTY_IS_CATALOG, true)
                     .id(id)
                     .contentType("application/octet-stream")
+                    .participantContextId("participantContextId")
                     .dataAddress(createDataAddress().build())
                     .build());
 
@@ -394,6 +398,7 @@ public class AssetApiEndToEndTest {
                     .description("test description")
                     .contentType("application/json")
                     .version("0.4.2")
+                    .participantContextId("participantContextId")
                     .dataAddress(createDataAddress().build());
         }
 

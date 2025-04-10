@@ -132,6 +132,7 @@ class ContractAgreementServiceImplTest {
                         .uri("local://test")
                         .build()))
                 .protocol("protocol")
+                .participantContextId("participantContextId")
                 .build();
     }
 }

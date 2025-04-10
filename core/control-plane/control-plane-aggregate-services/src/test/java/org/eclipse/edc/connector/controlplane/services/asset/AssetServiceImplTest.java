@@ -160,95 +160,6 @@ class AssetServiceImplTest {
         verifyNoInteractions(index);
     }
 
-    @Nested
-    class Delete {
-        @Test
-        void shouldDeleteAssetIfNotReferenceByContractAgreement() {
-            when(contractNegotiationStore.queryNegotiations(any())).thenReturn(Stream.empty());
-            when(index.deleteById("assetId")).thenReturn(StoreResult.success(createAsset("assetId")));
-
-            var deleted = service.delete("assetId");
-
-            assertThat(deleted.succeeded()).isTrue();
-            assertThat(deleted.getContent()).matches(hasId("assetId"));
-        }
-
-        @Test
-        void shouldNotDeleteIfAssetIsAlreadyPartOfAnAgreement() {
-            var asset = createAsset("assetId");
-            when(index.deleteById("assetId")).thenReturn(StoreResult.success(asset));
-            var contractNegotiation = ContractNegotiation.Builder.newInstance()
-                    .id(UUID.randomUUID().toString())
-                    .counterPartyId(UUID.randomUUID().toString())
-                    .counterPartyAddress("address")
-                    .protocol("protocol")
-                    .contractAgreement(ContractAgreement.Builder.newInstance()
-                            .id(UUID.randomUUID().toString())
-                            .providerId(UUID.randomUUID().toString())
-                            .consumerId(UUID.randomUUID().toString())
-                            .assetId(asset.getId())
-                            .policy(Policy.Builder.newInstance().build())
-                            .build())
-                    .build();
-            when(contractNegotiationStore.queryNegotiations(any())).thenReturn(Stream.of(contractNegotiation));
-
-            var deleted = service.delete("assetId");
-
-            assertThat(deleted.failed()).isTrue();
-            assertThat(deleted.getFailure().getReason()).isEqualTo(CONFLICT);
-            verify(contractNegotiationStore).queryNegotiations(any());
-            verifyNoMoreInteractions(contractNegotiationStore);
-        }
-
-        @ParameterizedTest
-        @MethodSource("nonFinalStates")
-        void shouldNotDeleteIfAssetIsAlreadyPartOfNotFinalNegotiation(ContractNegotiationStates state) {
-            var asset = createAsset("assetId");
-            when(index.deleteById("assetId")).thenReturn(StoreResult.success(asset));
-            var contractNegotiation = ContractNegotiation.Builder.newInstance()
-                    .id(UUID.randomUUID().toString())
-                    .counterPartyId(UUID.randomUUID().toString())
-                    .counterPartyAddress("address")
-                    .protocol("protocol")
-                    .state(state.code())
-                    .build();
-            when(contractNegotiationStore.queryNegotiations(any())).thenReturn(Stream.of(contractNegotiation));
-
-            var deleted = service.delete("assetId");
-
-            assertThat(deleted.failed()).isTrue();
-            assertThat(deleted.getFailure().getReason()).isEqualTo(CONFLICT);
-            verify(contractNegotiationStore).queryNegotiations(any());
-            verifyNoMoreInteractions(contractNegotiationStore);
-        }
-
-        @Test
-        void shouldFailIfAssetDoesNotExist() {
-            when(index.deleteById("assetId")).thenReturn(StoreResult.notFound("test"));
-
-            var deleted = service.delete("assetId");
-
-            assertThat(deleted.failed()).isTrue();
-            assertThat(deleted.getFailure().getReason()).isEqualTo(NOT_FOUND);
-        }
-
-        @Test
-        @DisplayName("Verifies that the query matches the internal data model")
-        void verifyCorrectQuery() {
-            when(index.deleteById(any())).thenReturn(StoreResult.success());
-
-            var deleted = service.delete("test-asset");
-            assertThat(deleted.succeeded()).isTrue();
-            verify(contractNegotiationStore).queryNegotiations(argThat(argument -> argument.getFilterExpression().size() == 1 && argument.getFilterExpression().get(0).getOperandLeft().equals("contractAgreement.assetId")));
-        }
-
-        private static Stream<Arguments> nonFinalStates() {
-            return Stream.of(ContractNegotiationStates.values())
-                    .filter(state -> !ContractNegotiationStates.isFinal(state.code()))
-                    .map(Arguments::of);
-        }
-    }
-
     @Test
     void updateAsset_shouldUpdateWhenExists() {
         var asset = createAsset("assetId");
@@ -298,6 +209,99 @@ class AssetServiceImplTest {
     }
 
     private Asset.Builder createAssetBuilder(String assetId) {
-        return Asset.Builder.newInstance().id(assetId).dataAddress(DataAddress.Builder.newInstance().type("any").build());
+        return Asset.Builder.newInstance().id(assetId)
+                .participantContextId(UUID.randomUUID().toString())
+                .dataAddress(DataAddress.Builder.newInstance().type("any").build());
+    }
+
+    @Nested
+    class Delete {
+        private static Stream<Arguments> nonFinalStates() {
+            return Stream.of(ContractNegotiationStates.values())
+                    .filter(state -> !ContractNegotiationStates.isFinal(state.code()))
+                    .map(Arguments::of);
+        }
+
+        @Test
+        void shouldDeleteAssetIfNotReferenceByContractAgreement() {
+            when(contractNegotiationStore.queryNegotiations(any())).thenReturn(Stream.empty());
+            when(index.deleteById("assetId")).thenReturn(StoreResult.success(createAsset("assetId")));
+
+            var deleted = service.delete("assetId");
+
+            assertThat(deleted.succeeded()).isTrue();
+            assertThat(deleted.getContent()).matches(hasId("assetId"));
+        }
+
+        @Test
+        void shouldNotDeleteIfAssetIsAlreadyPartOfAnAgreement() {
+            var asset = createAsset("assetId");
+            when(index.deleteById("assetId")).thenReturn(StoreResult.success(asset));
+            var contractNegotiation = ContractNegotiation.Builder.newInstance()
+                    .id(UUID.randomUUID().toString())
+                    .counterPartyId(UUID.randomUUID().toString())
+                    .counterPartyAddress("address")
+                    .protocol("protocol")
+                    .participantContextId("participantContextId")
+                    .contractAgreement(ContractAgreement.Builder.newInstance()
+                            .id(UUID.randomUUID().toString())
+                            .providerId(UUID.randomUUID().toString())
+                            .consumerId(UUID.randomUUID().toString())
+                            .assetId(asset.getId())
+                            .policy(Policy.Builder.newInstance().build())
+                            .build())
+                    .build();
+            when(contractNegotiationStore.queryNegotiations(any())).thenReturn(Stream.of(contractNegotiation));
+
+            var deleted = service.delete("assetId");
+
+            assertThat(deleted.failed()).isTrue();
+            assertThat(deleted.getFailure().getReason()).isEqualTo(CONFLICT);
+            verify(contractNegotiationStore).queryNegotiations(any());
+            verifyNoMoreInteractions(contractNegotiationStore);
+        }
+
+        @ParameterizedTest
+        @MethodSource("nonFinalStates")
+        void shouldNotDeleteIfAssetIsAlreadyPartOfNotFinalNegotiation(ContractNegotiationStates state) {
+            var asset = createAsset("assetId");
+            when(index.deleteById("assetId")).thenReturn(StoreResult.success(asset));
+            var contractNegotiation = ContractNegotiation.Builder.newInstance()
+                    .id(UUID.randomUUID().toString())
+                    .counterPartyId(UUID.randomUUID().toString())
+                    .counterPartyAddress("address")
+                    .protocol("protocol")
+                    .state(state.code())
+                    .participantContextId(asset.getParticipantContextId())
+                    .build();
+            when(contractNegotiationStore.queryNegotiations(any())).thenReturn(Stream.of(contractNegotiation));
+
+            var deleted = service.delete("assetId");
+
+            assertThat(deleted.failed()).isTrue();
+            assertThat(deleted.getFailure().getReason()).isEqualTo(CONFLICT);
+            verify(contractNegotiationStore).queryNegotiations(any());
+            verifyNoMoreInteractions(contractNegotiationStore);
+        }
+
+        @Test
+        void shouldFailIfAssetDoesNotExist() {
+            when(index.deleteById("assetId")).thenReturn(StoreResult.notFound("test"));
+
+            var deleted = service.delete("assetId");
+
+            assertThat(deleted.failed()).isTrue();
+            assertThat(deleted.getFailure().getReason()).isEqualTo(NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("Verifies that the query matches the internal data model")
+        void verifyCorrectQuery() {
+            when(index.deleteById(any())).thenReturn(StoreResult.success());
+
+            var deleted = service.delete("test-asset");
+            assertThat(deleted.succeeded()).isTrue();
+            verify(contractNegotiationStore).queryNegotiations(argThat(argument -> argument.getFilterExpression().size() == 1 && argument.getFilterExpression().get(0).getOperandLeft().equals("contractAgreement.assetId")));
+        }
     }
 }

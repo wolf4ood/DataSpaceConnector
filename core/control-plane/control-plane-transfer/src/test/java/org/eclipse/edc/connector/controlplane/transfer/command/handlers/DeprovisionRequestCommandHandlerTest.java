@@ -30,7 +30,9 @@ class DeprovisionRequestCommandHandlerTest {
 
     @Test
     void shouldModify_whenTransferProcessIsDeprovisionable() {
-        var entity = TransferProcess.Builder.newInstance().state(TERMINATED.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(TERMINATED.code())
+                .participantContextId("participantContextId")
+                .build();
         var command = new DeprovisionRequest("processId");
 
         var result = handler.modify(entity, command);
@@ -41,7 +43,9 @@ class DeprovisionRequestCommandHandlerTest {
 
     @Test
     void shouldNotModify_whenTransferProcessIsNotDeprovisionable() {
-        var entity = TransferProcess.Builder.newInstance().state(STARTED.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(STARTED.code())
+                .participantContextId("participantContextId")
+                .build();
         var command = new DeprovisionRequest("processId");
 
         var result = handler.modify(entity, command);

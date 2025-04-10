@@ -496,7 +496,9 @@ public class TransferProcess extends StatefulEntity<TransferProcess> {
                 .transferType(transferType)
                 .type(type)
                 .protocolMessages(protocolMessages)
-                .dataPlaneId(dataPlaneId);
+                .dataPlaneId(dataPlaneId)
+                .dataspaceContext(dataspaceContext)
+                .participantContextId(participantContextId);
         return copy(builder);
     }
 

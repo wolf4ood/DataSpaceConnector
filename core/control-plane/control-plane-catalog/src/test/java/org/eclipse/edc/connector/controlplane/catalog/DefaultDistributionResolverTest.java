@@ -44,7 +44,7 @@ class DefaultDistributionResolverTest {
         when(dataFlowManager.transferTypesFor(any())).thenReturn(Set.of("type1", "type2"));
 
         var dataAddress = DataAddress.Builder.newInstance().type("any").build();
-        var asset = Asset.Builder.newInstance().dataAddress(dataAddress).build();
+        var asset = Asset.Builder.newInstance().dataAddress(dataAddress).participantContextId("participantContextId").build();
 
         var distributions = resolver.getDistributions(any(), asset);
 
@@ -72,6 +72,7 @@ class DefaultDistributionResolverTest {
                 .dataAddress(dataAddress)
                 .property(Asset.PROPERTY_IS_CATALOG, true)
                 .description("test description")
+                .participantContextId("participantContextId")
                 .build();
 
         var distributions = resolver.getDistributions(any(), asset);

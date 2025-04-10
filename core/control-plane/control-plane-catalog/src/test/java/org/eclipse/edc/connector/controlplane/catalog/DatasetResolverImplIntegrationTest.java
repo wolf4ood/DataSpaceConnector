@@ -78,7 +78,9 @@ class DatasetResolverImplIntegrationTest {
                 policyStore,
                 mock(),
                 criterionOperatorRegistry);
-        var policyDefinition = PolicyDefinition.Builder.newInstance().policy(Policy.Builder.newInstance().build()).build();
+        var policyDefinition = PolicyDefinition.Builder.newInstance().policy(Policy.Builder.newInstance().build())
+                .participantContextId("participantContextId")
+                .build();
         when(policyStore.findById(any())).thenReturn(policyDefinition);
     }
 
@@ -183,6 +185,7 @@ class DatasetResolverImplIntegrationTest {
                 .id(id)
                 .accessPolicyId("access")
                 .contractPolicyId("contract")
+                .participantContextId("participantContextId")
                 .assetsSelector(emptyList());
     }
 
@@ -190,6 +193,7 @@ class DatasetResolverImplIntegrationTest {
         return Asset.Builder.newInstance()
                 .id(id)
                 .name("test asset " + id)
+                .participantContextId("participantContextId")
                 .dataAddress(DataAddress.Builder.newInstance().type("test-type").build());
     }
 

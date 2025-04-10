@@ -22,6 +22,7 @@ import org.eclipse.edc.connector.controlplane.contract.spi.types.agreement.Contr
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractNegotiation;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.offer.ContractOffer;
 import org.eclipse.edc.connector.controlplane.contract.spi.validation.ContractValidationService;
+import org.eclipse.edc.connector.controlplane.participants.spi.domain.ParticipantContext;
 import org.eclipse.edc.connector.controlplane.policy.spi.PolicyDefinition;
 import org.eclipse.edc.connector.controlplane.policy.spi.store.PolicyDefinitionStore;
 import org.eclipse.edc.connector.controlplane.provision.http.HttpProvisionerFixtures;
@@ -125,13 +126,15 @@ public class HttpProvisionerExtensionEndToEndTest {
         policyStore.create(createPolicyDefinition());
         assetIndex.create(createAssetEntry());
 
+        var participantContext = new ParticipantContext("participantContextId", "participantContextId");
+
         when(delegate.intercept(any()))
                 .thenAnswer(invocation -> HttpProvisionerFixtures.createResponse(503, invocation))
                 .thenAnswer(invocation -> HttpProvisionerFixtures.createResponse(200, invocation));
 
         when(identityService.verifyJwtToken(any(), isA(VerificationContext.class))).thenReturn(Result.success(ClaimToken.Builder.newInstance().build()));
 
-        var result = protocolService.notifyRequested(createTransferRequestMessage(), TokenRepresentation.Builder.newInstance().build());
+        var result = protocolService.notifyRequested(participantContext, createTransferRequestMessage(), TokenRepresentation.Builder.newInstance().build());
 
         assertThat(result).isSucceeded();
         await().untilAsserted(() -> {

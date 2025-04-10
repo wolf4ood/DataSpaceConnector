@@ -19,6 +19,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.eclipse.edc.connector.controlplane.contract.spi.negotiation.store.ContractNegotiationStore;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.agreement.ContractAgreement;
 import org.eclipse.edc.connector.controlplane.contract.spi.validation.ContractValidationService;
+import org.eclipse.edc.connector.controlplane.participants.spi.domain.ParticipantContext;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolTokenValidator;
 import org.eclipse.edc.connector.controlplane.services.spi.transferprocess.TransferProcessProtocolService;
 import org.eclipse.edc.connector.controlplane.transfer.spi.observe.TransferProcessObservable;
@@ -88,18 +89,18 @@ public class TransferProcessProtocolServiceImpl implements TransferProcessProtoc
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<TransferProcess> notifyRequested(TransferRequestMessage message, TokenRepresentation tokenRepresentation) {
+    public ServiceResult<TransferProcess> notifyRequested(ParticipantContext participantContext, TransferRequestMessage message, TokenRepresentation tokenRepresentation) {
         return transactionContext.execute(() -> fetchNotifyRequestContext(message)
                 .compose(context -> verifyRequest(tokenRepresentation, context, message))
                 .compose(context -> validateDestination(message, context))
                 .compose(context -> validateAgreement(message, context))
-                .compose(context -> requestedAction(message, context.agreement().getAssetId())));
+                .compose(context -> requestedAction(participantContext, message, context.agreement().getAssetId())));
     }
 
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<TransferProcess> notifyStarted(TransferStartMessage message, TokenRepresentation tokenRepresentation) {
+    public ServiceResult<TransferProcess> notifyStarted(ParticipantContext participantContext, TransferStartMessage message, TokenRepresentation tokenRepresentation) {
         return transactionContext.execute(() -> fetchRequestContext(message, this::findTransferProcess)
                 .compose(context -> verifyRequest(tokenRepresentation, context, message))
                 .compose(context -> onMessageDo(message, context.participantAgent(), context.agreement(), transferProcess -> startedAction(message, transferProcess)))
@@ -109,7 +110,7 @@ public class TransferProcessProtocolServiceImpl implements TransferProcessProtoc
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<TransferProcess> notifyCompleted(TransferCompletionMessage message, TokenRepresentation tokenRepresentation) {
+    public ServiceResult<TransferProcess> notifyCompleted(ParticipantContext participantContext, TransferCompletionMessage message, TokenRepresentation tokenRepresentation) {
         return transactionContext.execute(() -> fetchRequestContext(message, this::findTransferProcess)
                 .compose(context -> verifyRequest(tokenRepresentation, context, message))
                 .compose(context -> onMessageDo(message, context.participantAgent(), context.agreement(), transferProcess -> completedAction(message, transferProcess)))
@@ -117,7 +118,7 @@ public class TransferProcessProtocolServiceImpl implements TransferProcessProtoc
     }
 
     @Override
-    public @NotNull ServiceResult<TransferProcess> notifySuspended(TransferSuspensionMessage message, TokenRepresentation tokenRepresentation) {
+    public @NotNull ServiceResult<TransferProcess> notifySuspended(ParticipantContext participantContext, TransferSuspensionMessage message, TokenRepresentation tokenRepresentation) {
         return transactionContext.execute(() -> fetchRequestContext(message, this::findTransferProcess)
                 .compose(context -> verifyRequest(tokenRepresentation, context, message))
                 .compose(context -> onMessageDo(message, context.participantAgent(), context.agreement(), transferProcess -> suspendedAction(message, transferProcess)))
@@ -127,7 +128,7 @@ public class TransferProcessProtocolServiceImpl implements TransferProcessProtoc
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<TransferProcess> notifyTerminated(TransferTerminationMessage message, TokenRepresentation tokenRepresentation) {
+    public ServiceResult<TransferProcess> notifyTerminated(ParticipantContext participantContext, TransferTerminationMessage message, TokenRepresentation tokenRepresentation) {
         return transactionContext.execute(() -> fetchRequestContext(message, this::findTransferProcess)
                 .compose(context -> verifyRequest(tokenRepresentation, context, message))
                 .compose(context -> onMessageDo(message, context.participantAgent(), context.agreement(), transferProcess -> terminatedAction(message, transferProcess)))
@@ -137,20 +138,21 @@ public class TransferProcessProtocolServiceImpl implements TransferProcessProtoc
     @Override
     @WithSpan
     @NotNull
-    public ServiceResult<TransferProcess> findById(String id, TokenRepresentation tokenRepresentation) {
+    public ServiceResult<TransferProcess> findById(ParticipantContext participantContext, String id, TokenRepresentation tokenRepresentation) {
         return transactionContext.execute(() -> fetchRequestContext(id, this::findTransferProcessById)
                 .compose(context -> verifyRequest(tokenRepresentation, context, null))
                 .compose(context -> validateCounterParty(context.participantAgent(), context.agreement(), context.transferProcess())));
     }
 
     @NotNull
-    private ServiceResult<TransferProcess> requestedAction(TransferRequestMessage message, String assetId) {
+    private ServiceResult<TransferProcess> requestedAction(ParticipantContext participantContext, TransferRequestMessage message, String assetId) {
         var existingTransferProcess = transferProcessStore.findForCorrelationId(message.getConsumerPid());
         if (existingTransferProcess != null) {
             return ServiceResult.success(existingTransferProcess);
         }
         var process = TransferProcess.Builder.newInstance()
                 .id(randomUUID().toString())
+                .participantContextId(participantContext.id())
                 .protocol(message.getProtocol())
                 .correlationId(message.getConsumerPid())
                 .counterPartyAddress(message.getCallbackAddress())

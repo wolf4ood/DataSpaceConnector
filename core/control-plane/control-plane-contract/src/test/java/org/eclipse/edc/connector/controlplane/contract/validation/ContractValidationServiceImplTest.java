@@ -83,7 +83,8 @@ class ContractValidationServiceImplTest {
         return ContractDefinition.Builder.newInstance()
                 .id("1")
                 .accessPolicyId("access")
-                .contractPolicyId("contract");
+                .contractPolicyId("contract")
+                .participantContextId("participantContextId");
     }
 
     @BeforeEach
@@ -96,7 +97,7 @@ class ContractValidationServiceImplTest {
         var participantAgent = new ParticipantAgent(emptyMap(), Map.of(PARTICIPANT_IDENTITY, CONSUMER_ID));
         var originalPolicy = Policy.Builder.newInstance().target("1").build();
         var newPolicy = Policy.Builder.newInstance().target("1").build();
-        var asset = Asset.Builder.newInstance().id("1").build();
+        var asset = Asset.Builder.newInstance().id("1").participantContextId("participantContextId").build();
 
         when(assetIndex.findById("1")).thenReturn(asset);
         when(policyEngine.evaluate(any(), isA(CatalogPolicyContext.class))).thenReturn(Result.success());
@@ -127,7 +128,7 @@ class ContractValidationServiceImplTest {
     void verifyContractOfferValidation_failedIfNoConsumerIdentity() {
         var participantAgent = new ParticipantAgent(emptyMap(), emptyMap());
         var originalPolicy = Policy.Builder.newInstance().target("a").build();
-        var asset = Asset.Builder.newInstance().id("1").build();
+        var asset = Asset.Builder.newInstance().id("1").participantContextId("participantContextId").build();
         var validatableOffer = createValidatableConsumerOffer(asset, originalPolicy);
 
         var result = validationService.validateInitialOffer(participantAgent, validatableOffer);
@@ -138,7 +139,7 @@ class ContractValidationServiceImplTest {
     @Test
     void validate_failsIfValidityDiscrepancy() {
         var originalPolicy = Policy.Builder.newInstance().target("a").build();
-        var asset = Asset.Builder.newInstance().id("1").build();
+        var asset = Asset.Builder.newInstance().id("1").participantContextId("participantContextId").build();
 
         var participantAgent = new ParticipantAgent(emptyMap(), emptyMap());
         when(assetIndex.findById("1")).thenReturn(asset);
@@ -154,7 +155,7 @@ class ContractValidationServiceImplTest {
     @Test
     void validate_failsIfOfferedPolicyIsNotTheEqualToTheStoredOne() {
         var offeredPolicy = Policy.Builder.newInstance().permission(Permission.Builder.newInstance().build()).build();
-        var asset = Asset.Builder.newInstance().id("1").build();
+        var asset = Asset.Builder.newInstance().id("1").participantContextId("participantContextId").build();
 
         var participantAgent = new ParticipantAgent(emptyMap(), emptyMap());
         when(assetIndex.findById("1")).thenReturn(asset);
@@ -191,7 +192,7 @@ class ContractValidationServiceImplTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "malicious-actor" })
+    @ValueSource(strings = {"malicious-actor"})
     @NullSource
     void verifyContractAgreementValidation_failedIfInvalidCredentials(String counterPartyId) {
         var participantAgent = new ParticipantAgent(emptyMap(), counterPartyId != null ? Map.of(PARTICIPANT_IDENTITY, counterPartyId) : Map.of());
@@ -308,6 +309,7 @@ class ContractValidationServiceImplTest {
                 .counterPartyId(CONSUMER_ID)
                 .counterPartyAddress("https://consumer.com")
                 .protocol("test")
+                .participantContextId("participantContextId")
                 .build();
 
         var participantAgent = new ParticipantAgent(Map.of(), Map.of(PARTICIPANT_IDENTITY, CONSUMER_ID));
@@ -324,7 +326,7 @@ class ContractValidationServiceImplTest {
         var participantAgent = new ParticipantAgent(emptyMap(), Map.of(PARTICIPANT_IDENTITY, CONSUMER_ID));
 
         when(policyEngine.evaluate(any(), isA(CatalogPolicyContext.class))).thenReturn(Result.success());
-        when(assetIndex.findById(anyString())).thenReturn(Asset.Builder.newInstance().build());
+        when(assetIndex.findById(anyString())).thenReturn(Asset.Builder.newInstance().participantContextId("participantContextId").build());
         when(assetIndex.countAssets(anyList())).thenReturn(0L);
 
         var result = validationService.validateInitialOffer(participantAgent, validatableOffer);
@@ -340,7 +342,7 @@ class ContractValidationServiceImplTest {
 
         when(policyEngine.evaluate(any(), isA(CatalogPolicyContext.class))).thenReturn(Result.success());
         when(policyEngine.evaluate(any(), isA(ContractNegotiationPolicyContext.class))).thenReturn(Result.failure("evaluation failure"));
-        when(assetIndex.findById(anyString())).thenReturn(Asset.Builder.newInstance().build());
+        when(assetIndex.findById(anyString())).thenReturn(Asset.Builder.newInstance().participantContextId("participantContextId").build());
         when(assetIndex.countAssets(anyList())).thenReturn(1L);
 
         var result = validationService.validateInitialOffer(participantAgent, validatableOffer);
@@ -350,7 +352,7 @@ class ContractValidationServiceImplTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { PROVIDER_ID })
+    @ValueSource(strings = {PROVIDER_ID})
     @NullSource
     void validateConsumerRequest_failsInvalidCredentials(String counterPartyId) {
         var negotiation = ContractNegotiation.Builder.newInstance()
@@ -358,6 +360,7 @@ class ContractValidationServiceImplTest {
                 .counterPartyId(CONSUMER_ID)
                 .counterPartyAddress("https://consumer.com")
                 .protocol("test")
+                .participantContextId("participantContextId")
                 .build();
 
         var participantAgent = new ParticipantAgent(Map.of(), counterPartyId != null ? Map.of(PARTICIPANT_IDENTITY, counterPartyId) : Map.of());
@@ -406,7 +409,7 @@ class ContractValidationServiceImplTest {
     }
 
     private ValidatableConsumerOffer createValidatableConsumerOffer() {
-        return createValidatableConsumerOffer(Asset.Builder.newInstance().build(), createPolicy());
+        return createValidatableConsumerOffer(Asset.Builder.newInstance().participantContextId("participantContextId").build(), createPolicy());
     }
 
     private ValidatableConsumerOffer createValidatableConsumerOffer(Asset asset, Policy accessPolicy, Policy contractPolicy) {
@@ -421,7 +424,7 @@ class ContractValidationServiceImplTest {
 
     @NotNull
     private ContractOffer createContractOffer() {
-        return createContractOffer(Asset.Builder.newInstance().build(), Policy.Builder.newInstance().build());
+        return createContractOffer(Asset.Builder.newInstance().participantContextId("participantContextId").build(), Policy.Builder.newInstance().build());
     }
 
     private ContractDefinition createContractDefinition() {

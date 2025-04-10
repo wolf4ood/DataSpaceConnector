@@ -18,6 +18,7 @@ package org.eclipse.edc.connector.controlplane.services.transferprocess;
 
 import org.eclipse.edc.connector.controlplane.contract.spi.negotiation.store.ContractNegotiationStore;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.agreement.ContractAgreement;
+import org.eclipse.edc.connector.controlplane.participants.spi.domain.ParticipantContext;
 import org.eclipse.edc.connector.controlplane.policy.spi.store.PolicyArchive;
 import org.eclipse.edc.connector.controlplane.services.spi.transferprocess.TransferProcessProtocolService;
 import org.eclipse.edc.connector.controlplane.services.spi.transferprocess.TransferProcessService;
@@ -118,6 +119,7 @@ public class TransferProcessEventDispatchTest {
 
         var token = ClaimToken.Builder.newInstance().build();
         var tokenRepresentation = TokenRepresentation.Builder.newInstance().token(UUID.randomUUID().toString()).build();
+        var participantContext = new ParticipantContext("participantContextId", "participantContextId");
 
         when(identityService.verifyJwtToken(any(), any())).thenReturn(Result.success(token));
 
@@ -139,7 +141,7 @@ public class TransferProcessEventDispatchTest {
         when(agentService.createFor(token)).thenReturn(agent);
         eventRouter.register(TransferProcessEvent.class, eventSubscriber);
 
-        var initiateResult = service.initiateTransfer(transferRequest);
+        var initiateResult = service.initiateTransfer(participantContext, transferRequest);
 
         assertThat(initiateResult).isSucceeded();
         await().atMost(TIMEOUT).untilAsserted(() -> {
@@ -156,7 +158,7 @@ public class TransferProcessEventDispatchTest {
                 .dataAddress(dataAddress)
                 .build();
 
-        var startedResult = protocolService.notifyStarted(startMessage, tokenRepresentation);
+        var startedResult = protocolService.notifyStarted(participantContext, startMessage, tokenRepresentation);
 
         assertThat(startedResult).isSucceeded();
         await().atMost(TIMEOUT).untilAsserted(() -> {
@@ -190,6 +192,7 @@ public class TransferProcessEventDispatchTest {
                                                         PolicyArchive policyArchive,
                                                         ContractNegotiationStore negotiationStore) {
 
+        var participantContext = new ParticipantContext("participantContextId", "participantContextId");
         var transferRequest = createTransferRequest();
         when(policyArchive.findPolicyForContract(matches("contractId"))).thenReturn(Policy.Builder.newInstance().target("assetId").build());
         var agreement = ContractAgreement.Builder.newInstance()
@@ -202,7 +205,7 @@ public class TransferProcessEventDispatchTest {
         dispatcherRegistry.register("test", getTestDispatcher());
         eventRouter.register(TransferProcessEvent.class, eventSubscriber);
 
-        var initiateResult = service.initiateTransfer(transferRequest);
+        var initiateResult = service.initiateTransfer(participantContext, transferRequest);
 
         await().atMost(TIMEOUT).untilAsserted(() -> {
             verify(eventSubscriber).on(argThat(isEnvelopeOf(TransferProcessInitiated.class)));
@@ -220,6 +223,8 @@ public class TransferProcessEventDispatchTest {
                                                      ContractNegotiationStore negotiationStore, PolicyArchive policyArchive) {
         dispatcherRegistry.register("test", getFailingDispatcher());
         eventRouter.register(TransferProcessEvent.class, eventSubscriber);
+        var participantContext = new ParticipantContext("participantContextId", "participantContextId");
+
         var transferRequest = createTransferRequest();
         var agreement = ContractAgreement.Builder.newInstance()
                 .assetId("assetId")
@@ -230,7 +235,7 @@ public class TransferProcessEventDispatchTest {
         when(negotiationStore.findContractAgreement(transferRequest.getContractId())).thenReturn(agreement);
         when(policyArchive.findPolicyForContract(any())).thenReturn(Policy.Builder.newInstance().build());
 
-        service.initiateTransfer(transferRequest);
+        service.initiateTransfer(participantContext, transferRequest);
 
         await().atMost(TIMEOUT).untilAsserted(() -> verify(eventSubscriber).on(argThat(isEnvelopeOf(TransferProcessTerminated.class))));
     }

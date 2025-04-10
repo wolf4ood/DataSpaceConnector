@@ -14,6 +14,7 @@
 
 package org.eclipse.edc.iam.mock;
 
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.runtime.metamodel.annotation.Provider;
@@ -37,6 +38,9 @@ public class IamMockExtension implements ServiceExtension {
     @Inject
     private TypeManager typeManager;
 
+    @Inject
+    private ParticipantContextSupplier participantContextSupplier;
+
     @Override
     public String name() {
         return NAME;
@@ -46,8 +50,7 @@ public class IamMockExtension implements ServiceExtension {
     public void initialize(ServiceExtensionContext context) {
         var region = context.getSetting("edc.mock.region", "eu");
         var faultyClientId = context.getSetting("edc.mock.faulty_client_id", "faultyClientId");
-        var participantId = context.getParticipantId();
-        context.registerService(IdentityService.class, new MockIdentityService(typeManager, region, participantId, faultyClientId));
+        context.registerService(IdentityService.class, new MockIdentityService(typeManager, region, participantContextSupplier, faultyClientId));
     }
 
     @Provider

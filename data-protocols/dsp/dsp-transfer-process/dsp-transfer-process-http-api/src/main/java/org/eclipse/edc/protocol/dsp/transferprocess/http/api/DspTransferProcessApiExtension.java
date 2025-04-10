@@ -14,6 +14,7 @@
 
 package org.eclipse.edc.protocol.dsp.transferprocess.http.api;
 
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolVersionRegistry;
 import org.eclipse.edc.connector.controlplane.services.spi.transferprocess.TransferProcessProtocolService;
 import org.eclipse.edc.jsonld.spi.JsonLd;
@@ -68,6 +69,8 @@ public class DspTransferProcessApiExtension implements ServiceExtension {
     private JsonLd jsonLd;
     @Inject
     private TypeManager typeManager;
+    @Inject
+    private ParticipantContextSupplier participantContextSupplier;
 
     @Override
     public void initialize(ServiceExtensionContext context) {
@@ -75,8 +78,8 @@ public class DspTransferProcessApiExtension implements ServiceExtension {
         registerValidators(DSP_NAMESPACE_V_08);
         registerValidators(DSP_NAMESPACE_V_2024_1);
 
-        webService.registerResource(ApiContext.PROTOCOL, new DspTransferProcessApiController(transferProcessProtocolService, dspRequestHandler));
-        webService.registerResource(ApiContext.PROTOCOL, new DspTransferProcessApiController20241(transferProcessProtocolService, dspRequestHandler));
+        webService.registerResource(ApiContext.PROTOCOL, new DspTransferProcessApiController(transferProcessProtocolService, dspRequestHandler, participantContextSupplier));
+        webService.registerResource(ApiContext.PROTOCOL, new DspTransferProcessApiController20241(transferProcessProtocolService, dspRequestHandler, participantContextSupplier));
         webService.registerDynamicResource(ApiContext.PROTOCOL, DspTransferProcessApiController.class, new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_08));
         webService.registerDynamicResource(ApiContext.PROTOCOL, DspTransferProcessApiController20241.class, new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_2024_1));
 

@@ -19,6 +19,7 @@ package org.eclipse.edc.connector.controlplane.transfer.process;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.eclipse.edc.connector.controlplane.asset.spi.index.DataAddressResolver;
+import org.eclipse.edc.connector.controlplane.participants.spi.domain.ParticipantContext;
 import org.eclipse.edc.connector.controlplane.policy.spi.store.PolicyArchive;
 import org.eclipse.edc.connector.controlplane.transfer.provision.DeprovisionResponsesHandler;
 import org.eclipse.edc.connector.controlplane.transfer.provision.ProvisionResponsesHandler;
@@ -133,7 +134,7 @@ public class TransferProcessManagerImpl extends AbstractStateEntityManager<Trans
      */
     @WithSpan
     @Override
-    public StatusResult<TransferProcess> initiateConsumerRequest(TransferRequest transferRequest) {
+    public StatusResult<TransferProcess> initiateConsumerRequest(ParticipantContext participantContext, TransferRequest transferRequest) {
         var id = Optional.ofNullable(transferRequest.getId()).orElseGet(() -> UUID.randomUUID().toString());
         var existingTransferProcess = store.findForCorrelationId(id);
         if (existingTransferProcess != null) {
@@ -148,6 +149,7 @@ public class TransferProcessManagerImpl extends AbstractStateEntityManager<Trans
         var process = TransferProcess.Builder.newInstance()
                 .id(id)
                 .assetId(policy.getTarget())
+                .participantContextId(participantContext.id())
                 .dataDestination(transferRequest.getDataDestination())
                 .counterPartyAddress(transferRequest.getCounterPartyAddress())
                 .contractId(transferRequest.getContractId())
@@ -579,17 +581,17 @@ public class TransferProcessManagerImpl extends AbstractStateEntityManager<Trans
     }
 
     private Processor processConsumerTransfersInState(TransferProcessStates state, Function<TransferProcess, Boolean> function) {
-        var filter = new Criterion[]{ hasState(state.code()), isNotPending(), Criterion.criterion("type", "=", CONSUMER.name()) };
+        var filter = new Criterion[]{hasState(state.code()), isNotPending(), Criterion.criterion("type", "=", CONSUMER.name())};
         return createProcessor(function, filter);
     }
 
     private Processor processProviderTransfersInState(TransferProcessStates state, Function<TransferProcess, Boolean> function) {
-        var filter = new Criterion[]{ hasState(state.code()), isNotPending(), Criterion.criterion("type", "=", PROVIDER.name()) };
+        var filter = new Criterion[]{hasState(state.code()), isNotPending(), Criterion.criterion("type", "=", PROVIDER.name())};
         return createProcessor(function, filter);
     }
 
     private Processor processTransfersInState(TransferProcessStates state, Function<TransferProcess, Boolean> function) {
-        var filter = new Criterion[]{ hasState(state.code()), isNotPending() };
+        var filter = new Criterion[]{hasState(state.code()), isNotPending()};
         return createProcessor(function, filter);
     }
 

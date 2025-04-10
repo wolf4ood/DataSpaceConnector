@@ -32,6 +32,9 @@ public abstract class TransferProcessEvent extends Event {
     protected String assetId;
     protected String type;
     protected String contractId;
+    protected String participantContextId;
+    protected String dataspaceContext;
+
 
     public String getTransferProcessId() {
         return transferProcessId;
@@ -47,6 +50,14 @@ public abstract class TransferProcessEvent extends Event {
 
     public String getContractId() {
         return contractId;
+    }
+
+    public String getParticipantContextId() {
+        return participantContextId;
+    }
+
+    public String getDataspaceContext() {
+        return dataspaceContext;
     }
 
     @Override
@@ -84,6 +95,16 @@ public abstract class TransferProcessEvent extends Event {
 
         public B contractId(String contractId) {
             event.contractId = contractId;
+            return self();
+        }
+
+        public B participantContextId(String participantContextId) {
+            event.participantContextId = participantContextId;
+            return self();
+        }
+
+        public B dataspaceContext(String dataspaceContext) {
+            event.dataspaceContext = dataspaceContext;
             return self();
         }
 

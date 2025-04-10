@@ -17,6 +17,8 @@ package org.eclipse.edc.protocol.dsp.version.http.api;
 import io.restassured.specification.RequestSpecification;
 import jakarta.json.Json;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
+import org.eclipse.edc.connector.controlplane.participants.spi.domain.ParticipantContext;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.VersionProtocolService;
 import org.eclipse.edc.junit.annotations.ApiTest;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
@@ -41,6 +43,8 @@ class DspVersionApiControllerTest extends RestControllerTestBase {
     private final VersionProtocolService service = mock();
     private final DspRequestHandler requestHandler = mock();
 
+    private final ParticipantContextSupplier participantContextSupplier = () -> new ParticipantContext("participantId", "participantId");
+
     @Test
     void shouldInvokeRequestHandler() {
         var output = Json.createObjectBuilder().add("protocolVersions", Json.createArrayBuilder().add(Json.createObjectBuilder().add("version", "1.0")).build()).build();
@@ -62,7 +66,7 @@ class DspVersionApiControllerTest extends RestControllerTestBase {
 
     @Override
     protected Object controller() {
-        return new DspVersionApiController(requestHandler, service);
+        return new DspVersionApiController(requestHandler, service, participantContextSupplier);
     }
 
     private RequestSpecification baseRequest() {

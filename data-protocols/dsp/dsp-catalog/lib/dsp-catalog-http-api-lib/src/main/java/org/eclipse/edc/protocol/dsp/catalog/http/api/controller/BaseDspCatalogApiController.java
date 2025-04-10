@@ -29,6 +29,7 @@ import org.eclipse.edc.connector.controlplane.catalog.spi.Catalog;
 import org.eclipse.edc.connector.controlplane.catalog.spi.CatalogError;
 import org.eclipse.edc.connector.controlplane.catalog.spi.CatalogRequestMessage;
 import org.eclipse.edc.connector.controlplane.catalog.spi.Dataset;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.catalog.CatalogProtocolService;
 import org.eclipse.edc.jsonld.spi.JsonLdNamespace;
 import org.eclipse.edc.protocol.dsp.http.spi.message.ContinuationTokenManager;
@@ -49,14 +50,17 @@ public abstract class BaseDspCatalogApiController {
     private final ContinuationTokenManager continuationTokenManager;
     private final String protocol;
     private final JsonLdNamespace namespace;
+    private final ParticipantContextSupplier participantContextSupplier;
 
 
-    public BaseDspCatalogApiController(CatalogProtocolService service, DspRequestHandler dspRequestHandler, ContinuationTokenManager continuationTokenManager, String protocol, JsonLdNamespace namespace) {
+    public BaseDspCatalogApiController(CatalogProtocolService service, DspRequestHandler dspRequestHandler, ContinuationTokenManager continuationTokenManager, String protocol, JsonLdNamespace namespace,
+                                       ParticipantContextSupplier participantContextSupplier) {
         this.service = service;
         this.dspRequestHandler = dspRequestHandler;
         this.continuationTokenManager = continuationTokenManager;
         this.protocol = protocol;
         this.namespace = namespace;
+        this.participantContextSupplier = participantContextSupplier;
     }
 
     @POST
@@ -75,6 +79,7 @@ public abstract class BaseDspCatalogApiController {
                 .token(token)
                 .expectedMessageType(namespace.toIri(DSPACE_TYPE_CATALOG_REQUEST_MESSAGE_TERM))
                 .message(messageJson)
+                .participantContextProvider(participantContextSupplier)
                 .serviceCall(service::getCatalog)
                 .errorProvider(CatalogError.Builder::newInstance)
                 .protocol(protocol)
@@ -90,7 +95,8 @@ public abstract class BaseDspCatalogApiController {
         var request = GetDspRequest.Builder.newInstance(Dataset.class, CatalogError.class)
                 .token(token)
                 .id(id)
-                .serviceCall((datasetId, tokenRepresentation) -> service.getDataset(datasetId, tokenRepresentation, protocol))
+                .serviceCall((p, i, t) -> service.getDataset(p, i, t, protocol))
+                .participantContextProvider(participantContextSupplier)
                 .errorProvider(CatalogError.Builder::newInstance)
                 .protocol(protocol)
                 .build();

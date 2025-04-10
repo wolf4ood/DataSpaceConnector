@@ -24,6 +24,7 @@ import org.eclipse.edc.connector.controlplane.api.management.policy.v3.PolicyDef
 import org.eclipse.edc.connector.controlplane.api.management.policy.v31alpha.PolicyDefinitionApiV31AlphaController;
 import org.eclipse.edc.connector.controlplane.api.management.policy.validation.PolicyDefinitionValidator;
 import org.eclipse.edc.connector.controlplane.api.management.policy.validation.PolicyEvaluationPlanRequestValidator;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.policydefinition.PolicyDefinitionService;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
@@ -62,6 +63,9 @@ public class PolicyDefinitionApiExtension implements ServiceExtension {
     @Inject
     private TypeManager typeManager;
 
+    @Inject
+    private ParticipantContextSupplier participantContextSupplier;
+
     @Override
     public String name() {
         return NAME;
@@ -81,7 +85,7 @@ public class PolicyDefinitionApiExtension implements ServiceExtension {
         validatorRegistry.register(EDC_POLICY_EVALUATION_PLAN_REQUEST_TYPE, PolicyEvaluationPlanRequestValidator.instance());
 
         var monitor = context.getMonitor();
-        webService.registerResource(ApiContext.MANAGEMENT, new PolicyDefinitionApiV3Controller(monitor, managementApiTransformerRegistry, service, validatorRegistry));
-        webService.registerResource(ApiContext.MANAGEMENT, new PolicyDefinitionApiV31AlphaController(monitor, managementApiTransformerRegistry, service, validatorRegistry));
+        webService.registerResource(ApiContext.MANAGEMENT, new PolicyDefinitionApiV3Controller(monitor, managementApiTransformerRegistry, service, validatorRegistry, participantContextSupplier));
+        webService.registerResource(ApiContext.MANAGEMENT, new PolicyDefinitionApiV31AlphaController(monitor, managementApiTransformerRegistry, service, validatorRegistry, participantContextSupplier));
     }
 }

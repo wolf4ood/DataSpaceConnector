@@ -25,7 +25,7 @@ public abstract class Entity {
     protected String id;
     protected Clock clock;
     protected long createdAt;
-
+    
     public long getCreatedAt() {
         return createdAt;
     }

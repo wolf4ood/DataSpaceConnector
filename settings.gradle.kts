@@ -47,6 +47,7 @@ include(":core:common:edr-store-core")
 include(":core:common:junit")
 include(":core:common:runtime-core")
 include(":core:common:token-core")
+include(":core:common:participant-context-core")
 
 include(":core:common:lib:api-lib")
 include(":core:common:lib:boot-lib")
@@ -270,6 +271,7 @@ include(":spi:common:identity-trust-spi")
 include(":spi:common:identity-trust-sts-spi")
 include(":spi:common:edr-store-spi")
 include(":spi:common:vault-hashicorp-spi")
+include(":spi:common:participant-context-spi")
 
 
 include(":spi:control-plane:asset-spi")

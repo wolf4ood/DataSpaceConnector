@@ -173,7 +173,7 @@ public class PolicyDefinitionApiV31AlphaControllerTest extends BasePolicyDefinit
 
     @Override
     protected Object controller() {
-        return new PolicyDefinitionApiV31AlphaController(monitor, transformerRegistry, service, validatorRegistry);
+        return new PolicyDefinitionApiV31AlphaController(monitor, transformerRegistry, service, validatorRegistry, participantContextSupplier);
     }
 
     @Override

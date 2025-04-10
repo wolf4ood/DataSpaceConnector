@@ -33,6 +33,7 @@ public interface Dsp2025Runtime {
                 ":core:control-plane:control-plane-core",
                 ":extensions:common:http",
                 ":core:common:connector-core",
+                ":core:common:participant-context-core",
                 ":core:common:runtime-core"
         );
 

@@ -17,6 +17,7 @@ package org.eclipse.edc.protocol.dsp.catalog.http.api.controller;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.catalog.CatalogProtocolService;
 import org.eclipse.edc.protocol.dsp.http.spi.message.ContinuationTokenManager;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
@@ -29,13 +30,14 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_NAMESPACE_V
 /**
  * Provides the HTTP endpoint for receiving catalog requests.
  */
-@Consumes({ APPLICATION_JSON })
-@Produces({ APPLICATION_JSON })
+@Consumes({APPLICATION_JSON})
+@Produces({APPLICATION_JSON})
 @Path(BASE_PATH)
 public class DspCatalogApiController extends BaseDspCatalogApiController {
-    
-    public DspCatalogApiController(CatalogProtocolService service, DspRequestHandler dspRequestHandler, ContinuationTokenManager continuationTokenManager) {
-        super(service, dspRequestHandler, continuationTokenManager, DATASPACE_PROTOCOL_HTTP, DSP_NAMESPACE_V_08);
+
+    public DspCatalogApiController(CatalogProtocolService service, DspRequestHandler dspRequestHandler, ContinuationTokenManager continuationTokenManager,
+                                   ParticipantContextSupplier participantContextSupplier) {
+        super(service, dspRequestHandler, continuationTokenManager, DATASPACE_PROTOCOL_HTTP, DSP_NAMESPACE_V_08, participantContextSupplier);
     }
 
 }

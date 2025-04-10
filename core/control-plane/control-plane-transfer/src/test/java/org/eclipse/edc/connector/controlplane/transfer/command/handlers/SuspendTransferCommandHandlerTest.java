@@ -38,7 +38,9 @@ class SuspendTransferCommandHandlerTest {
     @Test
     void shouldModify_ifItCanBeSuspended() {
         var command = new SuspendTransferCommand("test-id", "a reason");
-        var entity = TransferProcess.Builder.newInstance().state(STARTED.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(STARTED.code())
+                .participantContextId("participantContextId")
+                .build();
 
         var result = handler.modify(entity, command);
 
@@ -50,7 +52,9 @@ class SuspendTransferCommandHandlerTest {
     @Test
     void shouldNotModify_ifItCannotBeSuspended() {
         var command = new SuspendTransferCommand("test-id", "a reason");
-        var entity = TransferProcess.Builder.newInstance().state(COMPLETED.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(COMPLETED.code())
+                .participantContextId("participantContextId")
+                .build();
 
         var result = handler.modify(entity, command);
 

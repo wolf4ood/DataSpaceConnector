@@ -61,6 +61,7 @@ public class TestFunctions {
                 .consumerId("consumer")
                 .assetId(UUID.randomUUID().toString())
                 .policy(createPolicy())
+                .participantContextId("participantContextId")
                 .contractSigningDate(Instant.now().getEpochSecond());
     }
 
@@ -75,6 +76,7 @@ public class TestFunctions {
                 .counterPartyId("consumerId")
                 .callbackAddresses(List.of(createCallbackAddress()))
                 .protocol("protocol")
+                .participantContextId("participantContextId")
                 .protocolMessages(new ProtocolMessages());
     }
 

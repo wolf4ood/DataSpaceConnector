@@ -216,6 +216,7 @@ class ProvisionResponsesHandlerTest {
                 .correlationId(UUID.randomUUID().toString())
                 .contractId(UUID.randomUUID().toString())
                 .assetId(UUID.randomUUID().toString())
+                .participantContextId("participantContextId")
                 .dataDestination(DataAddress.Builder.newInstance().type("type")
                         .build());
     }

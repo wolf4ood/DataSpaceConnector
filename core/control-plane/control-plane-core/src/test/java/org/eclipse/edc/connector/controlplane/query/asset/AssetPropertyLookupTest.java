@@ -28,6 +28,7 @@ class AssetPropertyLookupTest {
     void shouldGetProperty() {
         var asset = Asset.Builder.newInstance()
                 .name("test-asset")
+                .participantContextId("participantContextId")
                 .build();
 
         var property = propertyLookup.getProperty(Asset.PROPERTY_NAME, asset);
@@ -41,6 +42,7 @@ class AssetPropertyLookupTest {
                 .name("test-asset")
                 .version("6.9")
                 .property("test-property", "some-value")
+                .participantContextId("participantContextId")
                 .build();
 
         var property = propertyLookup.getProperty("test-property", asset);
@@ -54,6 +56,7 @@ class AssetPropertyLookupTest {
                 .name("test-asset")
                 .property("test-property", "some-value")
                 .privateProperty("test-private-property", "somePrivateValue")
+                .participantContextId("participantContextId")
                 .build();
 
         var property = propertyLookup.getProperty("test-private-property", asset);
@@ -63,7 +66,8 @@ class AssetPropertyLookupTest {
 
     @Test
     void shouldReturnNull_whenPropertyDoesNotExist() {
-        var asset = Asset.Builder.newInstance().build();
+        var asset = Asset.Builder.newInstance().participantContextId("participantContextId")
+                .build();
 
         var property = propertyLookup.getProperty("not-existent", asset);
 

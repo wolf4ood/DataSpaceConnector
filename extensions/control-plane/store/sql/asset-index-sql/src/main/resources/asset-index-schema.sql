@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS edc_asset
     properties         JSON    DEFAULT '{}',
     private_properties JSON    DEFAULT '{}',
     data_address       JSON    DEFAULT '{}',
+    participant_context_id  VARCHAR NOT NULL,
+    dataspace_context       VARCHAR NOT NULL,
     PRIMARY KEY (asset_id)
 );
 

@@ -34,6 +34,7 @@ import org.eclipse.edc.connector.controlplane.contract.spi.policy.TransferProces
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractNegotiation;
 import org.eclipse.edc.connector.controlplane.contract.spi.validation.ContractValidationService;
 import org.eclipse.edc.connector.controlplane.contract.validation.ContractValidationServiceImpl;
+import org.eclipse.edc.connector.controlplane.participants.spi.store.ParticipantContextStore;
 import org.eclipse.edc.connector.controlplane.policy.contract.ContractExpiryCheckFunction;
 import org.eclipse.edc.connector.controlplane.policy.spi.store.PolicyDefinitionStore;
 import org.eclipse.edc.policy.engine.spi.PolicyEngine;
@@ -147,6 +148,9 @@ public class ContractCoreExtension implements ServiceExtension {
     @Inject
     private ExecutorInstrumentation executorInstrumentation;
 
+    @Inject
+    private ParticipantContextStore participantContextStore;
+
     @Override
     public String name() {
         return NAME;
@@ -179,7 +183,6 @@ public class ContractCoreExtension implements ServiceExtension {
     }
 
     private void registerServices(ServiceExtensionContext context) {
-        var participantId = context.getParticipantId();
 
         var policyEquality = new PolicyEquality(typeManager);
         var validationService = new ContractValidationServiceImpl(assetIndex, policyEngine, policyEquality);
@@ -197,7 +200,6 @@ public class ContractCoreExtension implements ServiceExtension {
         observable.registerListener(new ContractNegotiationEventListener(eventRouter, clock));
 
         consumerNegotiationManager = ConsumerContractNegotiationManagerImpl.Builder.newInstance()
-                .participantId(participantId)
                 .waitStrategy(waitStrategy)
                 .dispatcherRegistry(dispatcherRegistry)
                 .monitor(monitor)
@@ -214,7 +216,7 @@ public class ContractCoreExtension implements ServiceExtension {
                 .build();
 
         providerNegotiationManager = ProviderContractNegotiationManagerImpl.Builder.newInstance()
-                .participantId(participantId)
+                .participantContextStore(participantContextStore)
                 .waitStrategy(waitStrategy)
                 .dispatcherRegistry(dispatcherRegistry)
                 .monitor(monitor)

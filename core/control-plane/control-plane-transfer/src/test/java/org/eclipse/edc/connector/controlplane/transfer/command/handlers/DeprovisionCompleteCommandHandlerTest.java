@@ -37,7 +37,9 @@ class DeprovisionCompleteCommandHandlerTest {
 
     @Test
     void modify_shouldInvokeDeprovisionResultHandler() {
-        var entity = TransferProcess.Builder.newInstance().state(DEPROVISIONING.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(DEPROVISIONING.code())
+                .participantContextId("participantContextId")
+                .build();
         var provisionResponse = DeprovisionedResource.Builder.newInstance().provisionedResourceId("provisionedResourceId").build();
         var command = new DeprovisionCompleteCommand("id", provisionResponse);
         when(deprovisionResponsesHandler.handle(any(), any())).thenReturn(true);
@@ -50,7 +52,9 @@ class DeprovisionCompleteCommandHandlerTest {
 
     @Test
     void postActions_shouldInvokeDeprovisionResultHandler() {
-        var entity = TransferProcess.Builder.newInstance().state(DEPROVISIONING.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(DEPROVISIONING.code())
+                .participantContextId("participantContextId")
+                .build();
         var provisionResponse = DeprovisionedResource.Builder.newInstance().provisionedResourceId("provisionedResourceId").build();
         var command = new DeprovisionCompleteCommand("id", provisionResponse);
 
@@ -61,7 +65,9 @@ class DeprovisionCompleteCommandHandlerTest {
 
     @Test
     void modify_shouldReturnFalse_whenDeprovisionResultHandlerCannotHandle() {
-        var entity = TransferProcess.Builder.newInstance().state(TERMINATED.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(TERMINATED.code())
+                .participantContextId("participantContextId")
+                .build();
         var provisionResponse = DeprovisionedResource.Builder.newInstance().provisionedResourceId("provisionedResourceId").build();
         var command = new DeprovisionCompleteCommand("id", provisionResponse);
         when(deprovisionResponsesHandler.handle(any(), any())).thenReturn(false);

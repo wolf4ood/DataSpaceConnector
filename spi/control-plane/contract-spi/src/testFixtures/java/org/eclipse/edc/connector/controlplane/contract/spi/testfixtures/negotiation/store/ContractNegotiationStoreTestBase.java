@@ -56,6 +56,7 @@ import static org.eclipse.edc.connector.controlplane.contract.spi.types.negotiat
 import static org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractNegotiation.Type.PROVIDER;
 import static org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractNegotiationStates.REQUESTED;
 import static org.eclipse.edc.junit.assertions.AbstractResultAssert.assertThat;
+import static org.eclipse.edc.spi.entity.ParticipantResource.filterByParticipantContextId;
 import static org.eclipse.edc.spi.persistence.StateEntityStore.hasState;
 import static org.eclipse.edc.spi.query.Criterion.criterion;
 import static org.eclipse.edc.spi.result.StoreFailure.Reason.ALREADY_LEASED;
@@ -214,6 +215,7 @@ public abstract class ContractNegotiationStoreTestBase {
                     .counterPartyAddress("consumer")
                     .counterPartyId("consumerId")
                     .protocol("protocol")
+                    .participantContextId("participantContextId")
                     .build();
 
             getContractNegotiationStore().save(newNegotiation);
@@ -269,6 +271,7 @@ public abstract class ContractNegotiationStoreTestBase {
                     .counterPartyAddress("consumer")
                     .counterPartyId("consumerId")
                     .protocol("protocol")
+                    .participantContextId("participantContextId")
                     .build();
 
             // update should break lease
@@ -586,6 +589,44 @@ public abstract class ContractNegotiationStoreTestBase {
         }
 
         @Test
+        void byParticipantContextId() {
+            var negotiation1 = createNegotiationBuilder("negotiation1").participantContextId("customParticipantContext").build();
+            var negotiation2 = createNegotiation("negotiation2");
+
+            getContractNegotiationStore().save(negotiation1);
+            getContractNegotiationStore().save(negotiation2);
+
+            var query = QuerySpec.Builder.newInstance()
+                    .filter(filterByParticipantContextId("customParticipantContext"))
+                    .build();
+            var result = getContractNegotiationStore().queryNegotiations(query);
+
+            assertThat(result).hasSize(1)
+                    .usingRecursiveFieldByFieldElementComparator()
+                    .containsExactly(negotiation1);
+
+        }
+
+        @Test
+        void byDataSpaceContext() {
+            var negotiation1 = createNegotiationBuilder("negotiation1").dataspaceContext("customDataspaceContext").build();
+            var negotiation2 = createNegotiation("negotiation2");
+
+            getContractNegotiationStore().save(negotiation1);
+            getContractNegotiationStore().save(negotiation2);
+
+            var query = QuerySpec.Builder.newInstance()
+                    .filter(criterion("dataspaceContext", "=", "customDataspaceContext"))
+                    .build();
+            var result = getContractNegotiationStore().queryNegotiations(query);
+
+            assertThat(result).hasSize(1)
+                    .usingRecursiveFieldByFieldElementComparator()
+                    .containsExactly(negotiation1);
+
+        }
+
+        @Test
         void shouldReturnEmpty_whenCriteriaLeftOperandIsInvalid() {
             var contractId = ContractOfferId.create("definition", "asset");
             var agreement1 = createContract(contractId);
@@ -622,6 +663,55 @@ public abstract class ContractNegotiationStoreTestBase {
             var all = getContractNegotiationStore().queryAgreements(QuerySpec.Builder.newInstance().build());
 
             assertThat(all).hasSize(10);
+        }
+
+
+        @Test
+        void byParticipantContextId() {
+            var assetId = UUID.randomUUID().toString();
+            var contractId = ContractOfferId.create(UUID.randomUUID().toString(), assetId).toString();
+            var contractAgreement1 = createContractBuilder(contractId).assetId(assetId).participantContextId("customParticipantContext").build();
+            var contractAgreement2 = createContractBuilder(contractId).assetId(assetId).build();
+
+            var negotiation1 = createNegotiation("negotiation1", contractAgreement1);
+            var negotiation2 = createNegotiation("negotiation2", contractAgreement2);
+
+            getContractNegotiationStore().save(negotiation1);
+            getContractNegotiationStore().save(negotiation2);
+
+            var query = QuerySpec.Builder.newInstance()
+                    .filter(filterByParticipantContextId("customParticipantContext"))
+                    .build();
+            var result = getContractNegotiationStore().queryAgreements(query);
+
+            assertThat(result).hasSize(1)
+                    .usingRecursiveFieldByFieldElementComparator()
+                    .containsExactly(contractAgreement1);
+
+        }
+
+        @Test
+        void byDataSpaceContext() {
+            var assetId = UUID.randomUUID().toString();
+            var contractId = ContractOfferId.create(UUID.randomUUID().toString(), assetId).toString();
+            var contractAgreement1 = createContractBuilder(contractId).assetId(assetId).dataspaceContext("customDataspaceContext").build();
+            var contractAgreement2 = createContractBuilder(contractId).assetId(assetId).build();
+
+            var negotiation1 = createNegotiation("negotiation1", contractAgreement1);
+            var negotiation2 = createNegotiation("negotiation2", contractAgreement2);
+
+            getContractNegotiationStore().save(negotiation1);
+            getContractNegotiationStore().save(negotiation2);
+
+            var query = QuerySpec.Builder.newInstance()
+                    .filter(criterion("dataspaceContext", "=", "customDataspaceContext"))
+                    .build();
+            var result = getContractNegotiationStore().queryAgreements(query);
+
+            assertThat(result).hasSize(1)
+                    .usingRecursiveFieldByFieldElementComparator()
+                    .containsExactly(contractAgreement1);
+
         }
 
         @Test
@@ -719,7 +809,7 @@ public abstract class ContractNegotiationStoreTestBase {
                     .state(REQUESTED.code())
                     .type(CONSUMER)
                     .build()).forEach(getContractNegotiationStore()::save);
-            var criteria = new Criterion[]{ hasState(REQUESTED.code()), new Criterion("type", "=", "CONSUMER") };
+            var criteria = new Criterion[]{hasState(REQUESTED.code()), new Criterion("type", "=", "CONSUMER")};
 
             var result = getContractNegotiationStore().nextNotLeased(10, criteria);
 

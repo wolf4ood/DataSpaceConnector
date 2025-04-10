@@ -230,6 +230,7 @@ public class ContractNegotiationEventListenerTest {
                         .events(Set.of("test"))
                         .transactional(true)
                         .build()))
+                .participantContextId("participantContextId")
                 .state(0);
     }
 

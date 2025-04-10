@@ -16,19 +16,21 @@
 -- table: edc_policydefinitions
 CREATE TABLE IF NOT EXISTS edc_policydefinitions
 (
-    policy_id             VARCHAR NOT NULL,
-    created_at            BIGINT  NOT NULL,
-    permissions           JSON,
-    prohibitions          JSON,
-    duties                JSON,
-    profiles              JSON,
-    extensible_properties JSON,
-    inherits_from         VARCHAR,
-    assigner              VARCHAR,
-    assignee              VARCHAR,
-    target                VARCHAR,
-    policy_type           VARCHAR NOT NULL,
-    private_properties    JSON,
+    policy_id              VARCHAR NOT NULL,
+    created_at             BIGINT  NOT NULL,
+    permissions            JSON,
+    prohibitions           JSON,
+    duties                 JSON,
+    profiles               JSON,
+    extensible_properties  JSON,
+    inherits_from          VARCHAR,
+    assigner               VARCHAR,
+    assignee               VARCHAR,
+    target                 VARCHAR,
+    policy_type            VARCHAR NOT NULL,
+    private_properties     JSON,
+    participant_context_id VARCHAR NOT NULL,
+    dataspace_context      VARCHAR NOT NULL,
     PRIMARY KEY (policy_id)
 );
 

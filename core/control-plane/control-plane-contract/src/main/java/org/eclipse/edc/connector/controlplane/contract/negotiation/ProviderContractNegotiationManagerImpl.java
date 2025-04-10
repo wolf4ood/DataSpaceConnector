@@ -26,6 +26,7 @@ import org.eclipse.edc.connector.controlplane.contract.spi.types.agreement.Contr
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractNegotiation;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractOfferMessage;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.protocol.ContractNegotiationAck;
+import org.eclipse.edc.connector.controlplane.participants.spi.store.ParticipantContextStore;
 import org.eclipse.edc.policy.model.PolicyType;
 import org.eclipse.edc.statemachine.StateMachineManager;
 
@@ -45,6 +46,8 @@ import static org.eclipse.edc.connector.controlplane.contract.spi.types.negotiat
  * Implementation of the {@link ProviderContractNegotiationManager}.
  */
 public class ProviderContractNegotiationManagerImpl extends AbstractContractNegotiationManager implements ProviderContractNegotiationManager {
+
+    private ParticipantContextStore participantContextStore;
 
     private ProviderContractNegotiationManagerImpl() {
     }
@@ -128,11 +131,13 @@ public class ProviderContractNegotiationManagerImpl extends AbstractContractNego
         var agreement = Optional.ofNullable(negotiation.getContractAgreement())
                 .orElseGet(() -> {
                     var lastOffer = negotiation.getLastContractOffer();
-
+                    var participant = participantContextStore.findById(negotiation.getParticipantContextId());
                     return ContractAgreement.Builder.newInstance()
                             .contractSigningDate(clock.instant().getEpochSecond())
-                            .providerId(participantId)
+                            .providerId(participant.getIdentity(negotiation.getDataspaceContext()))
                             .consumerId(negotiation.getCounterPartyId())
+                            .participantContextId(negotiation.getParticipantContextId())
+                            .dataspaceContext(negotiation.getDataspaceContext())
                             .policy(lastOffer.getPolicy().toBuilder().type(PolicyType.CONTRACT).build())
                             .assetId(lastOffer.getAssetId())
                             .build();
@@ -186,6 +191,11 @@ public class ProviderContractNegotiationManagerImpl extends AbstractContractNego
 
         public static Builder newInstance() {
             return new Builder();
+        }
+
+        public Builder participantContextStore(ParticipantContextStore participantContextStore) {
+            manager.participantContextStore = participantContextStore;
+            return this;
         }
 
     }

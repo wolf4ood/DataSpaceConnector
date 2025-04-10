@@ -23,6 +23,7 @@ import org.eclipse.edc.connector.controlplane.api.management.transferprocess.tra
 import org.eclipse.edc.connector.controlplane.api.management.transferprocess.v3.TransferProcessApiV3Controller;
 import org.eclipse.edc.connector.controlplane.api.management.transferprocess.validation.TerminateTransferValidator;
 import org.eclipse.edc.connector.controlplane.api.management.transferprocess.validation.TransferRequestValidator;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.transferprocess.TransferProcessService;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
@@ -54,6 +55,9 @@ public class TransferProcessApiExtension implements ServiceExtension {
     @Inject
     private JsonObjectValidatorRegistry validatorRegistry;
 
+    @Inject
+    private ParticipantContextSupplier participantContextSupplier;
+
     @Override
     public String name() {
         return NAME;
@@ -74,6 +78,6 @@ public class TransferProcessApiExtension implements ServiceExtension {
         validatorRegistry.register(TRANSFER_REQUEST_TYPE, TransferRequestValidator.instance(context.getMonitor()));
         validatorRegistry.register(TERMINATE_TRANSFER_TYPE, TerminateTransferValidator.instance());
 
-        webService.registerResource(ApiContext.MANAGEMENT, new TransferProcessApiV3Controller(context.getMonitor(), service, managementApiTransformerRegistry, validatorRegistry));
+        webService.registerResource(ApiContext.MANAGEMENT, new TransferProcessApiV3Controller(context.getMonitor(), service, managementApiTransformerRegistry, validatorRegistry, participantContextSupplier));
     }
 }

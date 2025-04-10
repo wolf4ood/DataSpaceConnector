@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":spi:common:policy:request-policy-context-spi"))
     implementation(project(":spi:common:transaction-spi"))
     implementation(project(":spi:common:validator-spi"))
+    implementation(project(":spi:common:participant-context-spi"))
     implementation(project(":spi:control-plane:asset-spi"))
     implementation(project(":spi:control-plane:control-plane-spi"))
     implementation(project(":spi:control-plane:secrets-spi"))
@@ -29,6 +30,7 @@ dependencies {
 
     testImplementation(project(":core:common:runtime-core"))
     testImplementation(project(":core:common:connector-core"))
+    testImplementation(project(":core:common:participant-context-core"))
     testImplementation(project(":core:control-plane:control-plane-catalog"))
     testImplementation(project(":core:control-plane:control-plane-contract"))
     testImplementation(project(":core:control-plane:control-plane-core"))

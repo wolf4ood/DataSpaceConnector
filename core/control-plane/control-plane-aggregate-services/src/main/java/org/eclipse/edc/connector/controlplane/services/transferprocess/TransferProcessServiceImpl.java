@@ -16,6 +16,7 @@
 package org.eclipse.edc.connector.controlplane.services.transferprocess;
 
 import org.eclipse.edc.connector.controlplane.contract.spi.negotiation.store.ContractNegotiationStore;
+import org.eclipse.edc.connector.controlplane.participants.spi.domain.ParticipantContext;
 import org.eclipse.edc.connector.controlplane.services.query.QueryValidator;
 import org.eclipse.edc.connector.controlplane.services.spi.transferprocess.TransferProcessService;
 import org.eclipse.edc.connector.controlplane.transfer.spi.TransferProcessManager;
@@ -122,7 +123,7 @@ public class TransferProcessServiceImpl implements TransferProcessService {
     }
 
     @Override
-    public @NotNull ServiceResult<TransferProcess> initiateTransfer(TransferRequest request) {
+    public @NotNull ServiceResult<TransferProcess> initiateTransfer(ParticipantContext participantContext, TransferRequest request) {
         var transferTypeParse = transferTypeParser.parse(request.getTransferType());
         if (transferTypeParse.failed()) {
             return ServiceResult.badRequest("Property transferType not valid: " + transferTypeParse.getFailureDetail());
@@ -147,7 +148,7 @@ public class TransferProcessServiceImpl implements TransferProcessService {
         }
 
         return transactionContext.execute(() -> {
-            var transferInitiateResult = manager.initiateConsumerRequest(request);
+            var transferInitiateResult = manager.initiateConsumerRequest(participantContext, request);
             return Optional.ofNullable(transferInitiateResult)
                     .filter(AbstractResult::succeeded)
                     .map(AbstractResult::getContent)

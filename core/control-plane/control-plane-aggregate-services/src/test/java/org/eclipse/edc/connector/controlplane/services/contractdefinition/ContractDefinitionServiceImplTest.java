@@ -204,6 +204,7 @@ class ContractDefinitionServiceImplTest {
                 .id(UUID.randomUUID().toString())
                 .accessPolicyId(UUID.randomUUID().toString())
                 .contractPolicyId(UUID.randomUUID().toString())
+                .participantContextId(UUID.randomUUID().toString())
                 .build();
     }
 }

@@ -19,6 +19,8 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import org.eclipse.edc.api.model.IdResponse;
 import org.eclipse.edc.connector.controlplane.asset.spi.domain.Asset;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
+import org.eclipse.edc.connector.controlplane.participants.spi.domain.ParticipantContext;
 import org.eclipse.edc.connector.controlplane.services.spi.asset.AssetService;
 import org.eclipse.edc.junit.annotations.ApiTest;
 import org.eclipse.edc.spi.query.QuerySpec;
@@ -72,6 +74,8 @@ class AssetApiControllerTest extends RestControllerTestBase {
     private final AssetService service = mock(AssetService.class);
     private final TypeTransformerRegistry transformerRegistry = mock(TypeTransformerRegistry.class);
     private final JsonObjectValidatorRegistry validator = mock(JsonObjectValidatorRegistry.class);
+
+    private final ParticipantContextSupplier participantContextSupplier = () -> new ParticipantContext("participantContextId", "participantContextId");
 
     @BeforeEach
     void setup() {
@@ -405,7 +409,7 @@ class AssetApiControllerTest extends RestControllerTestBase {
 
     @Override
     protected Object controller() {
-        return new AssetApiController(service, transformerRegistry, monitor, validator);
+        return new AssetApiController(service, transformerRegistry, monitor, validator, participantContextSupplier);
     }
 
     private JsonObjectBuilder createAssetJson() {

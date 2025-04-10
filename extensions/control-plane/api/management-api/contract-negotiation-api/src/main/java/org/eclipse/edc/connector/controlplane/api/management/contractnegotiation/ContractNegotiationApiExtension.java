@@ -23,6 +23,7 @@ import org.eclipse.edc.connector.controlplane.api.management.contractnegotiation
 import org.eclipse.edc.connector.controlplane.api.management.contractnegotiation.v3.ContractNegotiationApiV3Controller;
 import org.eclipse.edc.connector.controlplane.api.management.contractnegotiation.validation.ContractRequestValidator;
 import org.eclipse.edc.connector.controlplane.api.management.contractnegotiation.validation.TerminateNegotiationValidator;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.contractnegotiation.ContractNegotiationService;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
@@ -55,6 +56,9 @@ public class ContractNegotiationApiExtension implements ServiceExtension {
     @Inject
     private JsonObjectValidatorRegistry validatorRegistry;
 
+    @Inject
+    private ParticipantContextSupplier participantContextSupplier;
+
     @Override
     public String name() {
         return NAME;
@@ -76,6 +80,6 @@ public class ContractNegotiationApiExtension implements ServiceExtension {
         validatorRegistry.register(CONTRACT_REQUEST_TYPE, ContractRequestValidator.instance());
         validatorRegistry.register(TERMINATE_NEGOTIATION_TYPE, TerminateNegotiationValidator.instance());
 
-        webService.registerResource(ApiContext.MANAGEMENT, new ContractNegotiationApiV3Controller(service, managementApiTransformerRegistry, monitor, validatorRegistry));
+        webService.registerResource(ApiContext.MANAGEMENT, new ContractNegotiationApiV3Controller(service, managementApiTransformerRegistry, monitor, validatorRegistry, participantContextSupplier));
     }
 }

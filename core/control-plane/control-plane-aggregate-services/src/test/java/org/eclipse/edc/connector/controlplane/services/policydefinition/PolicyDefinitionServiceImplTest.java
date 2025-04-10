@@ -30,6 +30,7 @@ import org.eclipse.edc.transaction.spi.TransactionContext;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -163,6 +164,7 @@ class PolicyDefinitionServiceImplTest {
 
         var contractDefinition = ContractDefinition.Builder.newInstance()
                 .id("A found Contract Definition")
+                .participantContextId(UUID.randomUUID().toString())
                 .accessPolicyId(policy.getId())
                 .contractPolicyId(policy.getId())
                 .assetsSelectorCriterion(criterion("left", "op", "right"))
@@ -184,6 +186,7 @@ class PolicyDefinitionServiceImplTest {
         var contractDefinition = ContractDefinition.Builder.newInstance()
                 .id("A found Contract Definition")
                 .accessPolicyId(policy.getId())
+                .participantContextId(UUID.randomUUID().toString())
                 .contractPolicyId(policy.getId())
                 .assetsSelectorCriterion(criterion("left", "op", "right"))
                 .build();
@@ -285,7 +288,9 @@ class PolicyDefinitionServiceImplTest {
     }
 
     private PolicyDefinition createPolicy(String policyId) {
-        return PolicyDefinition.Builder.newInstance().policy(Policy.Builder.newInstance().build()).id(policyId).build();
+        return PolicyDefinition.Builder.newInstance().policy(Policy.Builder.newInstance().build()).id(policyId)
+                .participantContextId(UUID.randomUUID().toString())
+                .build();
     }
 
 }

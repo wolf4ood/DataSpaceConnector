@@ -55,6 +55,14 @@ public interface AssetStatements extends SqlStatements {
         return "data_address";
     }
 
+    default String getParticipantContextIdColumn() {
+        return "participant_context_id";
+    }
+
+    default String getDataspaceContextColumn() {
+        return "dataspace_context";
+    }
+
     /**
      * The data address table name.
      */

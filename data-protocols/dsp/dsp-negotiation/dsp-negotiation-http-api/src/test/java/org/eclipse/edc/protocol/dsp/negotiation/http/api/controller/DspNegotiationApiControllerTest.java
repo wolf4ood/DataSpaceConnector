@@ -24,7 +24,7 @@ import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_NAMESPACE_V
 import static org.eclipse.edc.protocol.dsp.spi.version.DspVersions.V_2024_1_PATH;
 
 class DspNegotiationApiControllerTest {
-    
+
     @ApiTest
     @Nested
     class DspNegotiationApiControllerV08Test extends DspNegotiationApiControllerTestBase {
@@ -41,7 +41,7 @@ class DspNegotiationApiControllerTest {
 
         @Override
         protected Object controller() {
-            return new DspNegotiationApiController(protocolService, dspRequestHandler);
+            return new DspNegotiationApiController(protocolService, dspRequestHandler, participantContextSupplier);
         }
     }
 
@@ -61,7 +61,7 @@ class DspNegotiationApiControllerTest {
 
         @Override
         protected Object controller() {
-            return new DspNegotiationApiController20241(protocolService, dspRequestHandler);
+            return new DspNegotiationApiController20241(protocolService, dspRequestHandler, participantContextSupplier);
         }
     }
 }

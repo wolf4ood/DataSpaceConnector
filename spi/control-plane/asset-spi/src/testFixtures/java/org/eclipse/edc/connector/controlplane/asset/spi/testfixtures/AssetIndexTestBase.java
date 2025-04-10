@@ -42,6 +42,7 @@ import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.edc.spi.constants.CoreConstants.EDC_NAMESPACE;
+import static org.eclipse.edc.spi.entity.ParticipantResource.filterByParticipantContextId;
 import static org.eclipse.edc.spi.query.Criterion.criterion;
 import static org.eclipse.edc.spi.result.StoreFailure.Reason.ALREADY_EXISTS;
 import static org.eclipse.edc.spi.result.StoreFailure.Reason.NOT_FOUND;
@@ -70,6 +71,7 @@ public abstract class AssetIndexTestBase {
                 .name(name)
                 .version("1")
                 .contentType(contentType)
+                .participantContextId("participantContextId")
                 .dataAddress(DataAddress.Builder.newInstance()
                         .keyName("test-keyname")
                         .type(contentType)
@@ -95,6 +97,7 @@ public abstract class AssetIndexTestBase {
                 .createdAt(Clock.systemUTC().millis())
                 .property("key" + id, "value" + id)
                 .contentType("type")
+                .participantContextId("participantContextId")
                 .dataAddress(getDataAddress());
     }
 
@@ -323,6 +326,30 @@ public abstract class AssetIndexTestBase {
             getAssetIndex().create(differentVersion);
 
             var assets = getAssetIndex().queryAssets(filter(criterion("'%s'.'%s'".formatted(nested, version), "=", "2.0")));
+
+            assertThat(assets).hasSize(1).usingRecursiveFieldByFieldElementComparator().containsOnly(expected);
+        }
+
+        @Test
+        void shouldFilterByParticipantContext() {
+            var expected = createAssetBuilder("id1").participantContextId("context1").build();
+            var differentVersion = createAssetBuilder("id2").participantContextId("context2").build();
+            getAssetIndex().create(expected);
+            getAssetIndex().create(differentVersion);
+
+            var assets = getAssetIndex().queryAssets(filter(filterByParticipantContextId("context1")));
+
+            assertThat(assets).hasSize(1).usingRecursiveFieldByFieldElementComparator().containsOnly(expected);
+        }
+
+        @Test
+        void shouldFilterByDataspaceContext() {
+            var expected = createAssetBuilder("id1").dataspaceContext("dataspace1").build();
+            var differentVersion = createAssetBuilder("id2").participantContextId("dataspace2").build();
+            getAssetIndex().create(expected);
+            getAssetIndex().create(differentVersion);
+
+            var assets = getAssetIndex().queryAssets(filter(criterion("dataspaceContext", "=", "dataspace1")));
 
             assertThat(assets).hasSize(1).usingRecursiveFieldByFieldElementComparator().containsOnly(expected);
         }

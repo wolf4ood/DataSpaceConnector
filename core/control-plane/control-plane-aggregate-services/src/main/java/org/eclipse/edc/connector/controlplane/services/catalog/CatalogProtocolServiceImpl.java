@@ -19,6 +19,7 @@ import org.eclipse.edc.connector.controlplane.catalog.spi.CatalogRequestMessage;
 import org.eclipse.edc.connector.controlplane.catalog.spi.DataServiceRegistry;
 import org.eclipse.edc.connector.controlplane.catalog.spi.Dataset;
 import org.eclipse.edc.connector.controlplane.catalog.spi.DatasetResolver;
+import org.eclipse.edc.connector.controlplane.participants.spi.domain.ParticipantContext;
 import org.eclipse.edc.connector.controlplane.services.spi.catalog.CatalogProtocolService;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.ProtocolTokenValidator;
 import org.eclipse.edc.policy.context.request.spi.RequestCatalogPolicyContext;
@@ -33,26 +34,22 @@ public class CatalogProtocolServiceImpl implements CatalogProtocolService {
 
     private final DatasetResolver datasetResolver;
     private final DataServiceRegistry dataServiceRegistry;
-    private final String participantId;
     private final TransactionContext transactionContext;
-
     private final ProtocolTokenValidator protocolTokenValidator;
 
     public CatalogProtocolServiceImpl(DatasetResolver datasetResolver,
                                       DataServiceRegistry dataServiceRegistry,
                                       ProtocolTokenValidator protocolTokenValidator,
-                                      String participantId,
                                       TransactionContext transactionContext) {
         this.datasetResolver = datasetResolver;
         this.dataServiceRegistry = dataServiceRegistry;
         this.protocolTokenValidator = protocolTokenValidator;
-        this.participantId = participantId;
         this.transactionContext = transactionContext;
     }
 
     @Override
     @NotNull
-    public ServiceResult<Catalog> getCatalog(CatalogRequestMessage message, TokenRepresentation tokenRepresentation) {
+    public ServiceResult<Catalog> getCatalog(ParticipantContext participantContext, CatalogRequestMessage message, TokenRepresentation tokenRepresentation) {
         return transactionContext.execute(() -> protocolTokenValidator.verify(tokenRepresentation, RequestCatalogPolicyContext::new, message)
                 .map(agent -> {
                     try (var datasets = datasetResolver.query(agent, message.getQuerySpec(), message.getProtocol())) {
@@ -61,7 +58,7 @@ public class CatalogProtocolServiceImpl implements CatalogProtocolService {
                         return Catalog.Builder.newInstance()
                                 .dataServices(dataServices)
                                 .datasets(datasets.toList())
-                                .participantId(participantId)
+                                .participantId(participantContext.getIdentity(message.getDataspaceContext()))
                                 .build();
                     }
                 })
@@ -69,7 +66,7 @@ public class CatalogProtocolServiceImpl implements CatalogProtocolService {
     }
 
     @Override
-    public @NotNull ServiceResult<Dataset> getDataset(String datasetId, TokenRepresentation tokenRepresentation, String protocol) {
+    public @NotNull ServiceResult<Dataset> getDataset(ParticipantContext participantContext, String datasetId, TokenRepresentation tokenRepresentation, String protocol) {
         return transactionContext.execute(() -> protocolTokenValidator.verify(tokenRepresentation, RequestCatalogPolicyContext::new)
                 .map(agent -> datasetResolver.getById(agent, datasetId, protocol))
                 .compose(dataset -> {

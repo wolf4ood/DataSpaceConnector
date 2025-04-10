@@ -222,7 +222,7 @@ public class ControlPlaneServicesExtension implements ServiceExtension {
     @Provider
     public CatalogProtocolService catalogProtocolService(ServiceExtensionContext context) {
         return new CatalogProtocolServiceImpl(datasetResolver, dataServiceRegistry,
-                protocolTokenValidator(), context.getParticipantId(), transactionContext);
+                protocolTokenValidator(), transactionContext);
     }
 
     @Provider

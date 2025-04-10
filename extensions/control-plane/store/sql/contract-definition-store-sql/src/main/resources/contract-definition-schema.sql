@@ -23,5 +23,7 @@ CREATE TABLE IF NOT EXISTS edc_contract_definitions
     contract_policy_id     VARCHAR NOT NULL,
     assets_selector        JSON    NOT NULL,
     private_properties     JSON,
+    participant_context_id VARCHAR NOT NULL,
+    dataspace_context      VARCHAR NOT NULL,
     PRIMARY KEY (contract_definition_id)
 );

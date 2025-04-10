@@ -14,6 +14,7 @@
 
 package org.eclipse.edc.connector.dataplane.iam;
 
+import org.eclipse.edc.connector.controlplane.participants.spi.domain.ParticipantContext;
 import org.eclipse.edc.connector.dataplane.iam.service.DataPlaneAuthorizationServiceImpl;
 import org.eclipse.edc.connector.dataplane.spi.AccessTokenData;
 import org.eclipse.edc.connector.dataplane.spi.Endpoint;
@@ -57,7 +58,8 @@ class DataPlaneAuthorizationServiceImplTest {
     private final DataPlaneAccessTokenService accessTokenService = mock();
     private final PublicEndpointGeneratorService endpointGenerator = mock();
     private final DataPlaneAccessControlService accessControlService = mock();
-    private final DataPlaneAuthorizationServiceImpl authorizationService = new DataPlaneAuthorizationServiceImpl(accessTokenService, endpointGenerator, accessControlService, OWN_PARTICIPANT_ID, Clock.systemUTC());
+    private final DataPlaneAuthorizationServiceImpl authorizationService = new DataPlaneAuthorizationServiceImpl(accessTokenService, endpointGenerator,
+            accessControlService, () -> new ParticipantContext(OWN_PARTICIPANT_ID, OWN_PARTICIPANT_ID), Clock.systemUTC());
 
     @BeforeEach
     void setup() {

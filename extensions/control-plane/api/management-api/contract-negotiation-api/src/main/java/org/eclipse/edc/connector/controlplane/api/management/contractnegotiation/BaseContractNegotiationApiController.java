@@ -21,6 +21,7 @@ import org.eclipse.edc.connector.controlplane.api.management.contractnegotiation
 import org.eclipse.edc.connector.controlplane.contract.spi.types.command.TerminateNegotiationCommand;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractNegotiation;
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractRequest;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.contractnegotiation.ContractNegotiationService;
 import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.monitor.Monitor;
@@ -45,13 +46,16 @@ public class BaseContractNegotiationApiController {
     protected final TypeTransformerRegistry transformerRegistry;
     protected final Monitor monitor;
     protected final JsonObjectValidatorRegistry validatorRegistry;
+    protected final ParticipantContextSupplier participantContextSupplier;
 
     public BaseContractNegotiationApiController(ContractNegotiationService service, TypeTransformerRegistry transformerRegistry,
-                                                Monitor monitor, JsonObjectValidatorRegistry validatorRegistry) {
+                                                Monitor monitor, JsonObjectValidatorRegistry validatorRegistry,
+                                                ParticipantContextSupplier participantContextSupplier) {
         this.service = service;
         this.transformerRegistry = transformerRegistry;
         this.monitor = monitor;
         this.validatorRegistry = validatorRegistry;
+        this.participantContextSupplier = participantContextSupplier;
     }
 
     public JsonArray queryNegotiations(JsonObject querySpecJson) {
@@ -107,7 +111,7 @@ public class BaseContractNegotiationApiController {
         var contractRequest = transformerRegistry.transform(requestObject, ContractRequest.class)
                 .orElseThrow(InvalidRequestException::new);
 
-        var contractNegotiation = service.initiateNegotiation(contractRequest);
+        var contractNegotiation = service.initiateNegotiation(participantContextSupplier.get(), contractRequest);
 
         var responseDto = IdResponse.Builder.newInstance()
                 .id(contractNegotiation.getId())

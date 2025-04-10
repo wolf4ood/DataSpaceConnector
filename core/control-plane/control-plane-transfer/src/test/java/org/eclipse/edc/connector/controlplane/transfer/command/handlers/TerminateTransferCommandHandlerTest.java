@@ -44,7 +44,9 @@ class TerminateTransferCommandHandlerTest {
     @Test
     void shouldModify_ifItCanBeTerminated() {
         var command = new TerminateTransferCommand("test-id", "a reason");
-        var entity = TransferProcess.Builder.newInstance().state(STARTED.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(STARTED.code())
+                .participantContextId("participantContextId")
+                .build();
 
         var result = handler.modify(entity, command);
 
@@ -56,7 +58,9 @@ class TerminateTransferCommandHandlerTest {
     @Test
     void shouldNotModify_ifItCannotBeTerminated() {
         var command = new TerminateTransferCommand("test-id", "a reason");
-        var entity = TransferProcess.Builder.newInstance().state(COMPLETED.code()).build();
+        var entity = TransferProcess.Builder.newInstance().state(COMPLETED.code())
+                .participantContextId("participantContextId")
+                .build();
 
         var result = handler.modify(entity, command);
 

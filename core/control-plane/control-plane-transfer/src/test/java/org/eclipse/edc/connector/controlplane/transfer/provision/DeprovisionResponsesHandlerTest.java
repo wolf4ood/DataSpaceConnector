@@ -175,6 +175,7 @@ class DeprovisionResponsesHandlerTest {
                 .id("test-process-" + processId)
                 .state(inState.code())
                 .protocol("protocol")
+                .participantContextId("participantContextId")
                 .counterPartyAddress("http://an/address");
     }
 

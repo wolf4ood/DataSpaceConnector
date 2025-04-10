@@ -15,6 +15,7 @@
 
 package org.eclipse.edc.connector.controlplane.services.spi.transferprocess;
 
+import org.eclipse.edc.connector.controlplane.participants.spi.domain.ParticipantContext;
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.DeprovisionedResource;
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.ProvisionResponse;
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.TransferProcess;
@@ -117,7 +118,7 @@ public interface TransferProcessService {
      * @return a result that is successful if the transfer process was initiated with the created TransferProcess.
      */
     @NotNull
-    ServiceResult<TransferProcess> initiateTransfer(TransferRequest request);
+    ServiceResult<TransferProcess> initiateTransfer(ParticipantContext participantContext, TransferRequest request);
 
     /**
      * Asynchronously notifies the system that the provisioning phase has been completed.

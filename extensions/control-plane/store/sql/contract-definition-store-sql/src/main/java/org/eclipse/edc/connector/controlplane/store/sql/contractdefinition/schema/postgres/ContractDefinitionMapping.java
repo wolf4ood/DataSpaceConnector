@@ -32,5 +32,7 @@ public class ContractDefinitionMapping extends TranslationMapping {
         add("contractPolicy", statements.getContractPolicyIdColumn());
         add("assetsSelector", new JsonFieldTranslator(statements.getAssetsSelectorAlias()));
         add("privateProperties", new JsonFieldTranslator(statements.getPrivatePropertiesColumn()));
+        add("participantContextId", statements.getParticipantContextIdColumn());
+        add("dataspaceContext", statements.getDataspaceContextColumn());
     }
 }

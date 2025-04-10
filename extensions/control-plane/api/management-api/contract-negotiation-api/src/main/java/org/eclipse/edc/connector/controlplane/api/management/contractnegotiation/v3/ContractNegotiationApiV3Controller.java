@@ -23,6 +23,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import org.eclipse.edc.connector.controlplane.api.management.contractnegotiation.BaseContractNegotiationApiController;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.contractnegotiation.ContractNegotiationService;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
@@ -34,8 +35,10 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 @Produces(APPLICATION_JSON)
 @Path("/v3/contractnegotiations")
 public class ContractNegotiationApiV3Controller extends BaseContractNegotiationApiController implements ContractNegotiationApiV3 {
-    public ContractNegotiationApiV3Controller(ContractNegotiationService service, TypeTransformerRegistry transformerRegistry, Monitor monitor, JsonObjectValidatorRegistry validatorRegistry) {
-        super(service, transformerRegistry, monitor, validatorRegistry);
+    public ContractNegotiationApiV3Controller(ContractNegotiationService service, TypeTransformerRegistry transformerRegistry,
+                                              Monitor monitor, JsonObjectValidatorRegistry validatorRegistry,
+                                              ParticipantContextSupplier participantContextSupplier) {
+        super(service, transformerRegistry, monitor, validatorRegistry, participantContextSupplier);
     }
 
     @POST

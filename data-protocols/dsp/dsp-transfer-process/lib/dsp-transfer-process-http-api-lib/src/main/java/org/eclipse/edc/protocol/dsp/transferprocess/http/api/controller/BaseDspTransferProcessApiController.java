@@ -21,6 +21,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.services.spi.transferprocess.TransferProcessProtocolService;
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.TransferProcess;
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.protocol.TransferCompletionMessage;
@@ -56,12 +57,14 @@ public abstract class BaseDspTransferProcessApiController {
     private final DspRequestHandler dspRequestHandler;
     private final String protocol;
     private final JsonLdNamespace namespace;
-    
-    public BaseDspTransferProcessApiController(TransferProcessProtocolService protocolService, DspRequestHandler dspRequestHandler, String protocol, JsonLdNamespace namespace) {
+    private final ParticipantContextSupplier participantContextSupplier;
+
+    public BaseDspTransferProcessApiController(TransferProcessProtocolService protocolService, DspRequestHandler dspRequestHandler, String protocol, JsonLdNamespace namespace, ParticipantContextSupplier participantContextSupplier) {
         this.protocolService = protocolService;
         this.dspRequestHandler = dspRequestHandler;
         this.protocol = protocol;
         this.namespace = namespace;
+        this.participantContextSupplier = participantContextSupplier;
     }
 
     /**
@@ -78,6 +81,7 @@ public abstract class BaseDspTransferProcessApiController {
                 .token(token)
                 .serviceCall(protocolService::findById)
                 .protocol(protocol)
+                .participantContextProvider(participantContextSupplier)
                 .errorProvider(TransferError.Builder::newInstance)
                 .build();
 
@@ -98,6 +102,7 @@ public abstract class BaseDspTransferProcessApiController {
                 .message(jsonObject)
                 .token(token)
                 .expectedMessageType(namespace.toIri(DSPACE_TYPE_TRANSFER_REQUEST_MESSAGE_TERM))
+                .participantContextProvider(participantContextSupplier)
                 .serviceCall(protocolService::notifyRequested)
                 .errorProvider(TransferError.Builder::newInstance)
                 .protocol(protocol)
@@ -123,6 +128,7 @@ public abstract class BaseDspTransferProcessApiController {
                 .message(jsonObject)
                 .token(token)
                 .serviceCall(protocolService::notifyStarted)
+                .participantContextProvider(participantContextSupplier)
                 .errorProvider(TransferError.Builder::newInstance)
                 .protocol(protocol)
                 .build();
@@ -147,6 +153,7 @@ public abstract class BaseDspTransferProcessApiController {
                 .message(jsonObject)
                 .token(token)
                 .serviceCall(protocolService::notifyCompleted)
+                .participantContextProvider(participantContextSupplier)
                 .errorProvider(TransferError.Builder::newInstance)
                 .protocol(protocol)
                 .build();
@@ -171,6 +178,7 @@ public abstract class BaseDspTransferProcessApiController {
                 .message(jsonObject)
                 .token(token)
                 .serviceCall(protocolService::notifyTerminated)
+                .participantContextProvider(participantContextSupplier)
                 .errorProvider(TransferError.Builder::newInstance)
                 .protocol(protocol)
                 .build();
@@ -195,6 +203,7 @@ public abstract class BaseDspTransferProcessApiController {
                 .message(jsonObject)
                 .token(token)
                 .serviceCall(protocolService::notifySuspended)
+                .participantContextProvider(participantContextSupplier)
                 .errorProvider(TransferError.Builder::newInstance)
                 .protocol(protocol)
                 .build();

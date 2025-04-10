@@ -27,6 +27,7 @@ import jakarta.ws.rs.Produces;
 import org.eclipse.edc.connector.controlplane.api.management.policy.BasePolicyDefinitionApiController;
 import org.eclipse.edc.connector.controlplane.api.management.policy.model.PolicyEvaluationPlanRequest;
 import org.eclipse.edc.connector.controlplane.api.management.policy.model.PolicyValidationResult;
+import org.eclipse.edc.connector.controlplane.participants.spi.ParticipantContextSupplier;
 import org.eclipse.edc.connector.controlplane.policy.spi.PolicyDefinition;
 import org.eclipse.edc.connector.controlplane.services.spi.policydefinition.PolicyDefinitionService;
 import org.eclipse.edc.spi.EdcException;
@@ -49,8 +50,8 @@ import static org.eclipse.edc.web.spi.exception.ServiceResultHandler.exceptionMa
 public class PolicyDefinitionApiV31AlphaController extends BasePolicyDefinitionApiController implements PolicyDefinitionApiV31Alpha {
 
     public PolicyDefinitionApiV31AlphaController(Monitor monitor, TypeTransformerRegistry transformerRegistry, PolicyDefinitionService service,
-                                                 JsonObjectValidatorRegistry validatorRegistry) {
-        super(monitor, transformerRegistry, service, validatorRegistry);
+                                                 JsonObjectValidatorRegistry validatorRegistry, ParticipantContextSupplier participantContextSupplier) {
+        super(monitor, transformerRegistry, service, validatorRegistry, participantContextSupplier);
     }
 
     @POST
