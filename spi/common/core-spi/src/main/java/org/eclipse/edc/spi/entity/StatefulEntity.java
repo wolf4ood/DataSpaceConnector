@@ -16,11 +16,14 @@
 package org.eclipse.edc.spi.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.eclipse.edc.spi.telemetry.TraceCarrier;
 
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,10 +39,11 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> extends Mutabl
     protected Map<String, String> traceContext = new HashMap<>();
     protected String errorDetail;
     protected boolean pending = false;
+    protected List<Integer> previousStates = new ArrayList<>();
 
     protected StatefulEntity() {
     }
-    
+
     public int getState() {
         return state;
     }
@@ -61,12 +65,12 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> extends Mutabl
         return errorDetail;
     }
 
-    public boolean isPending() {
-        return pending;
-    }
-
     public void setErrorDetail(String errorDetail) {
         this.errorDetail = errorDetail;
+    }
+
+    public boolean isPending() {
+        return pending;
     }
 
     public void setPending(boolean pending) {
@@ -93,9 +97,38 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> extends Mutabl
 
     protected void transitionTo(int targetState) {
         stateCount = state == targetState ? stateCount + 1 : 1;
+        if (previousStates == null) {
+            previousStates = new ArrayList<>();
+        }
+        if (state != targetState) {
+            previousStates.add(state);
+        }
         state = targetState;
         updateStateTimestamp();
         setModified();
+    }
+
+    /**
+     * Returns the list of previous states.
+     * This is used to track the history of state transitions.
+     *
+     * @return a list of previous states.
+     */
+    public List<Integer> getPreviousStates() {
+        return previousStates;
+    }
+
+    /**
+     * Returns the last previous state.
+     *
+     * @return the last previous state, or null if there are no previous states.
+     */
+    @JsonIgnore
+    public Integer getLastPreviousState() {
+        if (previousStates == null || previousStates.isEmpty()) {
+            return null;
+        }
+        return previousStates.get(previousStates.size() - 1);
     }
 
     protected <B extends Builder<T, B>> T copy(Builder<T, B> builder) {
@@ -110,6 +143,7 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> extends Mutabl
                 .errorDetail(errorDetail)
                 .clock(clock)
                 .pending(pending)
+                .previousStates(previousStates)
                 .build();
     }
 
@@ -156,6 +190,11 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> extends Mutabl
             return self();
         }
 
+        public B previousStates(List<Integer> previousStates) {
+            entity.previousStates = previousStates;
+            return self();
+        }
+
         protected T build() {
             super.build();
             if (entity.id == null) {
@@ -164,6 +203,10 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> extends Mutabl
 
             if (entity.stateTimestamp == 0) {
                 entity.stateTimestamp = entity.clock.millis();
+            }
+
+            if (entity.previousStates == null) {
+                entity.previousStates = new ArrayList<>();
             }
 
             return entity;

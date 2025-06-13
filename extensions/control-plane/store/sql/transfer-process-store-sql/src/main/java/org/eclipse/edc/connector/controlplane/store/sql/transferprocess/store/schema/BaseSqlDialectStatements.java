@@ -89,6 +89,7 @@ public abstract class BaseSqlDialectStatements implements TransferProcessStoreSt
                 .column(getAssetIdColumn())
                 .column(getContractIdColumn())
                 .jsonColumn(getDataDestinationColumn())
+                .jsonColumn(getPreviousStatesColumn())
                 .insertInto(getTransferProcessTableName());
     }
 
@@ -121,6 +122,7 @@ public abstract class BaseSqlDialectStatements implements TransferProcessStoreSt
                 .column(getAssetIdColumn())
                 .column(getContractIdColumn())
                 .jsonColumn(getDataDestinationColumn())
+                .jsonColumn(getPreviousStatesColumn())
                 .update(getTransferProcessTableName(), getIdColumn());
     }
 
