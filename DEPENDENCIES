@@ -91,6 +91,7 @@ maven/mavencentral/com.networknt/json-schema-validator/1.0.76, Apache-2.0, appro
 maven/mavencentral/com.networknt/json-schema-validator/1.5.7, Apache-2.0 AND Unicode-TOU, approved, #15630
 maven/mavencentral/com.networknt/json-schema-validator/1.5.8, Apache-2.0 AND Unicode-TOU, approved, #15630
 maven/mavencentral/com.nimbusds/nimbus-jose-jwt/10.3, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.nimbusds/nimbus-jose-jwt/10.3.1, , restricted, clearlydefined
 maven/mavencentral/com.nimbusds/nimbus-jose-jwt/9.28, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.puppycrawl.tools/checkstyle/10.26.1, LGPL-2.1-or-later, approved, #22306
 maven/mavencentral/com.samskivert/jmustache/1.15, BSD-2-Clause AND BSD-3-Clause, approved, clearlydefined
@@ -275,14 +276,14 @@ maven/mavencentral/org.eclipse.dataspacetck.dsp/dsp-transfer-process/1.0.0-RC4, 
 maven/mavencentral/org.eclipse.dataspacetck.dsp/tck-runtime/1.0.0-RC4, Apache-2.0, approved, technology.dataspacetck
 maven/mavencentral/org.eclipse.edc/autodoc-processor/0.14.0-SNAPSHOT, Apache-2.0, approved, technology.edc
 maven/mavencentral/org.eclipse.edc/runtime-metamodel/0.14.0-SNAPSHOT, Apache-2.0, approved, technology.edc
-maven/mavencentral/org.eclipse.jetty.ee10/jetty-ee10-servlet/12.0.22, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-maven/mavencentral/org.eclipse.jetty.websocket/jetty-websocket/12.0.22, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-maven/mavencentral/org.eclipse.jetty/jetty-http/12.0.22, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-maven/mavencentral/org.eclipse.jetty/jetty-io/12.0.22, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-maven/mavencentral/org.eclipse.jetty/jetty-security/12.0.22, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-maven/mavencentral/org.eclipse.jetty/jetty-server/12.0.22, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-maven/mavencentral/org.eclipse.jetty/jetty-session/12.0.22, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-maven/mavencentral/org.eclipse.jetty/jetty-util/12.0.22, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty.ee10/jetty-ee10-servlet/12.0.23, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty.websocket/jetty-websocket/12.0.23, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-http/12.0.23, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-io/12.0.23, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-security/12.0.23, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-server/12.0.23, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-session/12.0.23, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-util/12.0.23, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 maven/mavencentral/org.eclipse.parsson/parsson/1.1.7, EPL-2.0, approved, ee4j.parsson
 maven/mavencentral/org.glassfish.hk2.external/aopalliance-repackaged/3.0.6, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.glassfish
 maven/mavencentral/org.glassfish.hk2/hk2-api/3.0.6, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.glassfish
@@ -317,21 +318,24 @@ maven/mavencentral/org.jetbrains/annotations/17.0.0, Apache-2.0, approved, #1967
 maven/mavencentral/org.jetbrains/annotations/26.0.2, Apache-2.0, approved, #16629
 maven/mavencentral/org.jspecify/jspecify/1.0.0, Apache-2.0, approved, #21897
 maven/mavencentral/org.junit-pioneer/junit-pioneer/2.3.0, EPL-2.0, approved, #16678
-maven/mavencentral/org.junit.jupiter/junit-jupiter-api/5.13.2, EPL-2.0, approved, #21577
-maven/mavencentral/org.junit.jupiter/junit-jupiter-engine/5.13.2, EPL-2.0, approved, #21699
-maven/mavencentral/org.junit.jupiter/junit-jupiter-params/5.13.2, EPL-2.0, approved, #21706
+maven/mavencentral/org.junit.jupiter/junit-jupiter-api/5.13.3, EPL-2.0, approved, #21577
+maven/mavencentral/org.junit.jupiter/junit-jupiter-engine/5.13.3, EPL-2.0, approved, #21699
+maven/mavencentral/org.junit.jupiter/junit-jupiter-params/5.13.3, EPL-2.0, approved, #21706
 maven/mavencentral/org.junit.jupiter/junit-jupiter/5.13.1, EPL-2.0, approved, #21845
 maven/mavencentral/org.junit.jupiter/junit-jupiter/5.13.2, EPL-2.0, approved, #21845
-maven/mavencentral/org.junit.platform/junit-platform-commons/1.13.2, EPL-2.0, approved, #21576
-maven/mavencentral/org.junit.platform/junit-platform-engine/1.13.2, EPL-2.0, approved, #21701
+maven/mavencentral/org.junit.jupiter/junit-jupiter/5.13.3, EPL-2.0, approved, #21845
+maven/mavencentral/org.junit.platform/junit-platform-commons/1.13.3, EPL-2.0, approved, #21576
+maven/mavencentral/org.junit.platform/junit-platform-engine/1.13.3, EPL-2.0, approved, #21701
 maven/mavencentral/org.junit.platform/junit-platform-launcher/1.13.2, EPL-2.0, approved, #21708
-maven/mavencentral/org.junit.platform/junit-platform-suite-api/1.13.2, EPL-2.0, approved, #21709
-maven/mavencentral/org.junit.platform/junit-platform-suite-commons/1.13.2, EPL-2.0, approved, #21704
+maven/mavencentral/org.junit.platform/junit-platform-launcher/1.13.3, EPL-2.0, approved, #21708
+maven/mavencentral/org.junit.platform/junit-platform-suite-api/1.13.3, EPL-2.0, approved, #21709
+maven/mavencentral/org.junit.platform/junit-platform-suite-commons/1.13.3, EPL-2.0, approved, #21704
 maven/mavencentral/org.junit.platform/junit-platform-suite-engine/1.11.3, EPL-2.0, approved, #15933
 maven/mavencentral/org.junit.platform/junit-platform-suite-engine/1.13.1, EPL-2.0, approved, #21703
 maven/mavencentral/org.junit.platform/junit-platform-suite-engine/1.13.2, EPL-2.0, approved, #21703
+maven/mavencentral/org.junit.platform/junit-platform-suite-engine/1.13.3, EPL-2.0, approved, #21703
 maven/mavencentral/org.junit/junit-bom/5.11.2, EPL-2.0, approved, #16062
-maven/mavencentral/org.junit/junit-bom/5.13.2, EPL-2.0, approved, #21846
+maven/mavencentral/org.junit/junit-bom/5.13.3, EPL-2.0, approved, #21846
 maven/mavencentral/org.jvnet.mimepull/mimepull/1.9.15, CDDL-1.1 OR GPL-2.0-only WITH Classpath-exception-2.0, approved, CQ21484
 maven/mavencentral/org.latencyutils/LatencyUtils/2.0.3, CC0-1.0, approved, #15280
 maven/mavencentral/org.lz4/lz4-java/1.8.0, Apache-2.0, approved, #20005
