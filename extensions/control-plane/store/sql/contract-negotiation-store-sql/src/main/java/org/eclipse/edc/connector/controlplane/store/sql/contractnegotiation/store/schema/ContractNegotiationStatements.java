@@ -124,5 +124,7 @@ public interface ContractNegotiationStatements extends StatefulEntityStatements,
 
     SqlQueryStatement createNegotiationsQuery(QuerySpec querySpec);
 
+    SqlQueryStatement createNegotiationNextNotLeaseQuery(QuerySpec querySpec);
+
     SqlQueryStatement createAgreementsQuery(QuerySpec querySpec);
 }

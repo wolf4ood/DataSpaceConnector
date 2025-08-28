@@ -22,6 +22,7 @@ import org.eclipse.edc.connector.controlplane.contract.spi.types.agreement.Contr
 import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractNegotiation;
 import org.eclipse.edc.connector.controlplane.store.sql.contractnegotiation.store.schema.ContractNegotiationStatements;
 import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.entity.ProtocolMessages;
 import org.eclipse.edc.spi.persistence.EdcPersistenceException;
 import org.eclipse.edc.spi.query.Criterion;
@@ -63,7 +64,7 @@ public class SqlContractNegotiationStore extends AbstractSqlStore implements Con
         super(dataSourceRegistry, dataSourceName, transactionContext, objectMapper, queryExecutor);
         this.statements = statements;
         this.clock = clock;
-        leaseContext = SqlLeaseContextBuilder.with(transactionContext, leaseHolderName, statements, clock, queryExecutor);
+        leaseContext = SqlLeaseContextBuilder.with(transactionContext, leaseHolderName, ContractNegotiation.class.getSimpleName(), statements, clock, queryExecutor);
     }
 
     @Override
@@ -82,20 +83,30 @@ public class SqlContractNegotiationStore extends AbstractSqlStore implements Con
         return transactionContext.execute(() -> {
             var filter = Arrays.stream(criteria).toList();
             var querySpec = QuerySpec.Builder.newInstance().filter(filter).sortField("stateTimestamp").limit(max).build();
-            var statement = statements.createNegotiationsQuery(querySpec)
+            var statement = statements.createNegotiationNextNotLeaseQuery(querySpec)
                     .addWhereClause(statements.getNotLeasedFilter(), clock.millis());
 
             try (
                     var connection = getConnection();
                     var stream = queryExecutor.query(getConnection(), true, contractNegotiationWithAgreementMapper(connection), statement.getQueryAsString(), statement.getParameters())
             ) {
-                var negotiations = stream.collect(toList());
-                negotiations.forEach(cn -> leaseContext.withConnection(connection).acquireLease(cn.getId()));
-                return negotiations;
+                return stream.filter(n -> lease(connection, n)).collect(toList());
             } catch (SQLException e) {
                 throw new EdcPersistenceException(e);
             }
         });
+    }
+
+    private boolean lease(Connection connection, ContractNegotiation entry) {
+        try {
+            leaseContext.withConnection(connection).acquireLease(entry.getId());
+        } catch (EdcException e) {
+            if (e.getCause() instanceof IllegalStateException) {
+                // already leased
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

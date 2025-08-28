@@ -63,6 +63,18 @@ public class BaseSqlDataPlaneInstanceStatements implements DataPlaneInstanceStat
     }
 
     @Override
+    public SqlQueryStatement createNextNotLeaseQuery(QuerySpec querySpec) {
+        var queryTemplate = "%s LEFT JOIN %s l ON %s.%s = l.%s".formatted(getSelectTemplate(), getLeaseTableName(), getDataPlaneInstanceTable(), getIdColumn(), getLeaseIdColumn());
+        return new SqlQueryStatement(queryTemplate, querySpec, new DataPlaneInstanceMapping(this), operatorTranslator);
+    }
+
+    @Override
+    public String getNotLeasedFilter() {
+        return format("(l.%s IS NULL OR (? > (%s + %s)))",
+                getLeaseIdColumn(), getLeasedAtColumn(), getLeaseDurationColumn());
+    }
+
+    @Override
     public String getInsertLeaseTemplate() {
         return executeStatement()
                 .column(getLeaseIdColumn())
@@ -79,14 +91,4 @@ public class BaseSqlDataPlaneInstanceStatements implements DataPlaneInstanceStat
                 .update(getDataPlaneInstanceTable(), getIdColumn());
     }
 
-    @Override
-    public String getFindLeaseByEntityTemplate() {
-        return format("SELECT * FROM %s WHERE %s = (SELECT lease_id FROM %s WHERE %s=? )",
-                getLeaseTableName(), getLeaseIdColumn(), getDataPlaneInstanceTable(), getIdColumn());
-    }
-
-    @Override
-    public String getDeleteLeaseTemplate() {
-        return executeStatement().delete(getLeaseTableName(), getLeaseIdColumn());
-    }
 }

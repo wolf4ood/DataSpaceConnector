@@ -18,6 +18,7 @@ import org.eclipse.edc.connector.controlplane.store.sql.transferprocess.store.Sq
 import org.eclipse.edc.connector.controlplane.store.sql.transferprocess.store.schema.postgres.PostgresDialectStatements;
 import org.eclipse.edc.connector.controlplane.transfer.spi.testfixtures.store.TestFunctions;
 import org.eclipse.edc.connector.controlplane.transfer.spi.testfixtures.store.TransferProcessStoreTestBase;
+import org.eclipse.edc.connector.controlplane.transfer.spi.types.TransferProcess;
 import org.eclipse.edc.json.JacksonTypeManager;
 import org.eclipse.edc.junit.annotations.ComponentTest;
 import org.eclipse.edc.junit.testfixtures.TestUtils;
@@ -46,7 +47,7 @@ class PostgresTransferProcessStoreTest extends TransferProcessStoreTestBase {
         typeManager.registerTypes(TestFunctions.TestResourceDef.class, TestFunctions.TestProvisionedResource.class);
         typeManager.registerTypes(PolicyRegistrationTypes.TYPES.toArray(Class<?>[]::new));
 
-        leaseUtil = new LeaseUtil(extension.getTransactionContext(), extension::getConnection, statements, clock);
+        leaseUtil = new LeaseUtil(extension.getTransactionContext(), extension::getConnection, TransferProcess.class.getSimpleName(), statements, clock);
         store = new SqlTransferProcessStore(extension.getDataSourceRegistry(), extension.getDatasourceName(),
                 extension.getTransactionContext(), typeManager.getMapper(), statements, "test-connector",
                 clock, queryExecutor);

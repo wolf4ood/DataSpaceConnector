@@ -54,8 +54,9 @@ public class BaseSqlPolicyMonitorStatements implements PolicyMonitorStatements {
     }
 
     @Override
-    public String getDeleteLeaseTemplate() {
-        return executeStatement().delete(getLeaseTableName(), getLeaseIdColumn());
+    public SqlQueryStatement createNextNotLeaseQuery(QuerySpec querySpec) {
+        var queryTemplate = "%s LEFT JOIN %s l ON %s.%s = l.%s".formatted(getSelectTemplate(), getLeaseTableName(), getPolicyMonitorTable(), getIdColumn(), getLeaseIdColumn());
+        return new SqlQueryStatement(queryTemplate, querySpec, new PolicyMonitorMapping(this), operatorTranslator);
     }
 
     @Override
@@ -76,8 +77,9 @@ public class BaseSqlPolicyMonitorStatements implements PolicyMonitorStatements {
     }
 
     @Override
-    public String getFindLeaseByEntityTemplate() {
-        return format("SELECT * FROM %s WHERE %s = (SELECT lease_id FROM %s WHERE %s=? )",
-                getLeaseTableName(), getLeaseIdColumn(), getPolicyMonitorTable(), getIdColumn());
+    public String getNotLeasedFilter() {
+        return format("(l.%s IS NULL OR (? > (%s + %s)))",
+                getLeaseIdColumn(), getLeasedAtColumn(), getLeaseDurationColumn());
     }
+
 }

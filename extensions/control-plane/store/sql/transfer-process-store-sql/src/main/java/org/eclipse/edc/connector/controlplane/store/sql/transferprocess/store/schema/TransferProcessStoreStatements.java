@@ -110,4 +110,7 @@ public interface TransferProcessStoreStatements extends StatefulEntityStatements
     }
 
     SqlQueryStatement createQuery(QuerySpec querySpec);
+
+    SqlQueryStatement createNextNotLeaseQuery(QuerySpec querySpec);
+
 }

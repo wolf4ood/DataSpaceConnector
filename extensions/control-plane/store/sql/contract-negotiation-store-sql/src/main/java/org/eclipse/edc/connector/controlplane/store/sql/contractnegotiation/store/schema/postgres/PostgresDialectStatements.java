@@ -40,12 +40,19 @@ public class PostgresDialectStatements extends BaseSqlDialectStatements {
         var selectStmt = getSelectNegotiationsTemplate();
         return new SqlQueryStatement(selectStmt, querySpec, new ContractNegotiationMapping(this), operatorTranslator);
     }
+    
+    @Override
+    public SqlQueryStatement createNegotiationNextNotLeaseQuery(QuerySpec querySpec) {
+        var queryTemplate = "%s LEFT JOIN %s l ON %s.%s = l.%s".formatted(getSelectNegotiationsTemplate(), getLeaseTableName(), getContractNegotiationTable(), getIdColumn(), getLeaseIdColumn());
+        return new SqlQueryStatement(queryTemplate, querySpec, new ContractNegotiationMapping(this), operatorTranslator);
+    }
 
     @Override
     public SqlQueryStatement createAgreementsQuery(QuerySpec querySpec) {
         var selectStmt = getSelectFromAgreementsTemplate();
         return new SqlQueryStatement(selectStmt, querySpec, new ContractAgreementMapping(this), operatorTranslator);
     }
+
 
     /**
      * Overridable operator to convert strings to JSON. For postgres, this is the "::json" operator

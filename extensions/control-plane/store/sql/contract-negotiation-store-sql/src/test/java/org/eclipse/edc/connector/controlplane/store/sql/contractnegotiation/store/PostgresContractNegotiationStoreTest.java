@@ -15,6 +15,7 @@
 package org.eclipse.edc.connector.controlplane.store.sql.contractnegotiation.store;
 
 import org.eclipse.edc.connector.controlplane.contract.spi.testfixtures.negotiation.store.ContractNegotiationStoreTestBase;
+import org.eclipse.edc.connector.controlplane.contract.spi.types.negotiation.ContractNegotiation;
 import org.eclipse.edc.connector.controlplane.store.sql.contractnegotiation.store.schema.postgres.PostgresDialectStatements;
 import org.eclipse.edc.json.JacksonTypeManager;
 import org.eclipse.edc.junit.annotations.ComponentTest;
@@ -52,7 +53,7 @@ class PostgresContractNegotiationStoreTest extends ContractNegotiationStoreTestB
 
         var schema = TestUtils.getResourceFileContentAsString("contract-negotiation-schema.sql");
         extension.runQuery(schema);
-        leaseUtil = new LeaseUtil(extension.getTransactionContext(), extension::getConnection, statements, clock);
+        leaseUtil = new LeaseUtil(extension.getTransactionContext(), extension::getConnection, ContractNegotiation.class.getSimpleName(), statements, clock);
     }
 
     @AfterEach

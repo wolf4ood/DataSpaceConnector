@@ -57,7 +57,7 @@ class PostgresLeaseContextTest {
         var schema = Files.readString(Paths.get("./src/test/resources/schema.sql"));
         setupExtension.runQuery(schema);
 
-        builder = SqlLeaseContextBuilder.with(transactionContext, LEASE_HOLDER, dialect, Clock.fixed(now, UTC), queryExecutor);
+        builder = SqlLeaseContextBuilder.with(transactionContext, LEASE_HOLDER, "TestTarget", dialect, Clock.fixed(now, UTC), queryExecutor);
         leaseContext = builder.by(LEASE_HOLDER).withConnection(connection);
     }
 
@@ -71,10 +71,10 @@ class PostgresLeaseContextTest {
     void breakLease(Connection connection) {
         insertTestEntity("id1", connection);
         leaseContext.acquireLease("id1");
-        assertThat(isLeased("id1", connection)).isTrue();
+        assertThat(isLeased("id1")).isTrue();
 
         leaseContext.breakLease("entityId");
-        assertThat(isLeased("id1", connection)).isTrue();
+        assertThat(isLeased("id1")).isTrue();
     }
 
     @Test
@@ -101,7 +101,7 @@ class PostgresLeaseContextTest {
 
         leaseContext.acquireLease(id);
 
-        assertThat(isLeased(id, connection)).isTrue();
+        assertThat(isLeased(id)).isTrue();
         var leaseAssert = assertThat(leaseContext.getLease(id));
         leaseAssert.extracting(SqlLease::getLeaseId).isNotNull();
         leaseAssert.extracting(SqlLease::getLeasedBy).isEqualTo(LEASE_HOLDER);
@@ -155,23 +155,24 @@ class PostgresLeaseContextTest {
         leaseContext.acquireLease(entityId);
         var lease = leaseContext.getLease(entityId);
         assertThat(lease).isNotNull();
-        var leaseId = lease.getLeaseId();
+        var leaseBy = lease.getLeasedBy();
 
         // should acquire lease by deleting old one after lease expiry
         var twoMinutesAheadClock = Clock.offset(Clock.fixed(now, UTC), Duration.of(2, ChronoUnit.MINUTES));
-        var twoMinutesAheadBuilder = SqlLeaseContextBuilder.with(transactionContext, LEASE_HOLDER, dialect, twoMinutesAheadClock, queryExecutor);
-        var twoMinutesAheadContext = twoMinutesAheadBuilder.by("someone-else").withConnection(connection);
+        var twoMinutesAheadBuilder = SqlLeaseContextBuilder.with(transactionContext, LEASE_HOLDER, "TestTarget", dialect, twoMinutesAheadClock, queryExecutor);
+        var twoMinutesAheadContext = twoMinutesAheadBuilder.withConnection(connection);
+
         twoMinutesAheadContext.acquireLease(entityId);
 
         var newLease = twoMinutesAheadContext.getLease(entityId);
         assertThat(newLease).isNotNull();
-        assertThat(newLease.getLeaseId()).isNotEqualTo(leaseId);
+        assertThat(newLease.getLeasedBy()).isNotEqualTo(leaseBy);
     }
 
-    protected boolean isLeased(String entityId, Connection connection) {
+    protected boolean isLeased(String entityId) {
         return transactionContext.execute(() -> {
-            var entity = getTestEntity(entityId, connection);
-            return entity.getLeaseId() != null;
+            var entity = leaseContext.getLease(entityId);
+            return entity != null;
         });
     }
 
@@ -197,12 +198,7 @@ class PostgresLeaseContextTest {
     }
 
     private static class TestEntityLeaseStatements implements LeaseStatements {
-
-        @Override
-        public String getDeleteLeaseTemplate() {
-            return executeStatement().delete(getLeaseTableName(), getLeaseIdColumn());
-        }
-
+        
         @Override
         public String getInsertLeaseTemplate() {
             return executeStatement()
@@ -221,8 +217,8 @@ class PostgresLeaseContextTest {
         }
 
         @Override
-        public String getFindLeaseByEntityTemplate() {
-            return "SELECT * FROM edc_lease WHERE lease_id = (SELECT lease_id FROM " + getEntityTableName() + " WHERE id=?)";
+        public String getNotLeasedFilter() {
+            return "";
         }
 
         public String getEntityTableName() {

@@ -14,6 +14,7 @@
 
 package org.eclipse.edc.connector.policy.monitor.store.sql;
 
+import org.eclipse.edc.connector.policy.monitor.spi.PolicyMonitorEntry;
 import org.eclipse.edc.connector.policy.monitor.spi.PolicyMonitorStore;
 import org.eclipse.edc.connector.policy.monitor.spi.testfixtures.store.PolicyMonitorStoreTestBase;
 import org.eclipse.edc.connector.policy.monitor.store.sql.schema.PolicyMonitorStatements;
@@ -48,7 +49,7 @@ public class PostgresPolicyMonitorStoreTest extends PolicyMonitorStoreTestBase {
 
         var clock = Clock.systemUTC();
 
-        leaseUtil = new LeaseUtil(extension.getTransactionContext(), extension::getConnection, statements, clock);
+        leaseUtil = new LeaseUtil(extension.getTransactionContext(), extension::getConnection, PolicyMonitorEntry.class.getSimpleName(), statements, clock);
         store = new SqlPolicyMonitorStore(extension.getDataSourceRegistry(), extension.getDatasourceName(), extension.getTransactionContext(),
                 statements, typeManager.getMapper(), clock, queryExecutor, "test-connector");
         var schema = TestUtils.getResourceFileContentAsString("policy-monitor-schema.sql");

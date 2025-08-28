@@ -49,7 +49,7 @@ public class PostgresDataPlaneInstanceStoreTest extends DataPlaneInstanceStoreTe
 
         var clock = Clock.systemUTC();
 
-        leaseUtil = new LeaseUtil(extension.getTransactionContext(), extension::getConnection, statements, clock);
+        leaseUtil = new LeaseUtil(extension.getTransactionContext(), extension::getConnection, DataPlaneInstance.class.getSimpleName(), statements, clock);
         store = new SqlDataPlaneInstanceStore(extension.getDataSourceRegistry(), extension.getDatasourceName(),
                 extension.getTransactionContext(), statements, typeManager.getMapper(), queryExecutor, clock, CONNECTOR_NAME);
         var schema = TestUtils.getResourceFileContentAsString("dataplane-instance-schema.sql");

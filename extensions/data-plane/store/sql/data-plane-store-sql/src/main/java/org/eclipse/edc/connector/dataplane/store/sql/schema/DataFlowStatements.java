@@ -69,5 +69,7 @@ public interface DataFlowStatements extends StatefulEntityStatements, LeaseState
     String getSelectTemplate();
 
     SqlQueryStatement createQuery(QuerySpec querySpec);
+
+    SqlQueryStatement createNextNotLeaseQuery(QuerySpec querySpec);
 }
 

@@ -22,6 +22,7 @@ import org.eclipse.edc.connector.controlplane.transfer.spi.store.TransferProcess
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.ProvisionedResourceSet;
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.ResourceManifest;
 import org.eclipse.edc.connector.controlplane.transfer.spi.types.TransferProcess;
+import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.entity.ProtocolMessages;
 import org.eclipse.edc.spi.persistence.EdcPersistenceException;
 import org.eclipse.edc.spi.query.Criterion;
@@ -67,7 +68,7 @@ public class SqlTransferProcessStore extends AbstractSqlStore implements Transfe
         this.statements = statements;
         this.leaseHolderName = leaseHolderName;
         this.clock = clock;
-        leaseContext = SqlLeaseContextBuilder.with(transactionContext, leaseHolderName, statements, clock, queryExecutor);
+        leaseContext = SqlLeaseContextBuilder.with(transactionContext, leaseHolderName, TransferProcess.class.getSimpleName(), statements, clock, queryExecutor);
     }
 
     @Override
@@ -86,20 +87,30 @@ public class SqlTransferProcessStore extends AbstractSqlStore implements Transfe
         return transactionContext.execute(() -> {
             var filter = Arrays.stream(criteria).collect(toList());
             var querySpec = QuerySpec.Builder.newInstance().filter(filter).sortField("stateTimestamp").limit(max).build();
-            var statement = statements.createQuery(querySpec)
+            var statement = statements.createNextNotLeaseQuery(querySpec)
                     .addWhereClause(statements.getNotLeasedFilter(), clock.millis());
 
             try (
                     var connection = getConnection();
                     var stream = queryExecutor.query(connection, true, this::mapTransferProcess, statement.getQueryAsString(), statement.getParameters())
             ) {
-                var transferProcesses = stream.collect(Collectors.toList());
-                transferProcesses.forEach(transferProcess -> leaseContext.withConnection(connection).acquireLease(transferProcess.getId()));
-                return transferProcesses;
+                return stream.filter(tp -> lease(connection, tp)).collect(Collectors.toList());
             } catch (SQLException e) {
                 throw new EdcPersistenceException(e);
             }
         });
+    }
+
+    private boolean lease(Connection connection, TransferProcess entry) {
+        try {
+            leaseContext.withConnection(connection).acquireLease(entry.getId());
+        } catch (EdcException e) {
+            if (e.getCause() instanceof IllegalStateException) {
+                // already leased
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

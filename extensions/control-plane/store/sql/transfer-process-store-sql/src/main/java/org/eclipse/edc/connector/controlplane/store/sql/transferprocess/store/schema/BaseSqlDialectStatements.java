@@ -32,12 +32,7 @@ public class BaseSqlDialectStatements implements TransferProcessStoreStatements 
     protected BaseSqlDialectStatements(SqlOperatorTranslator operatorTranslator) {
         this.operatorTranslator = operatorTranslator;
     }
-
-    @Override
-    public String getDeleteLeaseTemplate() {
-        return executeStatement().delete(getLeaseTableName(), getLeaseIdColumn());
-    }
-
+    
     @Override
     public String getInsertLeaseTemplate() {
         return executeStatement()
@@ -56,9 +51,9 @@ public class BaseSqlDialectStatements implements TransferProcessStoreStatements 
     }
 
     @Override
-    public String getFindLeaseByEntityTemplate() {
-        return format("SELECT * FROM %s  WHERE %s = (SELECT lease_id FROM %s WHERE %s=? )",
-                getLeaseTableName(), getLeaseIdColumn(), getTransferProcessTableName(), getIdColumn());
+    public String getNotLeasedFilter() {
+        return format("(l.%s IS NULL OR (? > (%s + %s)))",
+                getLeaseIdColumn(), getLeasedAtColumn(), getLeaseDurationColumn());
     }
 
     @Override
@@ -107,4 +102,9 @@ public class BaseSqlDialectStatements implements TransferProcessStoreStatements 
         return new SqlQueryStatement(getSelectTemplate(), querySpec, new TransferProcessMapping(this), operatorTranslator);
     }
 
+    @Override
+    public SqlQueryStatement createNextNotLeaseQuery(QuerySpec querySpec) {
+        var queryTemplate = "%s LEFT JOIN %s l ON %s.%s = l.%s".formatted(getSelectTemplate(), getLeaseTableName(), getTransferProcessTableName(), getIdColumn(), getLeaseIdColumn());
+        return new SqlQueryStatement(queryTemplate, querySpec, new TransferProcessMapping(this), operatorTranslator);
+    }
 }

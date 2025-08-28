@@ -34,9 +34,9 @@ public class LeaseUtil {
     private final SqlLeaseContextBuilder leaseContextBuilder;
     private final Supplier<Connection> connectionSupplier;
 
-    public LeaseUtil(TransactionContext context, Supplier<Connection> connectionSupplier, LeaseStatements statements, Clock clock) {
+    public LeaseUtil(TransactionContext context, Supplier<Connection> connectionSupplier, String resourceKind, LeaseStatements statements, Clock clock) {
         this.connectionSupplier = connectionSupplier;
-        leaseContextBuilder = SqlLeaseContextBuilder.with(context, "test", statements, clock, new SqlQueryExecutor());
+        leaseContextBuilder = SqlLeaseContextBuilder.with(context, "test", resourceKind, statements, clock, new SqlQueryExecutor());
     }
 
     public void leaseEntity(String tpId, String leaseHolder, Duration leaseDuration) {

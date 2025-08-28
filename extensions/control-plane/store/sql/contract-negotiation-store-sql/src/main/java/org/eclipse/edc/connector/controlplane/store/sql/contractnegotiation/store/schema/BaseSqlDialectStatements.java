@@ -148,18 +148,25 @@ public class BaseSqlDialectStatements implements ContractNegotiationStatements {
     }
 
     @Override
+    public SqlQueryStatement createNegotiationNextNotLeaseQuery(QuerySpec querySpec) {
+        var queryTemplate = "%s LEFT JOIN %s l ON %s.%s = l.%s".formatted(getSelectNegotiationsTemplate(), getLeaseTableName(), getContractNegotiationTable(), getIdColumn(), getLeaseIdColumn());
+        return new SqlQueryStatement(queryTemplate, querySpec.getLimit(), querySpec.getOffset());
+    }
+
+
+    @Override
+    public String getNotLeasedFilter() {
+        return format("(l.%s IS NULL OR (? > (%s + %s)))",
+                getLeaseIdColumn(), getLeasedAtColumn(), getLeaseDurationColumn());
+    }
+
+    @Override
     public SqlQueryStatement createAgreementsQuery(QuerySpec querySpec) {
         // for generic SQL, only the limit and offset fields are used!
         var sql = "SELECT * FROM " + getContractAgreementTable();
         return new SqlQueryStatement(sql, querySpec.getLimit(), querySpec.getOffset());
     }
-
-    @Override
-    public String getDeleteLeaseTemplate() {
-        return executeStatement()
-                .delete(getLeaseTableName(), getLeaseIdColumn());
-    }
-
+    
     @Override
     public String getInsertLeaseTemplate() {
         return executeStatement()
@@ -175,12 +182,6 @@ public class BaseSqlDialectStatements implements ContractNegotiationStatements {
         return executeStatement()
                 .column(getLeaseIdColumn())
                 .update(getContractNegotiationTable(), getIdColumn());
-    }
-
-    @Override
-    public String getFindLeaseByEntityTemplate() {
-        return format("SELECT * FROM %s  WHERE %s = (SELECT lease_id FROM %s WHERE %s=? )",
-                getLeaseTableName(), getLeaseIdColumn(), getContractNegotiationTable(), getIdColumn());
     }
 
 }

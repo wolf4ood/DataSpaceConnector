@@ -14,6 +14,7 @@
 
 package org.eclipse.edc.connector.dataplane.store.sql;
 
+import org.eclipse.edc.connector.dataplane.spi.DataFlow;
 import org.eclipse.edc.connector.dataplane.spi.store.DataPlaneStore;
 import org.eclipse.edc.connector.dataplane.spi.testfixtures.store.DataPlaneStoreTestBase;
 import org.eclipse.edc.connector.dataplane.store.sql.schema.DataFlowStatements;
@@ -46,7 +47,7 @@ public class PostgresDataPlaneStoreTest extends DataPlaneStoreTestBase {
 
         var clock = Clock.systemUTC();
 
-        leaseUtil = new LeaseUtil(extension.getTransactionContext(), extension::getConnection, statements, clock);
+        leaseUtil = new LeaseUtil(extension.getTransactionContext(), extension::getConnection, DataFlow.class.getSimpleName(), statements, clock);
         store = new SqlDataPlaneStore(extension.getDataSourceRegistry(), extension.getDatasourceName(), extension.getTransactionContext(),
                 statements, typeManager.getMapper(), clock, queryExecutor, "test-connector");
         var schema = TestUtils.getResourceFileContentAsString("dataplane-schema.sql");

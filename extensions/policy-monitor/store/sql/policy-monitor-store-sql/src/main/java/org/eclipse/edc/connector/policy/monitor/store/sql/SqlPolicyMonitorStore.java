@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.edc.connector.policy.monitor.spi.PolicyMonitorEntry;
 import org.eclipse.edc.connector.policy.monitor.spi.PolicyMonitorStore;
 import org.eclipse.edc.connector.policy.monitor.store.sql.schema.PolicyMonitorStatements;
+import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.persistence.EdcPersistenceException;
 import org.eclipse.edc.spi.query.Criterion;
 import org.eclipse.edc.spi.query.QuerySpec;
@@ -56,7 +57,7 @@ public class SqlPolicyMonitorStore extends AbstractSqlStore implements PolicyMon
         this.statements = statements;
         this.clock = clock;
         this.leaseHolderName = leaseHolderName;
-        leaseContext = SqlLeaseContextBuilder.with(transactionContext, leaseHolderName, statements, clock, queryExecutor);
+        leaseContext = SqlLeaseContextBuilder.with(transactionContext, leaseHolderName, PolicyMonitorEntry.class.getSimpleName(), statements, clock, queryExecutor);
     }
 
     @Override
@@ -75,20 +76,31 @@ public class SqlPolicyMonitorStore extends AbstractSqlStore implements PolicyMon
         return transactionContext.execute(() -> {
             var filter = Arrays.stream(criteria).collect(toList());
             var querySpec = QuerySpec.Builder.newInstance().filter(filter).sortField("stateTimestamp").limit(max).build();
-            var statement = statements.createQuery(querySpec)
+            var statement = statements.createNextNotLeaseQuery(querySpec)
                     .addWhereClause(statements.getNotLeasedFilter(), clock.millis());
 
             try (
                     var connection = getConnection();
                     var stream = queryExecutor.query(connection, true, this::mapEntry, statement.getQueryAsString(), statement.getParameters())
             ) {
-                var entries = stream.collect(Collectors.toList());
-                entries.forEach(entry -> leaseContext.withConnection(connection).acquireLease(entry.getId()));
-                return entries;
+                return stream.filter(entry -> lease(connection, entry))
+                        .collect(Collectors.toList());
             } catch (SQLException e) {
                 throw new EdcPersistenceException(e);
             }
         });
+    }
+
+    private boolean lease(Connection connection, PolicyMonitorEntry entry) {
+        try {
+            leaseContext.withConnection(connection).acquireLease(entry.getId());
+        } catch (EdcException e) {
+            if (e.getCause() instanceof IllegalStateException) {
+                // already leased
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

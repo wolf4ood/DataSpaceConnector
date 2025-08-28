@@ -36,6 +36,8 @@ public interface PolicyMonitorStatements extends StatefulEntityStatements, Lease
     String getUpsertTemplate();
 
     String getSelectTemplate();
-
+    
     SqlQueryStatement createQuery(QuerySpec querySpec);
+
+    SqlQueryStatement createNextNotLeaseQuery(QuerySpec querySpec);
 }

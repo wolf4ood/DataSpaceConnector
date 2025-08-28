@@ -45,5 +45,6 @@ public interface DataPlaneInstanceStatements extends StatefulEntityStatements, L
 
     SqlQueryStatement createQuery(QuerySpec querySpec);
 
+    SqlQueryStatement createNextNotLeaseQuery(QuerySpec querySpec);
 }
 

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.edc.connector.dataplane.selector.spi.instance.DataPlaneInstance;
 import org.eclipse.edc.connector.dataplane.selector.spi.store.DataPlaneInstanceStore;
 import org.eclipse.edc.connector.dataplane.selector.store.sql.schema.DataPlaneInstanceStatements;
+import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.persistence.EdcPersistenceException;
 import org.eclipse.edc.spi.query.Criterion;
 import org.eclipse.edc.spi.query.QuerySpec;
@@ -59,7 +60,7 @@ public class SqlDataPlaneInstanceStore extends AbstractSqlStore implements DataP
         this.statements = statements;
         this.clock = clock;
         this.leaseHolderName = leaseHolderName;
-        leaseContext = SqlLeaseContextBuilder.with(transactionContext, leaseHolderName, statements, clock, queryExecutor);
+        leaseContext = SqlLeaseContextBuilder.with(transactionContext, leaseHolderName, DataPlaneInstance.class.getSimpleName(), statements, clock, queryExecutor);
     }
 
     @Override
@@ -98,20 +99,31 @@ public class SqlDataPlaneInstanceStore extends AbstractSqlStore implements DataP
         return transactionContext.execute(() -> {
             var filter = Arrays.stream(criteria).collect(toList());
             var querySpec = QuerySpec.Builder.newInstance().filter(filter).limit(max).build();
-            var statement = statements.createQuery(querySpec)
+            var statement = statements.createNextNotLeaseQuery(querySpec)
                     .addWhereClause(statements.getNotLeasedFilter(), clock.millis());
 
             try (
                     var connection = getConnection();
                     var stream = queryExecutor.query(connection, true, this::mapResultSet, statement.getQueryAsString(), statement.getParameters())
             ) {
-                var entries = stream.collect(Collectors.toList());
-                entries.forEach(entry -> leaseContext.withConnection(connection).acquireLease(entry.getId()));
-                return entries;
+                return stream.filter(entry -> lease(connection, entry))
+                        .collect(Collectors.toList());
             } catch (SQLException e) {
                 throw new EdcPersistenceException(e);
             }
         });
+    }
+
+    private boolean lease(Connection connection, DataPlaneInstance entry) {
+        try {
+            leaseContext.withConnection(connection).acquireLease(entry.getId());
+        } catch (EdcException e) {
+            if (e.getCause() instanceof IllegalStateException) {
+                // already leased
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

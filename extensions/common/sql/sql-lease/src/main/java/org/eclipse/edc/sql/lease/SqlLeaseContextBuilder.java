@@ -43,25 +43,28 @@ import java.util.Objects;
 public class SqlLeaseContextBuilder {
     private final TransactionContext trxContext;
     private final LeaseStatements statements;
+    private final String resourceKind;
     private final Clock clock;
     private final QueryExecutor queryExecutor;
     private String leaseHolder;
     private Duration leaseDuration;
 
-    private SqlLeaseContextBuilder(TransactionContext trxContext, LeaseStatements statements, String leaseHolder, Clock clock, QueryExecutor queryExecutor) {
+    private SqlLeaseContextBuilder(TransactionContext trxContext, LeaseStatements statements, String leaseHolder, String resourceKind, Clock clock, QueryExecutor queryExecutor) {
         this.trxContext = trxContext;
         this.statements = statements;
         this.leaseHolder = leaseHolder;
+        this.resourceKind = resourceKind;
         this.clock = clock;
         this.queryExecutor = queryExecutor;
     }
 
-    public static SqlLeaseContextBuilder with(TransactionContext trxContext, String leaseHolder, LeaseStatements statements, Clock clock, QueryExecutor queryExecutor) {
+    public static SqlLeaseContextBuilder with(TransactionContext trxContext, String leaseHolder, String resourceKind, LeaseStatements statements, Clock clock, QueryExecutor queryExecutor) {
         Objects.requireNonNull(trxContext, "trxContext");
         Objects.requireNonNull(leaseHolder, "leaseHolder");
         Objects.requireNonNull(statements, "statements");
         Objects.requireNonNull(queryExecutor, "queryExecutor");
-        return new SqlLeaseContextBuilder(trxContext, statements, leaseHolder, clock, queryExecutor);
+        Objects.requireNonNull(queryExecutor, "resourceKind");
+        return new SqlLeaseContextBuilder(trxContext, statements, leaseHolder, resourceKind, clock, queryExecutor);
     }
 
     /**
@@ -86,6 +89,6 @@ public class SqlLeaseContextBuilder {
      */
     public SqlLeaseContext withConnection(Connection connection) {
         Objects.requireNonNull(connection, "connection");
-        return new SqlLeaseContext(trxContext, statements, leaseHolder, clock, leaseDuration, connection, queryExecutor);
+        return new SqlLeaseContext(trxContext, statements, leaseHolder, resourceKind, clock, leaseDuration, connection, queryExecutor);
     }
 }
