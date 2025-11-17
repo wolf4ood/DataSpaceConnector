@@ -31,7 +31,7 @@ maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.18
 maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.20.1, Apache-2.0, approved, #23058
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-jsonp/2.20.1, , restricted, clearlydefined
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.16.2, Apache-2.0, approved, #11853
-maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.20.1, , restricted, clearlydefined
+maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.20.1, Apache-2.0, approved, #24684
 maven/mavencentral/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-base/2.20.1, , restricted, clearlydefined
 maven/mavencentral/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-json-provider/2.16.2, Apache-2.0, approved, #11858
 maven/mavencentral/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-json-provider/2.20.1, , restricted, clearlydefined
@@ -86,9 +86,9 @@ maven/mavencentral/io.cloudevents/cloudevents-api/4.0.1, Apache-2.0, approved, c
 maven/mavencentral/io.cloudevents/cloudevents-core/4.0.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.cloudevents/cloudevents-http-basic/4.0.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.github.classgraph/classgraph/4.8.176, MIT, approved, CQ22530
-maven/mavencentral/io.micrometer/micrometer-commons/1.15.5, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #23144
-maven/mavencentral/io.micrometer/micrometer-core/1.15.5, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #23142
-maven/mavencentral/io.micrometer/micrometer-observation/1.15.5, Apache-2.0, approved, #23139
+maven/mavencentral/io.micrometer/micrometer-commons/1.16.0, , restricted, clearlydefined
+maven/mavencentral/io.micrometer/micrometer-core/1.16.0, , restricted, clearlydefined
+maven/mavencentral/io.micrometer/micrometer-observation/1.16.0, , restricted, clearlydefined
 maven/mavencentral/io.opentelemetry.instrumentation/opentelemetry-instrumentation-annotations/1.32.0, Apache-2.0, approved, #11684
 maven/mavencentral/io.opentelemetry.proto/opentelemetry-proto/1.8.0-alpha, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.opentelemetry/opentelemetry-api/1.32.0, Apache-2.0, approved, #11682
