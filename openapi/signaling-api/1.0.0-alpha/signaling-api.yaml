@@ -9,10 +9,40 @@ info:
 servers:
 - url: /
 paths:
-  /v4beta/dataplanes:
+  /transfers/{transferId}/dataflow/prepared:
+    post:
+      tags:
+      - Data Plane Transfer events
+      description: Notify a prepared transfer
+      operationId: prepared
+      parameters:
+      - name: transferId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataFlowStatusMessage"
+      responses:
+        "200":
+          description: Prepared notification delivered correctly
+        "404":
+          description: Transfer process does not exist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+  /v4/dataplanes:
     put:
       tags:
-      - Dataplane Signaling Registration v4beta
+      - Dataplane Signaling Registration v4
       description: Register or update a Dataplane instance
       operationId: register
       requestBody:
@@ -39,30 +69,25 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /transfers/{transferId}/dataflow/prepared:
-    post:
+  /v4/dataplanes/{dataplaneId}:
+    delete:
       tags:
-      - Data Plane Transfer events
-      description: Notify a prepared transfer
-      operationId: prepared
+      - Dataplane Signaling Registration v4
+      description: Update a Dataplane instance
+      operationId: delete
       parameters:
-      - name: transferId
+      - name: dataplaneId
         in: path
         required: true
         style: simple
         explode: false
         schema:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/DataFlowStatusMessage"
       responses:
         "200":
-          description: Prepared notification delivered correctly
+          description: Dataplane instance correctly deleted
         "404":
-          description: Transfer process does not exist
+          description: Not found
           content:
             application/json:
               schema:
@@ -99,25 +124,30 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
-  /v4beta/dataplanes/{dataplaneId}:
-    delete:
+  /transfers/{transferId}/dataflow/errored:
+    post:
       tags:
-      - Dataplane Signaling Registration v4beta
-      description: Update a Dataplane instance
-      operationId: delete
+      - Data Plane Transfer events
+      description: Notify an errored transfer
+      operationId: errored
       parameters:
-      - name: dataplaneId
+      - name: transferId
         in: path
         required: true
         style: simple
         explode: false
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataFlowStatusMessage"
       responses:
         "200":
-          description: Dataplane instance correctly deleted
+          description: Errored notification delivered correctly
         "404":
-          description: Not found
+          description: Transfer process does not exist
           content:
             application/json:
               schema:
@@ -167,38 +197,6 @@ components:
         type: ErrorType
         path: object.error.path
         invalidValue: this value is not valid
-    DataPlaneRegistrationMessage:
-      type: object
-      properties:
-        authorization:
-          type: object
-          additionalProperties:
-            type: object
-        dataplaneId:
-          type: string
-        endpoint:
-          type: string
-        labels:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-        transferTypes:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-      example:
-        authorization:
-          key: "{}"
-        dataplaneId: dataplaneId
-        endpoint: endpoint
-        transferTypes:
-        - transferTypes
-        - transferTypes
-        labels:
-        - labels
-        - labels
     DataFlowStatusMessage:
       type: object
       properties:
@@ -259,3 +257,35 @@ components:
         '@type': '@type'
         name: name
         value: value
+    DataPlaneRegistrationMessage:
+      type: object
+      properties:
+        authorization:
+          type: object
+          additionalProperties:
+            type: object
+        dataplaneId:
+          type: string
+        endpoint:
+          type: string
+        labels:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        transferTypes:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      example:
+        authorization:
+          key: "{}"
+        dataplaneId: dataplaneId
+        endpoint: endpoint
+        transferTypes:
+        - transferTypes
+        - transferTypes
+        labels:
+        - labels
+        - labels
