@@ -19,6 +19,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -33,51 +34,62 @@ import org.eclipse.edc.connector.controlplane.catalog.spi.CatalogRequestMessage;
 import org.eclipse.edc.connector.controlplane.catalog.spi.Dataset;
 import org.eclipse.edc.connector.controlplane.catalog.spi.DatasetRequestMessage;
 import org.eclipse.edc.connector.controlplane.services.spi.catalog.CatalogProtocolService;
-import org.eclipse.edc.jsonld.spi.JsonLdNamespace;
 import org.eclipse.edc.participantcontext.spi.service.ParticipantContextService;
 import org.eclipse.edc.participantcontext.spi.service.ParticipantContextSupplier;
 import org.eclipse.edc.protocol.dsp.http.spi.message.ContinuationTokenManager;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
 import org.eclipse.edc.protocol.dsp.http.spi.message.GetDspRequest;
 import org.eclipse.edc.protocol.dsp.http.spi.message.PostDspRequest;
+import org.eclipse.edc.protocol.spi.DataspaceProfileContext;
+import org.eclipse.edc.protocol.spi.ParticipantProfileResolver;
 
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.edc.protocol.dsp.catalog.http.api.CatalogApiPaths.BASE_PATH;
 import static org.eclipse.edc.protocol.dsp.catalog.http.api.CatalogApiPaths.CATALOG_REQUEST;
 import static org.eclipse.edc.protocol.dsp.catalog.http.api.CatalogApiPaths.DATASET_REQUEST;
+import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP;
+import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP_SEPARATOR;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_PATH;
+import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspCatalogPropertyAndTypeNames.DSPACE_TYPE_CATALOG_REQUEST_MESSAGE_TERM;
 
 /**
- * Versioned Catalog endpoint for 2025/1 protocol version
+ * Versioned Catalog endpoint for 2025/1 protocol version. Path is scoped by participant context
+ * id, profile id and DSP protocol version segment. The version segment dispatches to this
+ * controller class; the profile determines the JSON-LD namespace and protocol string used to
+ * dispatch the request. The profile's DSP version must match this controller's version.
  */
 @Consumes({APPLICATION_JSON})
 @Produces({APPLICATION_JSON})
-@Path("/{participantContextId}" + V_2025_1_PATH + BASE_PATH)
+@Path("/{participantContextId}/{profileId}" + V_2025_1_PATH + BASE_PATH)
 public class DspCatalogApiController20251 {
 
     private final CatalogProtocolService service;
     private final ParticipantContextService participantContextService;
+    private final ParticipantProfileResolver profileResolver;
     private final DspRequestHandler dspRequestHandler;
     private final ContinuationTokenManager continuationTokenManager;
-    private final String protocol;
-    private final JsonLdNamespace namespace;
 
-    public DspCatalogApiController20251(CatalogProtocolService service, ParticipantContextService participantContextService, DspRequestHandler dspRequestHandler,
-                                        ContinuationTokenManager continuationTokenManager, String protocol, JsonLdNamespace namespace) {
+    public DspCatalogApiController20251(CatalogProtocolService service,
+                                        ParticipantContextService participantContextService,
+                                        ParticipantProfileResolver profileResolver,
+                                        DspRequestHandler dspRequestHandler,
+                                        ContinuationTokenManager continuationTokenManager) {
         this.service = service;
         this.participantContextService = participantContextService;
+        this.profileResolver = profileResolver;
         this.dspRequestHandler = dspRequestHandler;
         this.continuationTokenManager = continuationTokenManager;
-        this.protocol = protocol;
-        this.namespace = namespace;
     }
 
     @POST
     @Path(CATALOG_REQUEST)
-    public Response requestCatalog(@PathParam("participantContextId") String participantContextId, JsonObject jsonObject, @HeaderParam(AUTHORIZATION) String token, @Context UriInfo uriInfo,
+    public Response requestCatalog(@PathParam("participantContextId") String participantContextId,
+                                   @PathParam("profileId") String profileId,
+                                   JsonObject jsonObject, @HeaderParam(AUTHORIZATION) String token, @Context UriInfo uriInfo,
                                    @QueryParam("continuationToken") String continuationToken) {
+        var profile = resolveProfile(participantContextId, profileId);
         JsonObject messageJson;
         if (continuationToken == null) {
             messageJson = jsonObject;
@@ -88,11 +100,11 @@ public class DspCatalogApiController20251 {
 
         var request = PostDspRequest.Builder.newInstance(CatalogRequestMessage.class, Catalog.class, CatalogError.class)
                 .token(token)
-                .expectedMessageType(namespace.toIri(DSPACE_TYPE_CATALOG_REQUEST_MESSAGE_TERM))
+                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_CATALOG_REQUEST_MESSAGE_TERM))
                 .message(messageJson)
                 .serviceCall(service::getCatalog)
                 .errorProvider(CatalogError.Builder::newInstance)
-                .protocol(protocol)
+                .protocol(protocolFor(profile))
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -102,7 +114,11 @@ public class DspCatalogApiController20251 {
 
     @GET
     @Path(DATASET_REQUEST + "/{id}")
-    public Response getDataset(@PathParam("participantContextId") String participantContextId, @PathParam("id") String id, @HeaderParam(AUTHORIZATION) String token) {
+    public Response getDataset(@PathParam("participantContextId") String participantContextId,
+                               @PathParam("profileId") String profileId,
+                               @PathParam("id") String id, @HeaderParam(AUTHORIZATION) String token) {
+        var profile = resolveProfile(participantContextId, profileId);
+        var protocol = protocolFor(profile);
         var message = DatasetRequestMessage.Builder.newInstance()
                 .datasetId(id)
                 .protocol(protocol)
@@ -119,6 +135,19 @@ public class DspCatalogApiController20251 {
                 .build();
 
         return dspRequestHandler.getResource(request);
+    }
+
+    private DataspaceProfileContext resolveProfile(String participantContextId, String profileId) {
+        var profile = profileResolver.resolve(participantContextId, profileId)
+                .orElseThrow(() -> new NotFoundException("No profile '%s' for participant '%s'".formatted(profileId, participantContextId)));
+        if (!V_2025_1_VERSION.equals(profile.protocolVersion().version())) {
+            throw new NotFoundException("Profile '%s' is not for DSP version %s".formatted(profileId, V_2025_1_VERSION));
+        }
+        return profile;
+    }
+
+    private static String protocolFor(DataspaceProfileContext profile) {
+        return DATASPACE_PROTOCOL_HTTP + DATASPACE_PROTOCOL_HTTP_SEPARATOR + profile.id();
     }
 
     private ParticipantContextSupplier participantContextSupplier(String id) {

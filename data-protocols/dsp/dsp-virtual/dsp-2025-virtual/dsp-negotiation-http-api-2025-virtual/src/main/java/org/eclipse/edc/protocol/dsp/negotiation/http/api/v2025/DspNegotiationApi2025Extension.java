@@ -26,6 +26,7 @@ import org.eclipse.edc.protocol.dsp.negotiation.validation.ContractNegotiationTe
 import org.eclipse.edc.protocol.dsp.negotiation.validation.ContractOfferMessageValidator;
 import org.eclipse.edc.protocol.dsp.negotiation.validation.ContractRequestMessageValidator;
 import org.eclipse.edc.protocol.spi.DataspaceProfileContextRegistry;
+import org.eclipse.edc.protocol.spi.ParticipantProfileResolver;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.spi.system.ServiceExtension;
@@ -36,9 +37,8 @@ import org.eclipse.edc.web.jersey.providers.jsonld.JerseyJsonLdInterceptor;
 import org.eclipse.edc.web.spi.WebService;
 import org.eclipse.edc.web.spi.configuration.ApiContext;
 
-import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DATASPACE_PROTOCOL_HTTP_V_2025_1;
-import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_NAMESPACE_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_SCOPE_V_2025_1;
+import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTypeNames.DSPACE_TYPE_CONTRACT_AGREEMENT_MESSAGE_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTypeNames.DSPACE_TYPE_CONTRACT_AGREEMENT_VERIFICATION_MESSAGE_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTypeNames.DSPACE_TYPE_CONTRACT_NEGOTIATION_EVENT_MESSAGE_TERM;
@@ -64,16 +64,15 @@ public class DspNegotiationApi2025Extension implements ServiceExtension {
     @Inject
     private DspRequestHandler dspRequestHandler;
     @Inject
-    private DataspaceProfileContextRegistry contextRegistry;
-
+    private DataspaceProfileContextRegistry profileContextRegistry;
     @Inject
     private JsonLd jsonLd;
-
     @Inject
     private TypeManager typeManager;
-
     @Inject
     private ParticipantContextService participantContextService;
+    @Inject
+    private ParticipantProfileResolver participantProfileResolver;
 
     @Override
     public String name() {
@@ -82,19 +81,24 @@ public class DspNegotiationApi2025Extension implements ServiceExtension {
 
     @Override
     public void initialize(ServiceExtensionContext context) {
-        registerValidators();
+        // Register validators for DSP 2025/1 profiles only (other DSP versions are handled by
+        // their own extensions).
+        profileContextRegistry.addRegistrationCallback(profile -> {
+            if (!V_2025_1_VERSION.equals(profile.protocolVersion().version())) {
+                return;
+            }
+            var ns = profile.namespace();
+            validatorRegistry.register(ns.toIri(DSPACE_TYPE_CONTRACT_REQUEST_MESSAGE_TERM), ContractRequestMessageValidator.instance(ns, false));
+            validatorRegistry.register(ns.toIri(DSPACE_TYPE_CONTRACT_OFFER_MESSAGE_TERM), ContractOfferMessageValidator.instance(ns, false));
+            validatorRegistry.register(ns.toIri(DSPACE_TYPE_CONTRACT_NEGOTIATION_EVENT_MESSAGE_TERM), ContractNegotiationEventMessageValidator.instance(ns));
+            validatorRegistry.register(ns.toIri(DSPACE_TYPE_CONTRACT_AGREEMENT_MESSAGE_TERM), ContractAgreementMessageValidator.instance(ns));
+            validatorRegistry.register(ns.toIri(DSPACE_TYPE_CONTRACT_AGREEMENT_VERIFICATION_MESSAGE_TERM), ContractAgreementVerificationMessageValidator.instance(ns));
+            validatorRegistry.register(ns.toIri(DSPACE_TYPE_CONTRACT_NEGOTIATION_TERMINATION_MESSAGE_TERM), ContractNegotiationTerminationMessageValidator.instance(ns));
+        });
 
-        webService.registerResource(ApiContext.PROTOCOL, new DspNegotiationApiController20251(protocolService, participantContextService, dspRequestHandler, DATASPACE_PROTOCOL_HTTP_V_2025_1, DSP_NAMESPACE_V_2025_1));
-        webService.registerDynamicResource(ApiContext.PROTOCOL, DspNegotiationApiController20251.class, new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_2025_1));
-    }
-
-
-    private void registerValidators() {
-        validatorRegistry.register(DSP_NAMESPACE_V_2025_1.toIri(DSPACE_TYPE_CONTRACT_REQUEST_MESSAGE_TERM), ContractRequestMessageValidator.instance(DSP_NAMESPACE_V_2025_1, false));
-        validatorRegistry.register(DSP_NAMESPACE_V_2025_1.toIri(DSPACE_TYPE_CONTRACT_OFFER_MESSAGE_TERM), ContractOfferMessageValidator.instance(DSP_NAMESPACE_V_2025_1, false));
-        validatorRegistry.register(DSP_NAMESPACE_V_2025_1.toIri(DSPACE_TYPE_CONTRACT_NEGOTIATION_EVENT_MESSAGE_TERM), ContractNegotiationEventMessageValidator.instance(DSP_NAMESPACE_V_2025_1));
-        validatorRegistry.register(DSP_NAMESPACE_V_2025_1.toIri(DSPACE_TYPE_CONTRACT_AGREEMENT_MESSAGE_TERM), ContractAgreementMessageValidator.instance(DSP_NAMESPACE_V_2025_1));
-        validatorRegistry.register(DSP_NAMESPACE_V_2025_1.toIri(DSPACE_TYPE_CONTRACT_AGREEMENT_VERIFICATION_MESSAGE_TERM), ContractAgreementVerificationMessageValidator.instance(DSP_NAMESPACE_V_2025_1));
-        validatorRegistry.register(DSP_NAMESPACE_V_2025_1.toIri(DSPACE_TYPE_CONTRACT_NEGOTIATION_TERMINATION_MESSAGE_TERM), ContractNegotiationTerminationMessageValidator.instance(DSP_NAMESPACE_V_2025_1));
+        webService.registerResource(ApiContext.PROTOCOL,
+                new DspNegotiationApiController20251(protocolService, participantContextService, participantProfileResolver, dspRequestHandler));
+        webService.registerDynamicResource(ApiContext.PROTOCOL, DspNegotiationApiController20251.class,
+                new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_2025_1));
     }
 }

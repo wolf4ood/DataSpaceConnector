@@ -24,6 +24,7 @@ import org.eclipse.edc.protocol.dsp.transferprocess.validation.TransferRequestMe
 import org.eclipse.edc.protocol.dsp.transferprocess.validation.TransferStartMessageValidator;
 import org.eclipse.edc.protocol.dsp.transferprocess.validation.TransferTerminationMessageValidator;
 import org.eclipse.edc.protocol.spi.DataspaceProfileContextRegistry;
+import org.eclipse.edc.protocol.spi.ParticipantProfileResolver;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.spi.system.ServiceExtension;
@@ -34,9 +35,8 @@ import org.eclipse.edc.web.jersey.providers.jsonld.JerseyJsonLdInterceptor;
 import org.eclipse.edc.web.spi.WebService;
 import org.eclipse.edc.web.spi.configuration.ApiContext;
 
-import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DATASPACE_PROTOCOL_HTTP_V_2025_1;
-import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_NAMESPACE_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_SCOPE_V_2025_1;
+import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_COMPLETION_MESSAGE_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_REQUEST_MESSAGE_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_START_MESSAGE_TERM;
@@ -59,27 +59,34 @@ public class DspTransferProcessApi2025Extension implements ServiceExtension {
     @Inject
     private JsonObjectValidatorRegistry validatorRegistry;
     @Inject
-    private DataspaceProfileContextRegistry versionRegistry;
+    private DataspaceProfileContextRegistry profileContextRegistry;
     @Inject
     private JsonLd jsonLd;
     @Inject
     private TypeManager typeManager;
-
     @Inject
     private ParticipantContextService participantContextService;
+    @Inject
+    private ParticipantProfileResolver participantProfileResolver;
 
     @Override
     public void initialize(ServiceExtensionContext context) {
-        registerValidators();
+        // Register validators for DSP 2025/1 profiles only (other DSP versions are handled by
+        // their own extensions).
+        profileContextRegistry.addRegistrationCallback(profile -> {
+            if (!V_2025_1_VERSION.equals(profile.protocolVersion().version())) {
+                return;
+            }
+            var ns = profile.namespace();
+            validatorRegistry.register(ns.toIri(DSPACE_TYPE_TRANSFER_REQUEST_MESSAGE_TERM), TransferRequestMessageValidator.instance(ns));
+            validatorRegistry.register(ns.toIri(DSPACE_TYPE_TRANSFER_START_MESSAGE_TERM), TransferStartMessageValidator.instance(ns));
+            validatorRegistry.register(ns.toIri(DSPACE_TYPE_TRANSFER_COMPLETION_MESSAGE_TERM), TransferCompletionMessageValidator.instance(ns));
+            validatorRegistry.register(ns.toIri(DSPACE_TYPE_TRANSFER_TERMINATION_MESSAGE_TERM), TransferTerminationMessageValidator.instance(ns));
+        });
 
-        webService.registerResource(ApiContext.PROTOCOL, new DspTransferProcessApiController20251(transferProcessProtocolService, participantContextService, dspRequestHandler, DATASPACE_PROTOCOL_HTTP_V_2025_1, DSP_NAMESPACE_V_2025_1));
-        webService.registerDynamicResource(ApiContext.PROTOCOL, DspTransferProcessApiController20251.class, new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_2025_1));
-    }
-
-    private void registerValidators() {
-        validatorRegistry.register(DSP_NAMESPACE_V_2025_1.toIri(DSPACE_TYPE_TRANSFER_REQUEST_MESSAGE_TERM), TransferRequestMessageValidator.instance(DSP_NAMESPACE_V_2025_1));
-        validatorRegistry.register(DSP_NAMESPACE_V_2025_1.toIri(DSPACE_TYPE_TRANSFER_START_MESSAGE_TERM), TransferStartMessageValidator.instance(DSP_NAMESPACE_V_2025_1));
-        validatorRegistry.register(DSP_NAMESPACE_V_2025_1.toIri(DSPACE_TYPE_TRANSFER_COMPLETION_MESSAGE_TERM), TransferCompletionMessageValidator.instance(DSP_NAMESPACE_V_2025_1));
-        validatorRegistry.register(DSP_NAMESPACE_V_2025_1.toIri(DSPACE_TYPE_TRANSFER_TERMINATION_MESSAGE_TERM), TransferTerminationMessageValidator.instance(DSP_NAMESPACE_V_2025_1));
+        webService.registerResource(ApiContext.PROTOCOL,
+                new DspTransferProcessApiController20251(transferProcessProtocolService, participantContextService, participantProfileResolver, dspRequestHandler));
+        webService.registerDynamicResource(ApiContext.PROTOCOL, DspTransferProcessApiController20251.class,
+                new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_2025_1));
     }
 }

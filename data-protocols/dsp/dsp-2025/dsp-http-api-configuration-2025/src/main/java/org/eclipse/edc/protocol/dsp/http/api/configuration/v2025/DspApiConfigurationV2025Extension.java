@@ -89,8 +89,12 @@ public class DspApiConfigurationV2025Extension implements ServiceExtension {
     public void initialize(ServiceExtensionContext context) {
         registerTransformers();
 
-        // bind JSON-LD contexts for every registered profile (now or later)
+        // bind JSON-LD contexts for every DSP 2025/1 profile (now or later); other DSP versions
+        // are handled by their own configuration extensions.
         dataspaceProfileContextRegistry.addRegistrationCallback(profile -> {
+            if (!V_2025_1_VERSION.equals(profile.protocolVersion().version())) {
+                return;
+            }
             var scope = DSP_SCOPE + DSP_CONTEXT_SEPARATOR + profile.id();
             jsonLd.registerContext(profile.jsonLdContextUrl().toString(), scope);
             jsonLd.registerContext(EDC_DSPACE_CONTEXT, scope);
