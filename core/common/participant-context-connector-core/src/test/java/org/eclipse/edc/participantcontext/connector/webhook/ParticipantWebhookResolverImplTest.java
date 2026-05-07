@@ -36,7 +36,7 @@ public class ParticipantWebhookResolverImplTest {
         var profile = mock(DataspaceProfileContext.class);
         var proto = mock(ProtocolWebhook.class);
 
-        when(profile.name()).thenReturn("protocolA");
+        when(profile.id()).thenReturn("protocolA");
         when(profile.webhook()).thenReturn(proto);
         when(proto.url()).thenReturn("https://example/%s");
         when(registry.getProfiles()).thenReturn(List.of(profile));
@@ -54,7 +54,7 @@ public class ParticipantWebhookResolverImplTest {
     void getWebhook_returnsNullWhenNoMatchingProfile() {
         var registry = mock(DataspaceProfileContextRegistry.class);
         var profile = mock(DataspaceProfileContext.class);
-        when(profile.name()).thenReturn("other");
+        when(profile.id()).thenReturn("other");
         when(registry.getProfiles()).thenReturn(List.of(profile));
 
         var resolver = new ParticipantWebhookResolverImpl(registry);

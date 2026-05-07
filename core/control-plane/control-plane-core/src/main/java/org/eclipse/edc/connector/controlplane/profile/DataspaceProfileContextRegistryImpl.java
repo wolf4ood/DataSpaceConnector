@@ -49,14 +49,14 @@ public class DataspaceProfileContextRegistryImpl implements DataspaceProfileCont
 
     @Override
     public @Nullable ProtocolVersion getProtocolVersion(String protocol) {
-        return getProfiles().stream().filter(it -> it.name().equals(protocol))
+        return getProfiles().stream().filter(it -> it.id().equals(protocol))
                 .map(DataspaceProfileContext::protocolVersion).findAny().orElse(null);
     }
 
     @Override
     public @Nullable ParticipantIdExtractionFunction getIdExtractionFunction(String protocol) {
         return getProfiles().stream()
-                .filter(it -> it.name().equals(protocol))
+                .filter(it -> it.id().equals(protocol))
                 .map(DataspaceProfileContext::idExtractionFunction)
                 .findAny()
                 .orElse(null);

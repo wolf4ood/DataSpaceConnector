@@ -41,16 +41,17 @@ import org.eclipse.edc.transform.transformer.edc.to.JsonObjectToCriterionTransfo
 import org.eclipse.edc.transform.transformer.edc.to.JsonObjectToQuerySpecTransformer;
 import org.eclipse.edc.transform.transformer.edc.to.JsonValueToGenericTypeTransformer;
 
+import java.net.URI;
 import java.util.Map;
 
 import static org.eclipse.edc.jsonld.spi.Namespaces.DSPACE_CONTEXT_2025_1;
 import static org.eclipse.edc.jsonld.spi.Namespaces.EDC_DSPACE_CONTEXT;
-import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DATASPACE_PROTOCOL_HTTP_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_NAMESPACE_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_SCOPE_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_TRANSFORMER_CONTEXT_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_PATH;
+import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
 import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
@@ -89,7 +90,13 @@ public class DspApiConfigurationV2025Extension implements ServiceExtension {
         registerNamespaces();
         registerTransformers();
 
-        var profileContext = new DataspaceProfileContext(DATASPACE_PROTOCOL_HTTP_V_2025_1, V_2025_1, () -> dspWebhookAddress.get() + V_2025_1_PATH, participantIdExtractionFunction);
+        var profileContext = new DataspaceProfileContext(
+                V_2025_1_VERSION,
+                V_2025_1,
+                () -> dspWebhookAddress.get() + V_2025_1_PATH,
+                participantIdExtractionFunction,
+                DSP_NAMESPACE_V_2025_1,
+                URI.create(DSPACE_CONTEXT_2025_1));
         dataspaceProfileContextRegistry.registerDefault(profileContext);
     }
 

@@ -18,6 +18,7 @@ import io.restassured.specification.RequestSpecification;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import org.eclipse.edc.connector.controlplane.services.spi.protocol.VersionsError;
+import org.eclipse.edc.jsonld.spi.JsonLdNamespace;
 import org.eclipse.edc.junit.annotations.ApiTest;
 import org.eclipse.edc.participantcontext.spi.service.ParticipantContextService;
 import org.eclipse.edc.participantcontext.spi.types.ParticipantContext;
@@ -30,6 +31,7 @@ import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.web.jersey.testfixtures.RestControllerTestBase;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -63,7 +65,7 @@ class DspMetadataApiControllerTest extends RestControllerTestBase {
                                 .add("path", protocolVersion.path())
                                 .add("binding", protocolVersion.binding())).build()).build();
 
-        var profile = new DataspaceProfileContext("profileId", protocolVersion, mock(), mock());
+        var profile = new DataspaceProfileContext("profileId", protocolVersion, mock(), mock(), new JsonLdNamespace("https://example.org/dspace/"), URI.create("https://example.org/context.jsonld"));
 
         when(profileContextRegistry.getProfiles()).thenReturn(List.of(profile));
         when(transformerRegistry.transform(any(), eq(JsonObject.class))).thenReturn(Result.success(output));
