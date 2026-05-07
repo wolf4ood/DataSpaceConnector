@@ -15,10 +15,13 @@
 package org.eclipse.edc.participantcontext.connector;
 
 import org.eclipse.edc.participantcontext.connector.identity.ParticipantContextIdentityResolverImpl;
+import org.eclipse.edc.participantcontext.connector.profile.ParticipantProfileResolverImpl;
 import org.eclipse.edc.participantcontext.connector.webhook.ParticipantWebhookResolverImpl;
+import org.eclipse.edc.participantcontext.spi.config.ParticipantContextConfig;
 import org.eclipse.edc.participantcontext.spi.identity.ParticipantIdentityResolver;
 import org.eclipse.edc.participantcontext.spi.service.ParticipantContextService;
 import org.eclipse.edc.protocol.spi.DataspaceProfileContextRegistry;
+import org.eclipse.edc.protocol.spi.ParticipantProfileResolver;
 import org.eclipse.edc.protocol.spi.ProtocolWebhookResolver;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
@@ -36,6 +39,8 @@ public class ConnectorParticipantContextExtension implements ServiceExtension {
     @Inject
     private ParticipantContextService participantContextService;
     @Inject
+    private ParticipantContextConfig participantContextConfig;
+    @Inject
     private Monitor monitor;
 
     @Override
@@ -46,6 +51,11 @@ public class ConnectorParticipantContextExtension implements ServiceExtension {
     @Provider
     public ProtocolWebhookResolver participantWebhookResolver() {
         return new ParticipantWebhookResolverImpl(dataspaceProfileContextRegistry);
+    }
+
+    @Provider
+    public ParticipantProfileResolver participantProfileResolver() {
+        return new ParticipantProfileResolverImpl(participantContextConfig, dataspaceProfileContextRegistry);
     }
 
     @Provider(isDefault = true)

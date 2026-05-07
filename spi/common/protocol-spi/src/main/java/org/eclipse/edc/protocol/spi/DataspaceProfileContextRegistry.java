@@ -74,4 +74,13 @@ public interface DataspaceProfileContextRegistry {
      * @return a list of profile contexts. Always not null.
      */
     List<DataspaceProfileContext> getProfiles();
+
+    /**
+     * Get a registered profile by its id.
+     *
+     * @param profileId the profile id
+     * @return the matching profile, or null if no profile with that id is registered
+     */
+    @Nullable
+    DataspaceProfileContext getProfile(String profileId);
 }

@@ -66,4 +66,12 @@ public class DataspaceProfileContextRegistryImpl implements DataspaceProfileCont
     public List<DataspaceProfileContext> getProfiles() {
         return standardProfiles.isEmpty() ? defaultProfiles : standardProfiles;
     }
+
+    @Override
+    public @Nullable DataspaceProfileContext getProfile(String profileId) {
+        return getProfiles().stream()
+                .filter(it -> it.id().equals(profileId))
+                .findAny()
+                .orElse(null);
+    }
 }
