@@ -18,6 +18,8 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 import jakarta.ws.rs.ext.ReaderInterceptor;
 import jakarta.ws.rs.ext.ReaderInterceptorContext;
@@ -33,6 +35,7 @@ import org.eclipse.edc.web.spi.validation.SchemaType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.Function;
 
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
 import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.TYPE;
@@ -43,8 +46,12 @@ public class JerseyJsonLdInterceptor implements ReaderInterceptor, WriterInterce
     private final TypeManager typeManager;
     private final String typeContext;
     private final String scope;
+    private final Function<UriInfo, String> scopeProvider;
     private final JsonObjectValidatorRegistry validatorRegistry;
     private final String schemaVersion;
+
+    @Context
+    private UriInfo uriInfo;
 
     public JerseyJsonLdInterceptor(JsonLd jsonLd, TypeManager typeManager, String typeContext, String scope) {
         this(jsonLd, typeManager, typeContext, scope, null, null);
@@ -55,8 +62,25 @@ public class JerseyJsonLdInterceptor implements ReaderInterceptor, WriterInterce
         this.typeManager = typeManager;
         this.typeContext = typeContext;
         this.scope = scope;
+        this.scopeProvider = null;
         this.validatorRegistry = validatorRegistry;
         this.schemaVersion = schemaVersion;
+    }
+
+    /**
+     * Constructor that derives the JSON-LD compaction scope per request from {@link UriInfo}
+     * (typically by reading a path parameter such as {@code profileId}). Use this when the same
+     * controller class serves multiple JSON-LD scopes — e.g. when each profile carries its own
+     * JSON-LD context.
+     */
+    public JerseyJsonLdInterceptor(JsonLd jsonLd, TypeManager typeManager, String typeContext, Function<UriInfo, String> scopeProvider) {
+        this.jsonLd = jsonLd;
+        this.typeManager = typeManager;
+        this.typeContext = typeContext;
+        this.scope = null;
+        this.scopeProvider = scopeProvider;
+        this.validatorRegistry = null;
+        this.schemaVersion = null;
     }
 
     @Override
@@ -129,7 +153,11 @@ public class JerseyJsonLdInterceptor implements ReaderInterceptor, WriterInterce
     }
 
     private JsonObject compact(JsonObject jsonObject) {
-        return jsonLd.compact(jsonObject, scope)
+        return jsonLd.compact(jsonObject, resolveScope())
                 .orElseThrow(f -> new InternalServerErrorException("Failed to compact JsonObject: " + f.getFailureDetail()));
+    }
+
+    private String resolveScope() {
+        return scopeProvider != null ? scopeProvider.apply(uriInfo) : scope;
     }
 }

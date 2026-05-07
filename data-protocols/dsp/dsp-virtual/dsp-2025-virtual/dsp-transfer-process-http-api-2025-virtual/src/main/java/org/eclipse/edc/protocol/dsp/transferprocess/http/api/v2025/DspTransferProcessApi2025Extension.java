@@ -35,8 +35,9 @@ import org.eclipse.edc.web.jersey.providers.jsonld.JerseyJsonLdInterceptor;
 import org.eclipse.edc.web.spi.WebService;
 import org.eclipse.edc.web.spi.configuration.ApiContext;
 
-import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_SCOPE_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
+import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_CONTEXT_SEPARATOR;
+import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_SCOPE;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_COMPLETION_MESSAGE_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_REQUEST_MESSAGE_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_START_MESSAGE_TERM;
@@ -87,6 +88,11 @@ public class DspTransferProcessApi2025Extension implements ServiceExtension {
         webService.registerResource(ApiContext.PROTOCOL,
                 new DspTransferProcessApiController20251(transferProcessProtocolService, participantContextService, participantProfileResolver, dspRequestHandler));
         webService.registerDynamicResource(ApiContext.PROTOCOL, DspTransferProcessApiController20251.class,
-                new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_2025_1));
+                new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DspTransferProcessApi2025Extension::scopeFromUri));
+    }
+
+    private static String scopeFromUri(jakarta.ws.rs.core.UriInfo uriInfo) {
+        var profileId = uriInfo.getPathParameters().getFirst("profileId");
+        return DSP_SCOPE + DSP_CONTEXT_SEPARATOR + profileId;
     }
 }

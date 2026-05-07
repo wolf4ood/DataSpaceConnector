@@ -46,9 +46,10 @@ import java.util.Optional;
 import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP;
 import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP_SEPARATOR;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_NAMESPACE_V_2025_1;
-import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_SCOPE_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_TRANSFORMER_CONTEXT_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
+import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_CONTEXT_SEPARATOR;
+import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_SCOPE;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspCatalogPropertyAndTypeNames.DSPACE_TYPE_CATALOG_REQUEST_MESSAGE_TERM;
 import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
@@ -111,7 +112,12 @@ public class DspCatalogApi2025Extension implements ServiceExtension {
         webService.registerResource(ApiContext.PROTOCOL,
                 new DspCatalogApiController20251(service, participantContextService, participantProfileResolver, dspRequestHandler, continuationTokenManager(monitor)));
         webService.registerDynamicResource(ApiContext.PROTOCOL, DspCatalogApiController20251.class,
-                new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_2025_1));
+                new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DspCatalogApi2025Extension::scopeFromUri));
+    }
+
+    private static String scopeFromUri(jakarta.ws.rs.core.UriInfo uriInfo) {
+        var profileId = uriInfo.getPathParameters().getFirst("profileId");
+        return DSP_SCOPE + DSP_CONTEXT_SEPARATOR + profileId;
     }
 
     private ContinuationTokenManager continuationTokenManager(Monitor monitor) {

@@ -37,8 +37,9 @@ import org.eclipse.edc.web.jersey.providers.jsonld.JerseyJsonLdInterceptor;
 import org.eclipse.edc.web.spi.WebService;
 import org.eclipse.edc.web.spi.configuration.ApiContext;
 
-import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_SCOPE_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
+import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_CONTEXT_SEPARATOR;
+import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_SCOPE;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTypeNames.DSPACE_TYPE_CONTRACT_AGREEMENT_MESSAGE_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTypeNames.DSPACE_TYPE_CONTRACT_AGREEMENT_VERIFICATION_MESSAGE_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspNegotiationPropertyAndTypeNames.DSPACE_TYPE_CONTRACT_NEGOTIATION_EVENT_MESSAGE_TERM;
@@ -99,6 +100,11 @@ public class DspNegotiationApi2025Extension implements ServiceExtension {
         webService.registerResource(ApiContext.PROTOCOL,
                 new DspNegotiationApiController20251(protocolService, participantContextService, participantProfileResolver, dspRequestHandler));
         webService.registerDynamicResource(ApiContext.PROTOCOL, DspNegotiationApiController20251.class,
-                new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DSP_SCOPE_V_2025_1));
+                new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DspNegotiationApi2025Extension::scopeFromUri));
+    }
+
+    private static String scopeFromUri(jakarta.ws.rs.core.UriInfo uriInfo) {
+        var profileId = uriInfo.getPathParameters().getFirst("profileId");
+        return DSP_SCOPE + DSP_CONTEXT_SEPARATOR + profileId;
     }
 }
