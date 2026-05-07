@@ -107,6 +107,32 @@ class DataspaceProfileContextRegistryImplTest {
     }
 
     @Nested
+    class GetProfileByProtocol {
+        @Test
+        void resolvesByBareId() {
+            var version = new ProtocolVersion("v", "/v", "https");
+            var profile = new DataspaceProfileContext("2025-1", version, () -> "url", ct -> "id", NAMESPACE, CONTEXT_URL);
+            registry.registerDefault(profile);
+
+            assertThat(registry.getProfileByProtocol("2025-1")).isEqualTo(profile);
+        }
+
+        @Test
+        void resolvesByBindingPrefixedProtocol() {
+            var version = new ProtocolVersion("v", "/v", "https");
+            var profile = new DataspaceProfileContext("2025-1", version, () -> "url", ct -> "id", NAMESPACE, CONTEXT_URL);
+            registry.registerDefault(profile);
+
+            assertThat(registry.getProfileByProtocol("dataspace-protocol-http:2025-1")).isEqualTo(profile);
+        }
+
+        @Test
+        void returnsNullWhenNoMatch() {
+            assertThat(registry.getProfileByProtocol("dataspace-protocol-http:unknown")).isNull();
+        }
+    }
+
+    @Nested
     class RegistrationCallback {
         @Test
         void firesOnSubsequentRegister() {
