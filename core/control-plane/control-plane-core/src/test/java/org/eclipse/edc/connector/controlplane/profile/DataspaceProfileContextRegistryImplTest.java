@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
+import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -102,6 +103,47 @@ class DataspaceProfileContextRegistryImplTest {
             var result = registry.getProtocolVersion("profile");
 
             assertThat(result).isEqualTo(version);
+        }
+    }
+
+    @Nested
+    class RegistrationCallback {
+        @Test
+        void firesOnSubsequentRegister() {
+            var seen = new ArrayList<String>();
+            registry.addRegistrationCallback(p -> seen.add(p.id()));
+            var version = new ProtocolVersion("v", "/v", "https");
+
+            registry.registerDefault(new DataspaceProfileContext("a", version, () -> "url", ct -> "id", NAMESPACE, CONTEXT_URL));
+            registry.register(new DataspaceProfileContext("b", version, () -> "url", ct -> "id", NAMESPACE, CONTEXT_URL));
+
+            assertThat(seen).containsExactly("a", "b");
+        }
+
+        @Test
+        void replaysAlreadyRegisteredProfiles() {
+            var version = new ProtocolVersion("v", "/v", "https");
+            registry.registerDefault(new DataspaceProfileContext("a", version, () -> "url", ct -> "id", NAMESPACE, CONTEXT_URL));
+            registry.register(new DataspaceProfileContext("b", version, () -> "url", ct -> "id", NAMESPACE, CONTEXT_URL));
+
+            var seen = new ArrayList<String>();
+            registry.addRegistrationCallback(p -> seen.add(p.id()));
+
+            assertThat(seen).containsExactly("a", "b");
+        }
+
+        @Test
+        void multipleCallbacks_eachFiresPerProfile() {
+            var seenByOne = new ArrayList<String>();
+            var seenByTwo = new ArrayList<String>();
+            registry.addRegistrationCallback(p -> seenByOne.add(p.id()));
+            registry.addRegistrationCallback(p -> seenByTwo.add(p.id()));
+            var version = new ProtocolVersion("v", "/v", "https");
+
+            registry.registerDefault(new DataspaceProfileContext("a", version, () -> "url", ct -> "id", NAMESPACE, CONTEXT_URL));
+
+            assertThat(seenByOne).containsExactly("a");
+            assertThat(seenByTwo).containsExactly("a");
         }
     }
 

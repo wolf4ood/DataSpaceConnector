@@ -15,15 +15,19 @@
 package org.eclipse.edc.protocol.dsp.http.dispatcher;
 
 import org.eclipse.edc.protocol.dsp.http.spi.dispatcher.DspHttpRemoteMessageDispatcher;
+import org.eclipse.edc.protocol.spi.DataspaceProfileContextRegistry;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.spi.message.RemoteMessageDispatcherRegistry;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
 
-import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DATASPACE_PROTOCOL_HTTP_V_2025_1;
+import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP;
+import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP_SEPARATOR;
 
 /**
- * Registers the message dispatcher for DSP v2025/1.
+ * Registers the DSP HTTP message dispatcher under {@code dataspace-protocol-http:{profileId}} for
+ * every profile registered in the {@link DataspaceProfileContextRegistry}, including profiles
+ * registered after this extension initializes.
  */
 public class DspHttpDispatcherV2025Extension implements ServiceExtension {
 
@@ -31,9 +35,12 @@ public class DspHttpDispatcherV2025Extension implements ServiceExtension {
     private RemoteMessageDispatcherRegistry dispatcherRegistry;
     @Inject
     private DspHttpRemoteMessageDispatcher dispatcher;
+    @Inject
+    private DataspaceProfileContextRegistry profileContextRegistry;
 
     @Override
     public void initialize(ServiceExtensionContext context) {
-        dispatcherRegistry.register(DATASPACE_PROTOCOL_HTTP_V_2025_1, dispatcher);
+        profileContextRegistry.addRegistrationCallback(profile ->
+                dispatcherRegistry.register(DATASPACE_PROTOCOL_HTTP + DATASPACE_PROTOCOL_HTTP_SEPARATOR + profile.id(), dispatcher));
     }
 }

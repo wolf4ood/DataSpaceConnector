@@ -17,6 +17,7 @@ package org.eclipse.edc.protocol.spi;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * A registry of configured {@link DataspaceProfileContext}.
@@ -83,4 +84,16 @@ public interface DataspaceProfileContextRegistry {
      */
     @Nullable
     DataspaceProfileContext getProfile(String profileId);
+
+    /**
+     * Adds a callback that is invoked once per profile that is now or will later be registered.
+     * The callback is invoked synchronously for every already-registered profile when added,
+     * and again whenever a new profile is registered via {@link #register(DataspaceProfileContext)}
+     * or {@link #registerDefault(DataspaceProfileContext)}. This lets components attach
+     * profile-scoped side effects (JSON-LD context registration, dispatcher binding, validator
+     * keying, etc.) without the registry depending on those subsystems.
+     *
+     * @param callback the callback to invoke per profile
+     */
+    void addRegistrationCallback(Consumer<DataspaceProfileContext> callback);
 }

@@ -24,20 +24,35 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class DataspaceProfileContextRegistryImpl implements DataspaceProfileContextRegistry {
 
     private final List<DataspaceProfileContext> defaultProfiles = new ArrayList<>();
     private final List<DataspaceProfileContext> standardProfiles = new ArrayList<>();
+    private final List<Consumer<DataspaceProfileContext>> callbacks = new ArrayList<>();
 
     @Override
     public void registerDefault(DataspaceProfileContext profileContext) {
         defaultProfiles.add(profileContext);
+        notifyCallbacks(profileContext);
     }
 
     @Override
     public void register(DataspaceProfileContext context) {
         standardProfiles.add(context);
+        notifyCallbacks(context);
+    }
+
+    @Override
+    public void addRegistrationCallback(Consumer<DataspaceProfileContext> callback) {
+        callbacks.add(callback);
+        Stream.concat(defaultProfiles.stream(), standardProfiles.stream()).forEach(callback);
+    }
+
+    private void notifyCallbacks(DataspaceProfileContext profile) {
+        callbacks.forEach(cb -> cb.accept(profile));
     }
 
     @Override
