@@ -23,7 +23,7 @@ import org.eclipse.edc.junit.annotations.ApiTest;
 import org.eclipse.edc.participantcontext.spi.service.ParticipantContextService;
 import org.eclipse.edc.participantcontext.spi.types.ParticipantContext;
 import org.eclipse.edc.protocol.spi.DataspaceProfileContext;
-import org.eclipse.edc.protocol.spi.DataspaceProfileContextRegistry;
+import org.eclipse.edc.protocol.spi.ParticipantProfileResolver;
 import org.eclipse.edc.protocol.spi.ProtocolVersion;
 import org.eclipse.edc.spi.result.Result;
 import org.eclipse.edc.spi.result.ServiceResult;
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 @ApiTest
 class DspMetadataApiControllerTest extends RestControllerTestBase {
 
-    private final DataspaceProfileContextRegistry profileContextRegistry = mock();
+    private final ParticipantProfileResolver profileResolver = mock();
     private final TypeTransformerRegistry transformerRegistry = mock();
     private final ParticipantContextService participantContextService = mock();
 
@@ -67,7 +67,7 @@ class DspMetadataApiControllerTest extends RestControllerTestBase {
 
         var profile = new DataspaceProfileContext("profileId", protocolVersion, mock(), mock(), new JsonLdNamespace("https://example.org/dspace/"), URI.create("https://example.org/context.jsonld"));
 
-        when(profileContextRegistry.getProfiles()).thenReturn(List.of(profile));
+        when(profileResolver.resolveAll(participantContextId)).thenReturn(List.of(profile));
         when(transformerRegistry.transform(any(), eq(JsonObject.class))).thenReturn(Result.success(output));
 
 
@@ -102,7 +102,7 @@ class DspMetadataApiControllerTest extends RestControllerTestBase {
 
     @Override
     protected Object controller() {
-        return new DspMetadataApiController(participantContextService, profileContextRegistry, transformerRegistry);
+        return new DspMetadataApiController(participantContextService, profileResolver, transformerRegistry);
     }
 
     private RequestSpecification baseRequest() {
