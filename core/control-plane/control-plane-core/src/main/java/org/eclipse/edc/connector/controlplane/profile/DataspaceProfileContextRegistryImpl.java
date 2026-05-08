@@ -64,13 +64,13 @@ public class DataspaceProfileContextRegistryImpl implements DataspaceProfileCont
 
     @Override
     public @Nullable ProtocolVersion getProtocolVersion(String protocol) {
-        var profile = getProfileByProtocol(protocol);
+        var profile = getProfile(protocol);
         return profile == null ? null : profile.protocolVersion();
     }
 
     @Override
     public @Nullable ParticipantIdExtractionFunction getIdExtractionFunction(String protocol) {
-        var profile = getProfileByProtocol(protocol);
+        var profile = getProfile(protocol);
         return profile == null ? null : profile.idExtractionFunction();
     }
 
@@ -87,11 +87,4 @@ public class DataspaceProfileContextRegistryImpl implements DataspaceProfileCont
                 .orElse(null);
     }
 
-    @Override
-    public @Nullable DataspaceProfileContext getProfileByProtocol(String protocol) {
-        return getProfiles().stream()
-                .filter(it -> protocol.equals(it.name()))
-                .findAny()
-                .orElse(null);
-    }
 }

@@ -12,7 +12,7 @@
  *
  */
 
-package org.eclipse.edc.protocol.dsp.transferprocess.http.api.v2025.controller;
+package org.eclipse.edc.protocol.dsp.transferprocess.http.api.v2025.virtual.controller;
 
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.Consumes;
@@ -43,8 +43,6 @@ import org.eclipse.edc.protocol.spi.DataspaceProfileContext;
 import org.eclipse.edc.protocol.spi.ParticipantProfileResolver;
 
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP;
-import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP_SEPARATOR;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_PATH;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_COMPLETION_MESSAGE_TERM;
@@ -92,7 +90,7 @@ public class DspTransferProcessApiController20251 {
                                        @PathParam("profileId") String profileId,
                                        @PathParam("id") String id, @HeaderParam(AUTHORIZATION) String token) {
         var profile = resolveProfile(participantContextId, profileId);
-        var protocol = protocolFor(profile);
+        var protocol = profile.name();
         var message = TransferProcessRequestMessage.Builder.newInstance()
                 .protocol(protocol)
                 .transferProcessId(id)
@@ -123,7 +121,7 @@ public class DspTransferProcessApiController20251 {
                 .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_TRANSFER_REQUEST_MESSAGE_TERM))
                 .serviceCall(protocolService::notifyRequested)
                 .errorProvider(TransferError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -143,7 +141,7 @@ public class DspTransferProcessApiController20251 {
                 .token(token)
                 .serviceCall(protocolService::notifyStarted)
                 .errorProvider(TransferError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -163,7 +161,7 @@ public class DspTransferProcessApiController20251 {
                 .token(token)
                 .serviceCall(protocolService::notifyCompleted)
                 .errorProvider(TransferError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -183,7 +181,7 @@ public class DspTransferProcessApiController20251 {
                 .token(token)
                 .serviceCall(protocolService::notifyTerminated)
                 .errorProvider(TransferError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -203,7 +201,7 @@ public class DspTransferProcessApiController20251 {
                 .token(token)
                 .serviceCall(protocolService::notifySuspended)
                 .errorProvider(TransferError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -217,10 +215,6 @@ public class DspTransferProcessApiController20251 {
             throw new NotFoundException("Profile '%s' is not for DSP version %s".formatted(profileId, V_2025_1_VERSION));
         }
         return profile;
-    }
-
-    private String protocolFor(DataspaceProfileContext profile) {
-        return DATASPACE_PROTOCOL_HTTP + DATASPACE_PROTOCOL_HTTP_SEPARATOR + profile.name();
     }
 
     private ParticipantContextSupplier participantContextSupplier(String id) {

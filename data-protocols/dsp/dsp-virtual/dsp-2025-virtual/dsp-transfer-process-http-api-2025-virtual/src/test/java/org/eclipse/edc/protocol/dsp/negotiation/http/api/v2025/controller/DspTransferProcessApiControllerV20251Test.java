@@ -19,7 +19,7 @@ import org.eclipse.edc.junit.annotations.ApiTest;
 import org.eclipse.edc.participantcontext.spi.service.ParticipantContextService;
 import org.eclipse.edc.participantcontext.spi.types.ParticipantContext;
 import org.eclipse.edc.protocol.dsp.transferprocess.http.api.controller.DspTransferProcessApiControllerBaseTest;
-import org.eclipse.edc.protocol.dsp.transferprocess.http.api.v2025.controller.DspTransferProcessApiController20251;
+import org.eclipse.edc.protocol.dsp.transferprocess.http.api.v2025.virtual.controller.DspTransferProcessApiController20251;
 import org.eclipse.edc.protocol.spi.DataspaceProfileContext;
 import org.eclipse.edc.protocol.spi.ParticipantProfileResolver;
 import org.eclipse.edc.spi.result.ServiceResult;

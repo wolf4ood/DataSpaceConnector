@@ -12,13 +12,13 @@
  *
  */
 
-package org.eclipse.edc.protocol.dsp.transferprocess.http.api.v2025;
+package org.eclipse.edc.protocol.dsp.transferprocess.http.api.v2025.virtual;
 
 import org.eclipse.edc.connector.controlplane.services.spi.transferprocess.TransferProcessProtocolService;
 import org.eclipse.edc.jsonld.spi.JsonLd;
 import org.eclipse.edc.participantcontext.spi.service.ParticipantContextService;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
-import org.eclipse.edc.protocol.dsp.transferprocess.http.api.v2025.controller.DspTransferProcessApiController20251;
+import org.eclipse.edc.protocol.dsp.transferprocess.http.api.v2025.virtual.controller.DspTransferProcessApiController20251;
 import org.eclipse.edc.protocol.dsp.transferprocess.validation.TransferCompletionMessageValidator;
 import org.eclipse.edc.protocol.dsp.transferprocess.validation.TransferRequestMessageValidator;
 import org.eclipse.edc.protocol.dsp.transferprocess.validation.TransferStartMessageValidator;
@@ -31,18 +31,14 @@ import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
 import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.validator.spi.JsonObjectValidatorRegistry;
-import org.eclipse.edc.web.jersey.providers.jsonld.JerseyJsonLdInterceptor;
 import org.eclipse.edc.web.spi.WebService;
 import org.eclipse.edc.web.spi.configuration.ApiContext;
 
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
-import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_CONTEXT_SEPARATOR;
-import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_SCOPE;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_COMPLETION_MESSAGE_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_REQUEST_MESSAGE_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_START_MESSAGE_TERM;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspTransferProcessPropertyAndTypeNames.DSPACE_TYPE_TRANSFER_TERMINATION_MESSAGE_TERM;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
  * Creates and registers the controller for dataspace protocol v2025/1 transfer process requests.
@@ -70,11 +66,6 @@ public class DspTransferProcessApi2025Extension implements ServiceExtension {
     @Inject
     private ParticipantProfileResolver participantProfileResolver;
 
-    private static String scopeFromUri(jakarta.ws.rs.core.UriInfo uriInfo) {
-        var profileId = uriInfo.getPathParameters().getFirst("profileId");
-        return DSP_SCOPE + DSP_CONTEXT_SEPARATOR + profileId;
-    }
-
     @Override
     public void initialize(ServiceExtensionContext context) {
         // Register validators for DSP 2025/1 profiles only (other DSP versions are handled by
@@ -92,7 +83,5 @@ public class DspTransferProcessApi2025Extension implements ServiceExtension {
 
         webService.registerResource(ApiContext.PROTOCOL,
                 new DspTransferProcessApiController20251(transferProcessProtocolService, participantContextService, participantProfileResolver, dspRequestHandler));
-        webService.registerDynamicResource(ApiContext.PROTOCOL, DspTransferProcessApiController20251.class,
-                new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DspTransferProcessApi2025Extension::scopeFromUri));
     }
 }

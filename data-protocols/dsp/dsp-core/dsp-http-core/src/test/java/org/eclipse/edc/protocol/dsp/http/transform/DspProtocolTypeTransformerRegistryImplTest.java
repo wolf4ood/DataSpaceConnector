@@ -44,7 +44,7 @@ public class DspProtocolTypeTransformerRegistryImplTest {
 
     @Test
     void forProtocol() {
-        when(dataspaceProfileContextRegistry.getProfileByProtocol(DATASPACE_PROTOCOL_HTTP)).thenReturn(PROFILE_MOCK);
+        when(dataspaceProfileContextRegistry.getProfile(DATASPACE_PROTOCOL_HTTP)).thenReturn(PROFILE_MOCK);
         when(transformerRegistry.forContext(DSP_TRANSFORMER_CONTEXT_V_MOCK)).thenReturn(transformerRegistry);
         assertThat(dspTransformerRegistry.forProtocol(DATASPACE_PROTOCOL_HTTP)).isSucceeded()
                 .isEqualTo(transformerRegistry);

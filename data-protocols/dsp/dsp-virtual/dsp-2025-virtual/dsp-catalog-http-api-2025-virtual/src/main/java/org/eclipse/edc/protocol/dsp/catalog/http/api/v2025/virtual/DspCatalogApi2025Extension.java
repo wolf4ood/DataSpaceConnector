@@ -12,7 +12,7 @@
  *
  */
 
-package org.eclipse.edc.protocol.dsp.catalog.http.api.v2025;
+package org.eclipse.edc.protocol.dsp.catalog.http.api.v2025.virtual;
 
 import org.eclipse.edc.connector.controlplane.catalog.spi.DataService;
 import org.eclipse.edc.connector.controlplane.catalog.spi.DataServiceRegistry;
@@ -21,7 +21,7 @@ import org.eclipse.edc.jsonld.spi.JsonLd;
 import org.eclipse.edc.participantcontext.spi.service.ParticipantContextService;
 import org.eclipse.edc.protocol.dsp.catalog.http.api.decorator.Base64continuationTokenSerDes;
 import org.eclipse.edc.protocol.dsp.catalog.http.api.decorator.ContinuationTokenManagerImpl;
-import org.eclipse.edc.protocol.dsp.catalog.http.api.v2025.controller.DspCatalogApiController20251;
+import org.eclipse.edc.protocol.dsp.catalog.http.api.v2025.virtual.controller.DspCatalogApiController20251;
 import org.eclipse.edc.protocol.dsp.catalog.validation.CatalogRequestMessageValidator;
 import org.eclipse.edc.protocol.dsp.http.spi.message.ContinuationTokenManager;
 import org.eclipse.edc.protocol.dsp.http.spi.message.DspRequestHandler;
@@ -37,7 +37,6 @@ import org.eclipse.edc.spi.system.ServiceExtensionContext;
 import org.eclipse.edc.spi.types.TypeManager;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.validator.spi.JsonObjectValidatorRegistry;
-import org.eclipse.edc.web.jersey.providers.jsonld.JerseyJsonLdInterceptor;
 import org.eclipse.edc.web.spi.WebService;
 import org.eclipse.edc.web.spi.configuration.ApiContext;
 
@@ -47,9 +46,6 @@ import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_NAMESPA
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_TRANSFORMER_CONTEXT_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspCatalogPropertyAndTypeNames.DSPACE_TYPE_CATALOG_REQUEST_MESSAGE_TERM;
-import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_CONTEXT_SEPARATOR;
-import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_SCOPE;
-import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
  * Creates and registers the controller for dataspace protocol v2025/1 catalog requests.
@@ -88,10 +84,6 @@ public class DspCatalogApi2025Extension implements ServiceExtension {
     @Inject
     private DataspaceProfileContextRegistry profileContextRegistry;
 
-    private static String scopeFromUri(jakarta.ws.rs.core.UriInfo uriInfo) {
-        var profileId = uriInfo.getPathParameters().getFirst("profileId");
-        return DSP_SCOPE + DSP_CONTEXT_SEPARATOR + profileId;
-    }
 
     @Override
     public String name() {
@@ -114,8 +106,6 @@ public class DspCatalogApi2025Extension implements ServiceExtension {
 
         webService.registerResource(ApiContext.PROTOCOL,
                 new DspCatalogApiController20251(service, participantContextService, participantProfileResolver, dspRequestHandler, continuationTokenManager(monitor)));
-        webService.registerDynamicResource(ApiContext.PROTOCOL, DspCatalogApiController20251.class,
-                new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DspCatalogApi2025Extension::scopeFromUri));
     }
 
     private ContinuationTokenManager continuationTokenManager(Monitor monitor) {

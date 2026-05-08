@@ -73,7 +73,7 @@ public class JsonLdRemoteMessageSerializerImpl implements JsonLdRemoteMessageSer
 
             if (transformResult.succeeded()) {
 
-                var profile = dataspaceProfileContextRegistry.getProfileByProtocol(message.getProtocol());
+                var profile = dataspaceProfileContextRegistry.getProfile(message.getProtocol());
                 if (profile == null) {
                     throw new EdcException(format("No profile found for protocol: %s", message.getProtocol()));
                 }

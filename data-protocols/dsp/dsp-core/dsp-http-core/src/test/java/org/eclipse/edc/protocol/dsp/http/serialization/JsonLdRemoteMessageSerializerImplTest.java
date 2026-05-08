@@ -82,7 +82,7 @@ class JsonLdRemoteMessageSerializerImplTest {
         when(dspTransformerRegistry.forProtocol(DATASPACE_PROTOCOL_HTTP)).thenReturn(Result.success(registry));
         when(registry.transform(message, JsonObject.class))
                 .thenReturn(Result.success(json));
-        when(dataspaceProfileContextRegistry.getProfileByProtocol(DATASPACE_PROTOCOL_HTTP)).thenReturn(PROFILE_MOCK);
+        when(dataspaceProfileContextRegistry.getProfile(DATASPACE_PROTOCOL_HTTP)).thenReturn(PROFILE_MOCK);
         when(mapper.writeValueAsString(any(JsonObject.class))).thenReturn(serialized);
 
         var result = serializer.serialize(message);
@@ -109,7 +109,7 @@ class JsonLdRemoteMessageSerializerImplTest {
         var json = messageJson();
 
         when(dspTransformerRegistry.forProtocol(DATASPACE_PROTOCOL_HTTP)).thenReturn(Result.success(registry));
-        when(dataspaceProfileContextRegistry.getProfileByProtocol(DATASPACE_PROTOCOL_HTTP)).thenReturn(PROFILE_MOCK);
+        when(dataspaceProfileContextRegistry.getProfile(DATASPACE_PROTOCOL_HTTP)).thenReturn(PROFILE_MOCK);
         when(registry.transform(message, JsonObject.class))
                 .thenReturn(Result.success(json));
         when(mapper.writeValueAsString(any(JsonObject.class))).thenThrow(JsonProcessingException.class);

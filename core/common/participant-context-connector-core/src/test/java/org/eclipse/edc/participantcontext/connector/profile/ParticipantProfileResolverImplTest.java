@@ -36,7 +36,7 @@ class ParticipantProfileResolverImplTest {
 
     private final ParticipantContextConfig config = mock();
     private final DataspaceProfileContextRegistry registry = mock();
-    private final ParticipantProfileResolverImpl resolver = new ParticipantProfileResolverImpl(config, registry);
+    private final ParticipantProfileResolverImpl resolver = new ParticipantProfileResolverImpl(config, registry, false);
 
     @Test
     void resolveAll_returnsProfilesInConfigOrder() {

@@ -30,15 +30,27 @@ public class ParticipantProfileResolverImpl implements ParticipantProfileResolve
 
     private final ParticipantContextConfig participantContextConfig;
     private final DataspaceProfileContextRegistry profileRegistry;
+    private final Boolean dspEnableAllProfiles;
 
     public ParticipantProfileResolverImpl(ParticipantContextConfig participantContextConfig,
-                                          DataspaceProfileContextRegistry profileRegistry) {
+                                          DataspaceProfileContextRegistry profileRegistry, Boolean dspEnableAllProfiles) {
         this.participantContextConfig = participantContextConfig;
         this.profileRegistry = profileRegistry;
+        this.dspEnableAllProfiles = dspEnableAllProfiles;
+    }
+
+    private static Set<String> parse(String csv) {
+        return Stream.of(csv.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
     public List<DataspaceProfileContext> resolveAll(String participantContextId) {
+        if (dspEnableAllProfiles) {
+            return profileRegistry.getProfiles();
+        }
         return parse(readRaw(participantContextId)).stream()
                 .map(profileRegistry::getProfile)
                 .filter(Objects::nonNull)
@@ -47,6 +59,11 @@ public class ParticipantProfileResolverImpl implements ParticipantProfileResolve
 
     @Override
     public Optional<DataspaceProfileContext> resolve(String participantContextId, String profileId) {
+
+        if (dspEnableAllProfiles) {
+            var profile = profileRegistry.getProfile(profileId);
+            return Optional.ofNullable(profile);
+        }
         var configured = parse(readRaw(participantContextId));
         if (!configured.contains(profileId)) {
             return Optional.empty();
@@ -56,12 +73,5 @@ public class ParticipantProfileResolverImpl implements ParticipantProfileResolve
 
     private String readRaw(String participantContextId) {
         return participantContextConfig.getString(participantContextId, PROFILES_CONFIG_KEY, "");
-    }
-
-    private static Set<String> parse(String csv) {
-        return Stream.of(csv.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isBlank())
-                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
     }
 }

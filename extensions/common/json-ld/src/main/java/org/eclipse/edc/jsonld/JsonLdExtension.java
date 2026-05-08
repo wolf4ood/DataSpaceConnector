@@ -46,14 +46,12 @@ public class JsonLdExtension implements ServiceExtension {
 
     public static final String NAME = "JSON-LD Extension";
     public static final String EDC_JSONLD_DOCUMENT_PREFIX = "edc.jsonld.document";
-
-    @SettingContext(EDC_JSONLD_DOCUMENT_PREFIX)
-    @Configuration
-    private Map<String, JsonLdDocumentConfiguration> jsonLdConfigurations = new HashMap<>();
-
     private static final boolean DEFAULT_HTTP_HTTPS_RESOLUTION = false;
     private static final boolean DEFAULT_AVOID_VOCAB_CONTEXT = false;
     private static final boolean DEFAULT_CHECK_PREFIXES = true;
+    @SettingContext(EDC_JSONLD_DOCUMENT_PREFIX)
+    @Configuration
+    private Map<String, JsonLdDocumentConfiguration> jsonLdConfigurations = new HashMap<>();
     @Setting(description = "If set enable http json-ld document resolution", defaultValue = DEFAULT_HTTP_HTTPS_RESOLUTION + "", key = "edc.jsonld.http.enabled")
     private boolean httpResolutionEnabled;
     @Setting(description = "If set enable https json-ld document resolution", defaultValue = DEFAULT_HTTP_HTTPS_RESOLUTION + "", key = "edc.jsonld.https.enabled")

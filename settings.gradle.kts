@@ -143,7 +143,7 @@ include(":data-protocols:dsp:dsp-virtual:dsp-2025-virtual")
 include(":data-protocols:dsp:dsp-virtual:dsp-2025-virtual:dsp-catalog-http-api-2025-virtual")
 include(":data-protocols:dsp:dsp-virtual:dsp-2025-virtual:dsp-negotiation-http-api-2025-virtual")
 include(":data-protocols:dsp:dsp-virtual:dsp-2025-virtual:dsp-transfer-process-http-api-2025-virtual")
-
+include(":data-protocols:dsp:dsp-virtual:dsp-http-api-configuration-2025-virtual")
 
 // modules for technology- or cloud-provider extensions --------------------------------------------
 include(":extensions:common:api:api-core")

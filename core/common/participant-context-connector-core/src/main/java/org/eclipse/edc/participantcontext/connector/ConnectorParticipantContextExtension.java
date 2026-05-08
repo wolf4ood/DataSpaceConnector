@@ -26,6 +26,7 @@ import org.eclipse.edc.protocol.spi.ProtocolWebhookResolver;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.runtime.metamodel.annotation.Provider;
+import org.eclipse.edc.runtime.metamodel.annotation.Setting;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.system.ServiceExtension;
 
@@ -33,6 +34,9 @@ import org.eclipse.edc.spi.system.ServiceExtension;
 public class ConnectorParticipantContextExtension implements ServiceExtension {
 
     public static final String NAME = "Connector Participant Context Extension";
+
+    @Setting(description = "When running in virtual mode, enable all the participants to use all the profiles enabled in the connector", key = "edc.dsp.profiles.enable.all", defaultValue = "false")
+    private Boolean dspEnableAllProfiles;
 
     @Inject
     private DataspaceProfileContextRegistry dataspaceProfileContextRegistry;
@@ -55,7 +59,7 @@ public class ConnectorParticipantContextExtension implements ServiceExtension {
 
     @Provider
     public ParticipantProfileResolver participantProfileResolver() {
-        return new ParticipantProfileResolverImpl(participantContextConfig, dataspaceProfileContextRegistry);
+        return new ParticipantProfileResolverImpl(participantContextConfig, dataspaceProfileContextRegistry, dspEnableAllProfiles);
     }
 
     @Provider(isDefault = true)

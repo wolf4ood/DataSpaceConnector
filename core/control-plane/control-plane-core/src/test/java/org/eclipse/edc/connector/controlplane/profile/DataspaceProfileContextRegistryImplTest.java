@@ -114,7 +114,7 @@ class DataspaceProfileContextRegistryImplTest {
             var profile = new DataspaceProfileContext("2025-1", version, () -> "url", ct -> "id", NAMESPACE, List.of(CONTEXT_URL));
             registry.registerDefault(profile);
 
-            assertThat(registry.getProfileByProtocol("2025-1")).isEqualTo(profile);
+            assertThat(registry.getProfile("2025-1")).isEqualTo(profile);
         }
 
         @Test
@@ -123,12 +123,12 @@ class DataspaceProfileContextRegistryImplTest {
             var profile = new DataspaceProfileContext("2025-1", version, () -> "url", ct -> "id", NAMESPACE, List.of(CONTEXT_URL));
             registry.registerDefault(profile);
 
-            assertThat(registry.getProfileByProtocol("dataspace-protocol-http:2025-1")).isEqualTo(profile);
+            assertThat(registry.getProfile("dataspace-protocol-http:2025-1")).isEqualTo(profile);
         }
 
         @Test
         void returnsNullWhenNoMatch() {
-            assertThat(registry.getProfileByProtocol("dataspace-protocol-http:unknown")).isNull();
+            assertThat(registry.getProfile("dataspace-protocol-http:unknown")).isNull();
         }
     }
 

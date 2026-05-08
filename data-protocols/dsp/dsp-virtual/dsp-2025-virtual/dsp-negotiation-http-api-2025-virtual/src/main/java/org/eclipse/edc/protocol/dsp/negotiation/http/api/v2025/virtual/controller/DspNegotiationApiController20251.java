@@ -12,7 +12,7 @@
  *
  */
 
-package org.eclipse.edc.protocol.dsp.negotiation.http.api.v2025.controller;
+package org.eclipse.edc.protocol.dsp.negotiation.http.api.v2025.virtual.controller;
 
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.Consumes;
@@ -44,8 +44,6 @@ import org.eclipse.edc.protocol.spi.DataspaceProfileContext;
 import org.eclipse.edc.protocol.spi.ParticipantProfileResolver;
 
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP;
-import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP_SEPARATOR;
 import static org.eclipse.edc.protocol.dsp.negotiation.http.api.NegotiationApiPaths.AGREEMENT;
 import static org.eclipse.edc.protocol.dsp.negotiation.http.api.NegotiationApiPaths.BASE_PATH;
 import static org.eclipse.edc.protocol.dsp.negotiation.http.api.NegotiationApiPaths.CONTRACT_OFFERS;
@@ -103,7 +101,7 @@ public class DspNegotiationApiController20251 {
                 .token(token)
                 .serviceCall(protocolService::notifyOffered)
                 .errorProvider(ContractNegotiationError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -122,7 +120,7 @@ public class DspNegotiationApiController20251 {
                 .token(token)
                 .serviceCall(protocolService::notifyOffered)
                 .errorProvider(ContractNegotiationError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -135,7 +133,7 @@ public class DspNegotiationApiController20251 {
                                    @PathParam("profileId") String profileId,
                                    @PathParam("id") String id, @HeaderParam(AUTHORIZATION) String token) {
         var profile = resolveProfile(participantContextId, profileId);
-        var protocol = protocolFor(profile);
+        var protocol = profile.name();
         var message = ContractNegotiationRequestMessage.Builder.newInstance()
                 .negotiationId(id)
                 .protocol(protocol)
@@ -166,7 +164,7 @@ public class DspNegotiationApiController20251 {
                 .token(token)
                 .serviceCall(protocolService::notifyRequested)
                 .errorProvider(ContractNegotiationError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -188,7 +186,7 @@ public class DspNegotiationApiController20251 {
                 .token(token)
                 .serviceCall(protocolService::notifyRequested)
                 .errorProvider(ContractNegotiationError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -213,7 +211,7 @@ public class DspNegotiationApiController20251 {
                     case ACCEPTED -> protocolService.notifyAccepted(ctx, message, claimToken);
                 })
                 .errorProvider(ContractNegotiationError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -235,7 +233,7 @@ public class DspNegotiationApiController20251 {
                 .token(token)
                 .serviceCall(protocolService::notifyVerified)
                 .errorProvider(ContractNegotiationError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -257,7 +255,7 @@ public class DspNegotiationApiController20251 {
                 .token(token)
                 .serviceCall(protocolService::notifyTerminated)
                 .errorProvider(ContractNegotiationError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -279,7 +277,7 @@ public class DspNegotiationApiController20251 {
                 .token(token)
                 .serviceCall(protocolService::notifyAgreed)
                 .errorProvider(ContractNegotiationError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -293,10 +291,6 @@ public class DspNegotiationApiController20251 {
             throw new NotFoundException("Profile '%s' is not for DSP version %s".formatted(profileId, V_2025_1_VERSION));
         }
         return profile;
-    }
-
-    private String protocolFor(DataspaceProfileContext profile) {
-        return DATASPACE_PROTOCOL_HTTP + DATASPACE_PROTOCOL_HTTP_SEPARATOR + profile.name();
     }
 
     private ParticipantContextSupplier participantContextSupplier(String id) {

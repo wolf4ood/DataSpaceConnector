@@ -12,7 +12,7 @@
  *
  */
 
-package org.eclipse.edc.protocol.dsp.catalog.http.api.v2025.controller;
+package org.eclipse.edc.protocol.dsp.catalog.http.api.v2025.virtual.controller;
 
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.BadRequestException;
@@ -48,8 +48,6 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.edc.protocol.dsp.catalog.http.api.CatalogApiPaths.BASE_PATH;
 import static org.eclipse.edc.protocol.dsp.catalog.http.api.CatalogApiPaths.CATALOG_REQUEST;
 import static org.eclipse.edc.protocol.dsp.catalog.http.api.CatalogApiPaths.DATASET_REQUEST;
-import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP;
-import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP_SEPARATOR;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_PATH;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
 import static org.eclipse.edc.protocol.dsp.spi.type.DspCatalogPropertyAndTypeNames.DSPACE_TYPE_CATALOG_REQUEST_MESSAGE_TERM;
@@ -104,7 +102,7 @@ public class DspCatalogApiController20251 {
                 .message(messageJson)
                 .serviceCall(service::getCatalog)
                 .errorProvider(CatalogError.Builder::newInstance)
-                .protocol(protocolFor(profile))
+                .protocol(profile.name())
                 .participantContextProvider(participantContextSupplier(participantContextId))
                 .build();
 
@@ -118,10 +116,9 @@ public class DspCatalogApiController20251 {
                                @PathParam("profileId") String profileId,
                                @PathParam("id") String id, @HeaderParam(AUTHORIZATION) String token) {
         var profile = resolveProfile(participantContextId, profileId);
-        var protocol = protocolFor(profile);
         var message = DatasetRequestMessage.Builder.newInstance()
                 .datasetId(id)
-                .protocol(protocol)
+                .protocol(profile.name())
                 .build();
 
         var request = GetDspRequest.Builder.newInstance(DatasetRequestMessage.class, Dataset.class, CatalogError.class)
@@ -131,7 +128,7 @@ public class DspCatalogApiController20251 {
                 .serviceCall(service::getDataset)
                 .errorProvider(CatalogError.Builder::newInstance)
                 .participantContextProvider(participantContextSupplier(participantContextId))
-                .protocol(protocol)
+                .protocol(profile.name())
                 .build();
 
         return dspRequestHandler.getResource(request);
@@ -144,10 +141,6 @@ public class DspCatalogApiController20251 {
             throw new NotFoundException("Profile '%s' is not for DSP version %s".formatted(profileId, V_2025_1_VERSION));
         }
         return profile;
-    }
-
-    private String protocolFor(DataspaceProfileContext profile) {
-        return DATASPACE_PROTOCOL_HTTP + DATASPACE_PROTOCOL_HTTP_SEPARATOR + profile.name();
     }
 
     private ParticipantContextSupplier participantContextSupplier(String id) {

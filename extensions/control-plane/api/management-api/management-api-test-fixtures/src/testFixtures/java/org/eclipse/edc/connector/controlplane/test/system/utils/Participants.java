@@ -27,7 +27,7 @@ public record Participants(Participant provider, Participant consumer) {
      * use the 6-arg {@link Participant} constructor and ensure the participant config sets
      * {@code edc.dsp.profiles} accordingly.
      */
-    public static final String DEFAULT_PROFILE_ID = "2025-1";
+    public static final String DEFAULT_PROFILE_ID = "http-dsp-profile-2025-1";
 
     /**
      * Default DSP protocol version segment used in tests. Matches the version of the bundled
@@ -38,7 +38,7 @@ public record Participants(Participant provider, Participant consumer) {
     public record Participant(String contextId, String id, LazySupplier<URI> protocol,
                               LazySupplier<URI> signalingProtocol,
                               Map<String, String> config,
-                              String profileId) {
+                              String profile) {
 
         public Participant(String contextId, String id, LazySupplier<URI> protocol, LazySupplier<URI> signalingProtocol) {
             this(contextId, id, protocol, signalingProtocol, Map.of(), DEFAULT_PROFILE_ID);
@@ -55,7 +55,7 @@ public record Participants(Participant provider, Participant consumer) {
          * dispatches the request.
          */
         public String getProtocolEndpoint() {
-            return protocol.get() + "/" + contextId + "/" + profileId + "/" + DEFAULT_DSP_VERSION_PATH;
+            return protocol.get() + "/" + contextId + "/" + profile + "/" + DEFAULT_DSP_VERSION_PATH;
         }
 
         public String getSignalingEndpointUrl() {

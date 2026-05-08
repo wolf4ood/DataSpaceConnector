@@ -86,18 +86,6 @@ public interface DataspaceProfileContextRegistry {
     DataspaceProfileContext getProfile(String profileId);
 
     /**
-     * Get a registered profile by a protocol string. The protocol string may be either the bare
-     * profile id (e.g. {@code 2025-1}) or a binding-prefixed form (e.g.
-     * {@code dataspace-protocol-http:2025-1}). The profile id is taken from the suffix after the
-     * last {@code :} when no profile matches the full string.
-     *
-     * @param protocol the protocol string carried on a {@code RemoteMessage}
-     * @return the matching profile, or null if none matches
-     */
-    @Nullable
-    DataspaceProfileContext getProfileByProtocol(String protocol);
-
-    /**
      * Adds a callback that is invoked once per profile that is now or will later be registered.
      * The callback is invoked synchronously for every already-registered profile when added,
      * and again whenever a new profile is registered via {@link #register(DataspaceProfileContext)}
