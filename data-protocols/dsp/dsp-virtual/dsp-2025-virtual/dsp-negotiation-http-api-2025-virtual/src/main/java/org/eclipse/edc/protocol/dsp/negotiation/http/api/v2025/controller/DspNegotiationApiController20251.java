@@ -97,7 +97,7 @@ public class DspNegotiationApiController20251 {
                                   @PathParam("id") String id, JsonObject body, @HeaderParam(AUTHORIZATION) String token) {
         var profile = resolveProfile(participantContextId, profileId);
         var request = PostDspRequest.Builder.newInstance(ContractOfferMessage.class, ContractNegotiation.class, ContractNegotiationError.class)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_CONTRACT_OFFER_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_CONTRACT_OFFER_MESSAGE_TERM))
                 .processId(id)
                 .message(body)
                 .token(token)
@@ -117,7 +117,7 @@ public class DspNegotiationApiController20251 {
                                          JsonObject jsonObject, @HeaderParam(AUTHORIZATION) String token) {
         var profile = resolveProfile(participantContextId, profileId);
         var request = PostDspRequest.Builder.newInstance(ContractOfferMessage.class, ContractNegotiation.class, ContractNegotiationError.class)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_CONTRACT_OFFER_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_CONTRACT_OFFER_MESSAGE_TERM))
                 .message(jsonObject)
                 .token(token)
                 .serviceCall(protocolService::notifyOffered)
@@ -161,7 +161,7 @@ public class DspNegotiationApiController20251 {
                                            JsonObject jsonObject, @HeaderParam(AUTHORIZATION) String token) {
         var profile = resolveProfile(participantContextId, profileId);
         var request = PostDspRequest.Builder.newInstance(ContractRequestMessage.class, ContractNegotiation.class, ContractNegotiationError.class)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_CONTRACT_REQUEST_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_CONTRACT_REQUEST_MESSAGE_TERM))
                 .message(jsonObject)
                 .token(token)
                 .serviceCall(protocolService::notifyRequested)
@@ -182,7 +182,7 @@ public class DspNegotiationApiController20251 {
                                     @HeaderParam(AUTHORIZATION) String token) {
         var profile = resolveProfile(participantContextId, profileId);
         var request = PostDspRequest.Builder.newInstance(ContractRequestMessage.class, ContractNegotiation.class, ContractNegotiationError.class)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_CONTRACT_REQUEST_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_CONTRACT_REQUEST_MESSAGE_TERM))
                 .processId(id)
                 .message(jsonObject)
                 .token(token)
@@ -204,7 +204,7 @@ public class DspNegotiationApiController20251 {
                                 @HeaderParam(AUTHORIZATION) String token) {
         var profile = resolveProfile(participantContextId, profileId);
         var request = PostDspRequest.Builder.newInstance(ContractNegotiationEventMessage.class, ContractNegotiation.class, ContractNegotiationError.class)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_CONTRACT_NEGOTIATION_EVENT_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_CONTRACT_NEGOTIATION_EVENT_MESSAGE_TERM))
                 .processId(id)
                 .message(jsonObject)
                 .token(token)
@@ -229,7 +229,7 @@ public class DspNegotiationApiController20251 {
                                     @HeaderParam(AUTHORIZATION) String token) {
         var profile = resolveProfile(participantContextId, profileId);
         var request = PostDspRequest.Builder.newInstance(ContractAgreementVerificationMessage.class, ContractNegotiation.class, ContractNegotiationError.class)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_CONTRACT_AGREEMENT_VERIFICATION_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_CONTRACT_AGREEMENT_VERIFICATION_MESSAGE_TERM))
                 .processId(id)
                 .message(jsonObject)
                 .token(token)
@@ -251,7 +251,7 @@ public class DspNegotiationApiController20251 {
                                          @HeaderParam(AUTHORIZATION) String token) {
         var profile = resolveProfile(participantContextId, profileId);
         var request = PostDspRequest.Builder.newInstance(ContractNegotiationTerminationMessage.class, ContractNegotiation.class, ContractNegotiationError.class)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_CONTRACT_NEGOTIATION_TERMINATION_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_CONTRACT_NEGOTIATION_TERMINATION_MESSAGE_TERM))
                 .processId(id)
                 .message(jsonObject)
                 .token(token)
@@ -273,7 +273,7 @@ public class DspNegotiationApiController20251 {
                                     @HeaderParam(AUTHORIZATION) String token) {
         var profile = resolveProfile(participantContextId, profileId);
         var request = PostDspRequest.Builder.newInstance(ContractAgreementMessage.class, ContractNegotiation.class, ContractNegotiationError.class)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_CONTRACT_AGREEMENT_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_CONTRACT_AGREEMENT_MESSAGE_TERM))
                 .processId(id)
                 .message(jsonObject)
                 .token(token)
@@ -295,8 +295,8 @@ public class DspNegotiationApiController20251 {
         return profile;
     }
 
-    private static String protocolFor(DataspaceProfileContext profile) {
-        return DATASPACE_PROTOCOL_HTTP + DATASPACE_PROTOCOL_HTTP_SEPARATOR + profile.id();
+    private String protocolFor(DataspaceProfileContext profile) {
+        return DATASPACE_PROTOCOL_HTTP + DATASPACE_PROTOCOL_HTTP_SEPARATOR + profile.name();
     }
 
     private ParticipantContextSupplier participantContextSupplier(String id) {

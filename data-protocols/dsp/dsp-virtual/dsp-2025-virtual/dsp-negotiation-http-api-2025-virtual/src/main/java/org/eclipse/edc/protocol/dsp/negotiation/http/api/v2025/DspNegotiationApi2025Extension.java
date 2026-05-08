@@ -75,6 +75,11 @@ public class DspNegotiationApi2025Extension implements ServiceExtension {
     @Inject
     private ParticipantProfileResolver participantProfileResolver;
 
+    private static String scopeFromUri(jakarta.ws.rs.core.UriInfo uriInfo) {
+        var profileId = uriInfo.getPathParameters().getFirst("profileId");
+        return DSP_SCOPE + DSP_CONTEXT_SEPARATOR + profileId;
+    }
+
     @Override
     public String name() {
         return NAME;
@@ -88,7 +93,7 @@ public class DspNegotiationApi2025Extension implements ServiceExtension {
             if (!V_2025_1_VERSION.equals(profile.protocolVersion().version())) {
                 return;
             }
-            var ns = profile.namespace();
+            var ns = profile.protocolNamespace();
             validatorRegistry.register(ns.toIri(DSPACE_TYPE_CONTRACT_REQUEST_MESSAGE_TERM), ContractRequestMessageValidator.instance(ns, false));
             validatorRegistry.register(ns.toIri(DSPACE_TYPE_CONTRACT_OFFER_MESSAGE_TERM), ContractOfferMessageValidator.instance(ns, false));
             validatorRegistry.register(ns.toIri(DSPACE_TYPE_CONTRACT_NEGOTIATION_EVENT_MESSAGE_TERM), ContractNegotiationEventMessageValidator.instance(ns));
@@ -101,10 +106,5 @@ public class DspNegotiationApi2025Extension implements ServiceExtension {
                 new DspNegotiationApiController20251(protocolService, participantContextService, participantProfileResolver, dspRequestHandler));
         webService.registerDynamicResource(ApiContext.PROTOCOL, DspNegotiationApiController20251.class,
                 new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DspNegotiationApi2025Extension::scopeFromUri));
-    }
-
-    private static String scopeFromUri(jakarta.ws.rs.core.UriInfo uriInfo) {
-        var profileId = uriInfo.getPathParameters().getFirst("profileId");
-        return DSP_SCOPE + DSP_CONTEXT_SEPARATOR + profileId;
     }
 }

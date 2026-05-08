@@ -70,6 +70,11 @@ public class DspTransferProcessApi2025Extension implements ServiceExtension {
     @Inject
     private ParticipantProfileResolver participantProfileResolver;
 
+    private static String scopeFromUri(jakarta.ws.rs.core.UriInfo uriInfo) {
+        var profileId = uriInfo.getPathParameters().getFirst("profileId");
+        return DSP_SCOPE + DSP_CONTEXT_SEPARATOR + profileId;
+    }
+
     @Override
     public void initialize(ServiceExtensionContext context) {
         // Register validators for DSP 2025/1 profiles only (other DSP versions are handled by
@@ -78,7 +83,7 @@ public class DspTransferProcessApi2025Extension implements ServiceExtension {
             if (!V_2025_1_VERSION.equals(profile.protocolVersion().version())) {
                 return;
             }
-            var ns = profile.namespace();
+            var ns = profile.protocolNamespace();
             validatorRegistry.register(ns.toIri(DSPACE_TYPE_TRANSFER_REQUEST_MESSAGE_TERM), TransferRequestMessageValidator.instance(ns));
             validatorRegistry.register(ns.toIri(DSPACE_TYPE_TRANSFER_START_MESSAGE_TERM), TransferStartMessageValidator.instance(ns));
             validatorRegistry.register(ns.toIri(DSPACE_TYPE_TRANSFER_COMPLETION_MESSAGE_TERM), TransferCompletionMessageValidator.instance(ns));
@@ -89,10 +94,5 @@ public class DspTransferProcessApi2025Extension implements ServiceExtension {
                 new DspTransferProcessApiController20251(transferProcessProtocolService, participantContextService, participantProfileResolver, dspRequestHandler));
         webService.registerDynamicResource(ApiContext.PROTOCOL, DspTransferProcessApiController20251.class,
                 new JerseyJsonLdInterceptor(jsonLd, typeManager, JSON_LD, DspTransferProcessApi2025Extension::scopeFromUri));
-    }
-
-    private static String scopeFromUri(jakarta.ws.rs.core.UriInfo uriInfo) {
-        var profileId = uriInfo.getPathParameters().getFirst("profileId");
-        return DSP_SCOPE + DSP_CONTEXT_SEPARATOR + profileId;
     }
 }

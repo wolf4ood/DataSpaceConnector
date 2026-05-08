@@ -120,7 +120,7 @@ public class DspTransferProcessApiController20251 {
         var request = PostDspRequest.Builder.newInstance(TransferRequestMessage.class, TransferProcess.class, TransferError.class)
                 .message(jsonObject)
                 .token(token)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_TRANSFER_REQUEST_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_TRANSFER_REQUEST_MESSAGE_TERM))
                 .serviceCall(protocolService::notifyRequested)
                 .errorProvider(TransferError.Builder::newInstance)
                 .protocol(protocolFor(profile))
@@ -138,7 +138,7 @@ public class DspTransferProcessApiController20251 {
         var profile = resolveProfile(participantContextId, profileId);
         var request = PostDspRequest.Builder.newInstance(TransferStartMessage.class, TransferProcess.class, TransferError.class)
                 .processId(id)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_TRANSFER_START_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_TRANSFER_START_MESSAGE_TERM))
                 .message(jsonObject)
                 .token(token)
                 .serviceCall(protocolService::notifyStarted)
@@ -158,7 +158,7 @@ public class DspTransferProcessApiController20251 {
         var profile = resolveProfile(participantContextId, profileId);
         var request = PostDspRequest.Builder.newInstance(TransferCompletionMessage.class, TransferProcess.class, TransferError.class)
                 .processId(id)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_TRANSFER_COMPLETION_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_TRANSFER_COMPLETION_MESSAGE_TERM))
                 .message(jsonObject)
                 .token(token)
                 .serviceCall(protocolService::notifyCompleted)
@@ -178,7 +178,7 @@ public class DspTransferProcessApiController20251 {
         var profile = resolveProfile(participantContextId, profileId);
         var request = PostDspRequest.Builder.newInstance(TransferTerminationMessage.class, TransferProcess.class, TransferError.class)
                 .processId(id)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_TRANSFER_TERMINATION_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_TRANSFER_TERMINATION_MESSAGE_TERM))
                 .message(jsonObject)
                 .token(token)
                 .serviceCall(protocolService::notifyTerminated)
@@ -198,7 +198,7 @@ public class DspTransferProcessApiController20251 {
         var profile = resolveProfile(participantContextId, profileId);
         var request = PostDspRequest.Builder.newInstance(TransferSuspensionMessage.class, TransferProcess.class, TransferError.class)
                 .processId(id)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_TRANSFER_SUSPENSION_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_TRANSFER_SUSPENSION_MESSAGE_TERM))
                 .message(jsonObject)
                 .token(token)
                 .serviceCall(protocolService::notifySuspended)
@@ -219,8 +219,8 @@ public class DspTransferProcessApiController20251 {
         return profile;
     }
 
-    private static String protocolFor(DataspaceProfileContext profile) {
-        return DATASPACE_PROTOCOL_HTTP + DATASPACE_PROTOCOL_HTTP_SEPARATOR + profile.id();
+    private String protocolFor(DataspaceProfileContext profile) {
+        return DATASPACE_PROTOCOL_HTTP + DATASPACE_PROTOCOL_HTTP_SEPARATOR + profile.name();
     }
 
     private ParticipantContextSupplier participantContextSupplier(String id) {

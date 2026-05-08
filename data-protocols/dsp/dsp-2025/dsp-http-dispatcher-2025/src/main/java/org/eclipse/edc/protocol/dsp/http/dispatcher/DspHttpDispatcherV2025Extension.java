@@ -21,8 +21,6 @@ import org.eclipse.edc.spi.message.RemoteMessageDispatcherRegistry;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
 
-import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP;
-import static org.eclipse.edc.protocol.dsp.http.spi.types.HttpMessageProtocol.DATASPACE_PROTOCOL_HTTP_SEPARATOR;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
 
 /**
@@ -43,7 +41,7 @@ public class DspHttpDispatcherV2025Extension implements ServiceExtension {
     public void initialize(ServiceExtensionContext context) {
         profileContextRegistry.addRegistrationCallback(profile -> {
             if (V_2025_1_VERSION.equals(profile.protocolVersion().version())) {
-                dispatcherRegistry.register(DATASPACE_PROTOCOL_HTTP + DATASPACE_PROTOCOL_HTTP_SEPARATOR + profile.id(), dispatcher);
+                dispatcherRegistry.register(profile.name(), dispatcher);
             }
         });
     }

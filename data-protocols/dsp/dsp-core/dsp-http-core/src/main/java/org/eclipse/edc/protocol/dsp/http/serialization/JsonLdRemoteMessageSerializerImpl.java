@@ -77,7 +77,7 @@ public class JsonLdRemoteMessageSerializerImpl implements JsonLdRemoteMessageSer
                 if (profile == null) {
                     throw new EdcException(format("No profile found for protocol: %s", message.getProtocol()));
                 }
-                var compacted = jsonLdService.compact(transformResult.getContent(), scopePrefix + DSP_CONTEXT_SEPARATOR + profile.id());
+                var compacted = jsonLdService.compact(transformResult.getContent(), scopePrefix + DSP_CONTEXT_SEPARATOR + profile.name());
                 if (compacted.succeeded()) {
                     return typeManager.getMapper(typeContext).writeValueAsString(compacted.getContent());
                 }

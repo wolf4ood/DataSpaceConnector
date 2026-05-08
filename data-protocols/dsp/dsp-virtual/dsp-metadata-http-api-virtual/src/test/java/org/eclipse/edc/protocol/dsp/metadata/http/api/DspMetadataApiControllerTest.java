@@ -31,7 +31,6 @@ import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.web.jersey.testfixtures.RestControllerTestBase;
 import org.junit.jupiter.api.Test;
 
-import java.net.URI;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -65,7 +64,7 @@ class DspMetadataApiControllerTest extends RestControllerTestBase {
                                 .add("path", protocolVersion.path())
                                 .add("binding", protocolVersion.binding())).build()).build();
 
-        var profile = new DataspaceProfileContext("profileId", protocolVersion, mock(), mock(), new JsonLdNamespace("https://example.org/dspace/"), URI.create("https://example.org/context.jsonld"));
+        var profile = new DataspaceProfileContext("profileId", protocolVersion, mock(), mock(), new JsonLdNamespace("https://example.org/dspace/"), List.of("https://example.org/context.jsonld"));
 
         when(profileResolver.resolveAll(participantContextId)).thenReturn(List.of(profile));
         when(transformerRegistry.transform(any(), eq(JsonObject.class))).thenReturn(Result.success(output));

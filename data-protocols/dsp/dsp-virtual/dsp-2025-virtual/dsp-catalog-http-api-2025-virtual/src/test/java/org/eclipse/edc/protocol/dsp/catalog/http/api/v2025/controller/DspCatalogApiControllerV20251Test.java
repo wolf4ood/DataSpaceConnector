@@ -24,7 +24,7 @@ import org.eclipse.edc.protocol.spi.ParticipantProfileResolver;
 import org.eclipse.edc.spi.result.ServiceResult;
 import org.junit.jupiter.api.BeforeEach;
 
-import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 
 import static org.eclipse.edc.protocol.dsp.catalog.http.api.CatalogApiPaths.BASE_PATH;
@@ -41,7 +41,7 @@ public class DspCatalogApiControllerV20251Test extends DspCatalogApiControllerTe
     private static final String PROFILE_ID = V_2025_1_VERSION;
     private static final DataspaceProfileContext PROFILE = new DataspaceProfileContext(
             PROFILE_ID, V_2025_1, () -> "https://example.org/webhook", ct -> "id",
-            DSP_NAMESPACE_V_2025_1, URI.create("https://example.org/context.jsonld"));
+            DSP_NAMESPACE_V_2025_1, List.of("https://example.org/context.jsonld"));
 
     private final ParticipantContextService participantContextService = mock();
     private final ParticipantProfileResolver profileResolver = mock();

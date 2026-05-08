@@ -16,28 +16,28 @@ package org.eclipse.edc.protocol.spi;
 
 import org.eclipse.edc.jsonld.spi.JsonLdNamespace;
 
-import java.net.URI;
+import java.util.List;
 
 /**
  * Represents a Dataspace Profile Context: the binding of a dataspace identity (JSON-LD namespace +
  * context document) to a DSP protocol version and an identity-extraction strategy.
  *
- * <p>The {@link #id} is used as the profile segment in DSP HTTP paths in virtual mode
+ * <p>The {@link #name} is used as the profile segment in DSP HTTP paths in virtual mode
  * ({@code /{participantContextId}/{profileId}/...}) and as the suffix of the protocol string
  * ({@code dataspace-protocol-http:{profileId}}).
  *
- * @param id                   the profile identifier; appears in URL paths and protocol strings.
+ * @param name                 the profile identifier; it may appear in URL paths for multiple profile support.
  * @param protocolVersion      the DSP protocol version this profile binds to.
  * @param webhook              the protocol endpoint URL.
  * @param idExtractionFunction extracts a participant id from a verified ClaimToken.
- * @param namespace            the JSON-LD namespace of the dataspace.
- * @param jsonLdContextUrl     URL of the JSON-LD context document used for compaction.
+ * @param protocolNamespace    the JSON-LD namespace of the dataspace.
+ * @param jsonLdContextsUrl    URL of the JSON-LD context document used for compaction.
  */
-public record DataspaceProfileContext(String id,
+public record DataspaceProfileContext(String name,
                                       ProtocolVersion protocolVersion,
                                       ProtocolWebhook webhook,
                                       ParticipantIdExtractionFunction idExtractionFunction,
-                                      JsonLdNamespace namespace,
-                                      URI jsonLdContextUrl) {
+                                      JsonLdNamespace protocolNamespace,
+                                      List<String> jsonLdContextsUrl) {
 
 }

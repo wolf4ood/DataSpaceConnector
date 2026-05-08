@@ -41,18 +41,17 @@ import org.eclipse.edc.transform.transformer.edc.to.JsonObjectToCriterionTransfo
 import org.eclipse.edc.transform.transformer.edc.to.JsonObjectToQuerySpecTransformer;
 import org.eclipse.edc.transform.transformer.edc.to.JsonValueToGenericTypeTransformer;
 
-import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.edc.jsonld.spi.Namespaces.DSPACE_CONTEXT_2025_1;
 import static org.eclipse.edc.jsonld.spi.Namespaces.EDC_DSPACE_CONTEXT;
+import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DATASPACE_PROTOCOL_HTTP_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_NAMESPACE_V_2025_1;
+import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_SCOPE_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.DSP_TRANSFORMER_CONTEXT_V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1;
 import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_PATH;
-import static org.eclipse.edc.protocol.dsp.spi.type.Dsp2025Constants.V_2025_1_VERSION;
-import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_CONTEXT_SEPARATOR;
-import static org.eclipse.edc.protocol.dsp.spi.type.DspConstants.DSP_SCOPE;
 import static org.eclipse.edc.spi.constants.CoreConstants.JSON_LD;
 
 /**
@@ -88,26 +87,21 @@ public class DspApiConfigurationV2025Extension implements ServiceExtension {
     @Override
     public void initialize(ServiceExtensionContext context) {
         registerTransformers();
-
-        // bind JSON-LD contexts for every DSP 2025/1 profile (now or later); other DSP versions
-        // are handled by their own configuration extensions.
-        dataspaceProfileContextRegistry.addRegistrationCallback(profile -> {
-            if (!V_2025_1_VERSION.equals(profile.protocolVersion().version())) {
-                return;
-            }
-            var scope = DSP_SCOPE + DSP_CONTEXT_SEPARATOR + profile.id();
-            jsonLd.registerContext(profile.jsonLdContextUrl().toString(), scope);
-            jsonLd.registerContext(EDC_DSPACE_CONTEXT, scope);
-        });
+        registerNamespaces();
 
         var profileContext = new DataspaceProfileContext(
-                V_2025_1_VERSION,
+                DATASPACE_PROTOCOL_HTTP_V_2025_1,
                 V_2025_1,
                 () -> dspWebhookAddress.get() + V_2025_1_PATH,
                 participantIdExtractionFunction,
                 DSP_NAMESPACE_V_2025_1,
-                URI.create(DSPACE_CONTEXT_2025_1));
+                List.of());
         dataspaceProfileContextRegistry.registerDefault(profileContext);
+    }
+
+    private void registerNamespaces() {
+        jsonLd.registerContext(DSPACE_CONTEXT_2025_1, DSP_SCOPE_V_2025_1);
+        jsonLd.registerContext(EDC_DSPACE_CONTEXT, DSP_SCOPE_V_2025_1);
     }
 
     private void registerTransformers() {

@@ -21,7 +21,7 @@ import org.eclipse.edc.protocol.spi.DataspaceProfileContextRegistry;
 import org.eclipse.edc.protocol.spi.ProtocolVersion;
 import org.junit.jupiter.api.Test;
 
-import java.net.URI;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.edc.protocol.spi.ParticipantProfileResolver.PROFILES_CONFIG_KEY;
@@ -33,7 +33,6 @@ import static org.mockito.Mockito.when;
 class ParticipantProfileResolverImplTest {
 
     private static final JsonLdNamespace NAMESPACE = new JsonLdNamespace("https://example.org/dspace/");
-    private static final URI CONTEXT_URL = URI.create("https://example.org/context.jsonld");
 
     private final ParticipantContextConfig config = mock();
     private final DataspaceProfileContextRegistry registry = mock();
@@ -104,8 +103,8 @@ class ParticipantProfileResolverImplTest {
         assertThat(resolver.resolve("p1", "b")).isEmpty();
     }
 
-    private static DataspaceProfileContext profile(String id) {
+    private DataspaceProfileContext profile(String id) {
         return new DataspaceProfileContext(id, new ProtocolVersion("v", "/v", "https"),
-                () -> "url", ct -> "id", NAMESPACE, CONTEXT_URL);
+                () -> "url", ct -> "id", NAMESPACE, List.of());
     }
 }

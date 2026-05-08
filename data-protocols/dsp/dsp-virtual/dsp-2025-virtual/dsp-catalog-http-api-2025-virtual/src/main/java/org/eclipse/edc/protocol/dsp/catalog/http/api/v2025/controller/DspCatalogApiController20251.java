@@ -100,7 +100,7 @@ public class DspCatalogApiController20251 {
 
         var request = PostDspRequest.Builder.newInstance(CatalogRequestMessage.class, Catalog.class, CatalogError.class)
                 .token(token)
-                .expectedMessageType(profile.namespace().toIri(DSPACE_TYPE_CATALOG_REQUEST_MESSAGE_TERM))
+                .expectedMessageType(profile.protocolNamespace().toIri(DSPACE_TYPE_CATALOG_REQUEST_MESSAGE_TERM))
                 .message(messageJson)
                 .serviceCall(service::getCatalog)
                 .errorProvider(CatalogError.Builder::newInstance)
@@ -146,8 +146,8 @@ public class DspCatalogApiController20251 {
         return profile;
     }
 
-    private static String protocolFor(DataspaceProfileContext profile) {
-        return DATASPACE_PROTOCOL_HTTP + DATASPACE_PROTOCOL_HTTP_SEPARATOR + profile.id();
+    private String protocolFor(DataspaceProfileContext profile) {
+        return DATASPACE_PROTOCOL_HTTP + DATASPACE_PROTOCOL_HTTP_SEPARATOR + profile.name();
     }
 
     private ParticipantContextSupplier participantContextSupplier(String id) {

@@ -30,7 +30,7 @@ public class ParticipantWebhookResolverImpl implements ProtocolWebhookResolver {
 
     @Override
     public @Nullable ProtocolWebhook getWebhook(String participantContextId, String protocol) {
-        return registry.getProfiles().stream().filter(it -> it.id().equals(protocol))
+        return registry.getProfiles().stream().filter(it -> it.name().equals(protocol))
                 .map(DataspaceProfileContext::webhook)
                 .map(protocolWebhook -> wrap(participantContextId, protocolWebhook))
                 .findAny().orElse(null);

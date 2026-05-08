@@ -82,7 +82,7 @@ public class DataspaceProfileContextRegistryImpl implements DataspaceProfileCont
     @Override
     public @Nullable DataspaceProfileContext getProfile(String profileId) {
         return getProfiles().stream()
-                .filter(it -> it.id().equals(profileId))
+                .filter(it -> it.name().equals(profileId))
                 .findAny()
                 .orElse(null);
     }
@@ -90,7 +90,7 @@ public class DataspaceProfileContextRegistryImpl implements DataspaceProfileCont
     @Override
     public @Nullable DataspaceProfileContext getProfileByProtocol(String protocol) {
         return getProfiles().stream()
-                .filter(it -> protocol.equals(it.id()) || protocol.endsWith(":" + it.id()))
+                .filter(it -> protocol.equals(it.name()))
                 .findAny()
                 .orElse(null);
     }
