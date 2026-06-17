@@ -24,37 +24,36 @@ maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.22, Apache-2
 maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.19.2, Apache-2.0 AND MIT, approved, #21916
 maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.21.2, Apache-2.0 AND MIT, approved, #25590
 maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.21.3, Apache-2.0 AND MIT, approved, #25590
-maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.21.4, Apache-2.0 AND MIT, approved, #25590
+maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.22.0, MIT AND BSD-2-Clause AND BSL-1.0 AND Apache-2.0, approved, #28625
 maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.18.3, Apache-2.0, approved, #16372
 maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.19.1, Apache-2.0, approved, #21909
 maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.19.2, Apache-2.0, approved, #21909
 maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.21.0, Apache-2.0, approved, #25591
 maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.21.2, Apache-2.0, approved, #25591
 maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.21.3, Apache-2.0, approved, #25591
-maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.21.4, Apache-2.0, approved, #25591
+maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.22.0, Apache-2.0, approved, #28621
 maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.18.3, Apache-2.0, approved, #16370
 maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.19.2, Apache-2.0, approved, #21912
-maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.21.3, Apache-2.0, approved, #25589
-maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.21.4, Apache-2.0, approved, #25589
+maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.22.0, Apache-2.0, approved, #28622
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-jsonp/2.21.0, Apache-2.0, approved, #26448
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-jsonp/2.21.2, Apache-2.0, approved, #26448
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-jsonp/2.21.3, Apache-2.0, approved, #26448
-maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-jsonp/2.21.4, Apache-2.0, approved, #26448
+maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-jsonp/2.22.0, , restricted, clearlydefined
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.19.2, Apache-2.0, approved, #23299
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.21.3, Apache-2.0, approved, #26441
-maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.21.4, Apache-2.0, approved, #26441
-maven/mavencentral/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-base/2.21.3, Apache-2.0, approved, #26442
+maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.22.0, , restricted, clearlydefined
+maven/mavencentral/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-base/2.22.0, , restricted, clearlydefined
 maven/mavencentral/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-json-provider/2.19.2, Apache-2.0, approved, #20839
-maven/mavencentral/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-json-provider/2.21.3, Apache-2.0, approved, #26443
+maven/mavencentral/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-json-provider/2.22.0, , restricted, clearlydefined
 maven/mavencentral/com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.19.2, Apache-2.0, approved, #20897
 maven/mavencentral/com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.19.2, Apache-2.0, approved, #21914
 maven/mavencentral/com.fasterxml.jackson.module/jackson-module-jakarta-xmlbind-annotations/2.19.1, Apache-2.0, approved, #21910
-maven/mavencentral/com.fasterxml.jackson.module/jackson-module-jakarta-xmlbind-annotations/2.21.3, Apache-2.0, approved, #25588
+maven/mavencentral/com.fasterxml.jackson.module/jackson-module-jakarta-xmlbind-annotations/2.22.0, Apache-2.0, approved, #28627
 maven/mavencentral/com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.19.2, Apache-2.0, approved, #21913
 maven/mavencentral/com.fasterxml.jackson/jackson-bom/2.19.2, Apache-2.0, approved, #20843
 maven/mavencentral/com.fasterxml.jackson/jackson-bom/2.20.1, Apache-2.0, approved, #26450
 maven/mavencentral/com.fasterxml.jackson/jackson-bom/2.21.3, Apache-2.0, approved, #26451
-maven/mavencentral/com.fasterxml.jackson/jackson-bom/2.21.4, Apache-2.0, approved, #26451
+maven/mavencentral/com.fasterxml.jackson/jackson-bom/2.22.0, , restricted, clearlydefined
 maven/mavencentral/com.github.docker-java/docker-java-api/3.7.1, Apache-2.0, approved, #26612
 maven/mavencentral/com.github.docker-java/docker-java-transport-zerodep/3.7.1, Apache-2.0 AND MPL-2.0, approved, #25269
 maven/mavencentral/com.github.docker-java/docker-java-transport/3.7.1, Apache-2.0, approved, #26615
@@ -81,16 +80,20 @@ maven/mavencentral/com.jayway.jsonpath/json-path/2.10.0, Apache-2.0, approved, c
 maven/mavencentral/com.networknt/json-schema-validator/1.5.9, Apache-2.0 AND Unicode-TOU, approved, #15630
 maven/mavencentral/com.networknt/json-schema-validator/2.0.0, Apache-2.0 AND Unicode-TOU, approved, #25988
 maven/mavencentral/com.networknt/json-schema-validator/2.0.1, Apache-2.0 AND Unicode-TOU, approved, #25988
-maven/mavencentral/com.nimbusds/nimbus-jose-jwt/10.8, Apache-2.0, approved, #26455
 maven/mavencentral/com.nimbusds/nimbus-jose-jwt/10.9, Apache-2.0, approved, #28183
+maven/mavencentral/com.nimbusds/nimbus-jose-jwt/10.9.1, , restricted, clearlydefined
 maven/mavencentral/com.puppycrawl.tools/checkstyle/12.3.0, LGPL-2.1-or-later, approved, #26456
 maven/mavencentral/com.squareup.okhttp3/okhttp-dnsoverhttps/5.3.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.squareup.okhttp3/okhttp-jvm/5.3.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.squareup.okhttp3/okhttp-jvm/5.4.0, , restricted, clearlydefined
 maven/mavencentral/com.squareup.okhttp3/okhttp/4.9.3, Apache-2.0 AND MPL-2.0, approved, #3225
 maven/mavencentral/com.squareup.okhttp3/okhttp/5.3.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.squareup.okhttp3/okhttp/5.3.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.squareup.okhttp3/okhttp/5.4.0, , restricted, clearlydefined
 maven/mavencentral/com.squareup.okio/okio-jvm/3.16.4, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.squareup.okio/okio-jvm/3.17.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.squareup.okio/okio/3.16.4, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.squareup.okio/okio/3.17.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.sun.activation/jakarta.activation/2.0.1, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 maven/mavencentral/commons-beanutils/commons-beanutils/1.11.0, Apache-2.0, approved, #21555
 maven/mavencentral/commons-codec/commons-codec/1.11, Apache-2.0 AND BSD-3-Clause, approved, CQ15971
@@ -109,10 +112,9 @@ maven/mavencentral/io.cloudevents/cloudevents-core/4.0.2, , restricted, clearlyd
 maven/mavencentral/io.cloudevents/cloudevents-http-basic/4.0.2, , restricted, clearlydefined
 maven/mavencentral/io.cloudevents/cloudevents-json-jackson/4.0.2, , restricted, clearlydefined
 maven/mavencentral/io.github.classgraph/classgraph/4.8.184, MIT, approved, CQ22530
-maven/mavencentral/io.micrometer/micrometer-commons/1.16.4, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #24726
-maven/mavencentral/io.micrometer/micrometer-core/1.16.4, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #24722
-maven/mavencentral/io.micrometer/micrometer-observation/1.16.4, Apache-2.0, approved, #24713
-maven/mavencentral/io.nats/jnats/2.25.2, , restricted, clearlydefined
+maven/mavencentral/io.micrometer/micrometer-commons/1.17.0, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #28746
+maven/mavencentral/io.micrometer/micrometer-core/1.17.0, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #28755
+maven/mavencentral/io.micrometer/micrometer-observation/1.17.0, Apache-2.0, approved, #28734
 maven/mavencentral/io.nats/jnats/2.25.3, , restricted, clearlydefined
 maven/mavencentral/io.opentelemetry.instrumentation/opentelemetry-instrumentation-annotations/1.32.0, Apache-2.0, approved, #11684
 maven/mavencentral/io.opentelemetry.proto/opentelemetry-proto/1.10.0-alpha, , restricted, clearlydefined
@@ -278,6 +280,7 @@ maven/mavencentral/org.hamcrest/hamcrest/2.2, BSD-3-Clause, approved, #17677
 maven/mavencentral/org.hdrhistogram/HdrHistogram/2.2.2, BSD-2-Clause AND CC0-1.0 AND CC0-1.0, approved, #14828
 maven/mavencentral/org.javassist/javassist/3.28.0-GA, Apache-2.0 OR LGPL-2.1-or-later OR MPL-1.1, approved, #327
 maven/mavencentral/org.javassist/javassist/3.30.2-GA, Apache-2.0 AND LGPL-2.1-or-later AND MPL-1.1, approved, #12108
+maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib/2.1.21, Apache-2.0, approved, #17634
 maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib/2.2.20, Apache-2.0, approved, #22410
 maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib/2.2.21, Apache-2.0, approved, #22410
 maven/mavencentral/org.jetbrains/annotations/13.0, Apache-2.0, approved, clearlydefined
@@ -307,7 +310,6 @@ maven/mavencentral/org.junit/junit-bom/5.11.2, EPL-2.0, approved, #16062
 maven/mavencentral/org.junit/junit-bom/6.0.3, EPL-2.0, approved, #26480
 maven/mavencentral/org.junit/junit-bom/6.1.0, , restricted, clearlydefined
 maven/mavencentral/org.jvnet.mimepull/mimepull/1.9.15, CDDL-1.1 OR GPL-2.0-only WITH Classpath-exception-2.0, approved, CQ21484
-maven/mavencentral/org.latencyutils/LatencyUtils/2.0.3, CC0-1.0, approved, #15280
 maven/mavencentral/org.mockito/mockito-core/5.2.0, MIT AND (Apache-2.0 AND MIT) AND Apache-2.0, approved, #7401
 maven/mavencentral/org.mockito/mockito-core/5.23.0, MIT AND (Apache-2.0 AND MIT) AND Apache-2.0, approved, #26529
 maven/mavencentral/org.mockito/mockito-inline/5.2.0, MIT, approved, clearlydefined
