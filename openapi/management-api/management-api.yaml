@@ -1589,29 +1589,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/api-error-schema"
-  /{flowId}/{resourceId}/deprovision:
-    post:
-      operationId: deprovision
-      parameters:
-      - name: flowId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      - name: resourceId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      responses:
-        default:
-          description: default response
-          content:
-            '*/*': {}
   /v5beta/dcpscopes:
     post:
       tags:
@@ -2664,6 +2641,54 @@ paths:
         "409":
           description: "Can't create the ParticipantContext, because a object with\
             \ the same ID already exists"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/api-error-schema"
+    patch:
+      tags:
+      - Participant Context config v5beta
+      description: "Merges the provided entries into the existing ParticipantContext\
+        \ config. Entries present in the request are added or overwritten, existing\
+        \ entries are preserved."
+      operationId: patchConfigV5
+      parameters:
+      - name: participantContextId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/participant-context-config-schema"
+      responses:
+        "204":
+          description: The Config was merged successfully
+        "400":
+          description: "Request body was malformed, or the request could not be processed"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/api-error-schema"
+        "401":
+          description: "The request could not be completed, because either the authentication\
+            \ was missing or was not valid."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/api-error-schema"
+        "404":
+          description: A ParticipantContext config with the given ID does not exist.
           content:
             application/json:
               schema:
@@ -4864,34 +4889,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/api-error-schema"
-  /{flowId}/{resourceId}/provision:
-    post:
-      operationId: provision
-      parameters:
-      - name: flowId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      - name: resourceId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: "#/components/schemas/ProvisionHttpResponse"
-      responses:
-        default:
-          description: default response
-          content:
-            '*/*': {}
   /v4/contractdefinitions/request:
     post:
       tags:
@@ -9977,25 +9974,6 @@ components:
           '@vocab': https://w3id.org/edc/v0.0.1/ns/
         '@type': PolicyEvaluationPlanRequest
         policyScope: catalog
-    ProvisionHttpResponse:
-      type: object
-      properties:
-        dataAddress:
-          $ref: "#/components/schemas/DataAddress_1"
-      example:
-        dataAddress:
-          properties:
-            key: "{}"
-    DataAddress_1:
-      type: object
-      properties:
-        properties:
-          type: object
-          additionalProperties:
-            type: object
-      example:
-        properties:
-          key: "{}"
     TransferProcessV3:
       type: object
       properties:
