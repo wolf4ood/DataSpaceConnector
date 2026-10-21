@@ -3139,6 +3139,40 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/api-error-schema"
+  /v5/participants/{id}/activate:
+    post:
+      tags:
+      - Participant Context v5
+      description: Activates a ParticipantContext.
+      operationId: activateParticipantV5
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "204":
+          description: The ParticipantContext was activated successfully.
+        "401":
+          description: "The request could not be completed, because either the authentication\
+            \ was missing or was not valid."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/api-error-schema"
+        "404":
+          description: A ParticipantContext with the given ID does not exist.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/api-error-schema"
   /v5/participants/{participantContextId}/partnergroups/{id}:
     get:
       tags:
@@ -4326,6 +4360,43 @@ paths:
                   $ref: "#/components/schemas/cel-expression-schema"
         "400":
           description: Request was malformed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/api-error-schema"
+  /v5/participants/{id}/deactivate:
+    post:
+      tags:
+      - Participant Context v5
+      description: "Deactivates a ParticipantContext. A deactivated ParticipantContext\
+        \ is answered like one that does not exist on the protocol API, and on the\
+        \ management API for non-admin callers. Its ongoing negotiations and transfers\
+        \ are not terminated."
+      operationId: deactivateParticipantV5
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "204":
+          description: The ParticipantContext was deactivated successfully.
+        "401":
+          description: "The request could not be completed, because either the authentication\
+            \ was missing or was not valid."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/api-error-schema"
+        "404":
+          description: A ParticipantContext with the given ID does not exist.
           content:
             application/json:
               schema:
